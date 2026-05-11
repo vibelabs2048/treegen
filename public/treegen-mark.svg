@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="TreeGen logo">
+  <rect width="128" height="128" rx="24" fill="#f7f2e8"/>
+  <path d="M28 96V30h72v12H70v54H58V42H28Z" fill="#314A9C"/>
+  <path d="M76 96V42h24v12H88v42H76Z" fill="#314A9C"/>
+  <circle cx="64" cy="24" r="10" fill="#C7281C"/>
+  <path d="M64 34v14M36 66h56M30 90h68" stroke="#1f1f1f" stroke-width="4" stroke-linecap="round"/>
+</svg>

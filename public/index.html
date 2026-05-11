@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TreeGen</title>
+    <link rel="icon" href="/public/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/public/treegen-mark.svg">
+    <link rel="stylesheet" href="/public/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <img src="/public/treegen-mark.svg" alt="TreeGen logo" class="brand-mark">
+          <div>
+            <h1>TreeGen</h1>
+            <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button id="load-demo" title="Load the example family tree">Load Placeholder Demo</button>
+          <button id="open-import" title="Import a YAML family tree from a file or pasted text">Import</button>
+          <button id="open-export" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
+          <button id="clear-tree" title="Clear every person and reset the current tree">Clear Tree</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="preview-panel">
+          <div class="preview-toolbar">
+            <div>
+              <strong>Preview</strong>
+              <span id="status-text">Ready</span>
+            </div>
+            <div class="preview-toolbar-actions">
+              <button id="zoom-out" type="button" title="Zoom out">-</button>
+              <label class="preview-zoom">
+                <span>Zoom</span>
+                <input id="zoom-range" type="range" min="5" max="150" step="5" value="70">
+              </label>
+              <label class="preview-zoom-value">
+                <span>%</span>
+                <input id="zoom-percent" type="number" min="5" max="300" step="5" value="70">
+              </label>
+              <button id="zoom-in" type="button" title="Zoom in">+</button>
+              <button id="fit-view" type="button" title="Fit the whole tree into the preview">Fit</button>
+            </div>
+          </div>
+          <div class="preview-stage">
+            <div id="svg-wrapper" class="svg-wrapper"></div>
+          </div>
+        </section>
+
+        <aside class="sidebar inspector-panel">
+          <section class="panel section-nav" aria-label="Editor tabs">
+            <div class="sidebar-tabs">
+              <button class="sidebar-tab active" data-target-panel="person" type="button" title="Edit the selected person">Person</button>
+              <button class="sidebar-tab" data-target-panel="type" type="button" title="Adjust generation fonts, colors, and sizing">Format</button>
+              <button class="sidebar-tab" data-target-panel="title" type="button" title="Edit the title box, author, crest, and numbering">Title</button>
+            </div>
+          </section>
+
+          <section class="panel tab-panel" data-panel="type">
+            <h2>Typography</h2>
+            <label>
+              Font Family
+              <input id="font-family" type="text" autocomplete="off">
+            </label>
+            <label class="checkbox-row">
+              <input id="faux-bold" type="checkbox">
+              <span>Faux Bold</span>
+            </label>
+            <label>
+              Generation
+              <select id="generation-style-select"></select>
+            </label>
+            <div class="field-row export-grid">
+              <label>
+                Name Size
+                <input id="gen-name-size" type="number" min="4" max="36" step="0.5">
+              </label>
+              <label>
+                Name Color
+                <input id="gen-name-color" type="color">
+              </label>
+            </div>
+            <div class="field-row export-grid">
+              <label>
+                Date Size
+                <input id="gen-date-size" type="number" min="4" max="36" step="0.5">
+              </label>
+              <label>
+                Date Color
+                <input id="gen-date-color" type="color">
+              </label>
+            </div>
+            <label class="checkbox-row">
+              <input id="gen-sync-name-date" type="checkbox">
+              <span>Sync Name/Date Size</span>
+            </label>
+            <div class="field-row export-grid">
+              <label>
+                Children Size
+                <input id="gen-children-size" type="number" min="4" max="36" step="0.5">
+              </label>
+              <label>
+                Children Color
+                <input id="gen-children-color" type="color">
+              </label>
+            </div>
+            <p class="help-text">Styles apply to the selected generation only.</p>
+          </section>
+
+          <section class="panel tab-panel" data-panel="title">
+            <h2>Title Box</h2>
+            <label class="checkbox-row">
+              <input id="title-enabled" type="checkbox" checked>
+              <span>Show Title Box</span>
+            </label>
+            <label>
+              Title
+              <input id="title-main" type="text" autocomplete="off" placeholder="Johnson Family Tree">
+            </label>
+            <label>
+              Subtitle / Notes
+              <textarea id="title-sub" rows="3" placeholder="Research draft&#10;Updated 2026"></textarea>
+            </label>
+            <label>
+              Author
+              <input id="title-author" type="text" autocomplete="off" placeholder="Prepared by ...">
+            </label>
+            <label class="checkbox-row">
+              <input id="box-numbering-enabled" type="checkbox">
+              <span>Show Tiny Box Numbers</span>
+            </label>
+            <label>
+              Numbering Start
+              <select id="box-numbering-start">
+                <option value="0">0-based</option>
+                <option value="1">1-based</option>
+              </select>
+            </label>
+            <label>
+              Crest Image
+              <input id="title-crest" type="file" accept="image/*">
+            </label>
+            <button id="clear-crest" type="button">Clear Crest</button>
+            <p id="crest-status" class="help-text">No crest image loaded.</p>
+          </section>
+
+          <section class="panel tab-panel active" data-panel="person">
+            <h2>Selected Person</h2>
+            <p id="selected-slot-label" class="slot-title"></p>
+            <label>
+              Display Name
+              <input id="person-name" type="text" autocomplete="off">
+            </label>
+            <div class="field-row">
+              <label>
+                Birth Year
+                <input id="person-birth" type="text" inputmode="numeric" autocomplete="off">
+              </label>
+              <label>
+                Death Year
+                <input id="person-death" type="text" inputmode="numeric" autocomplete="off">
+              </label>
+            </div>
+            <label>
+              Child Annotation
+              <textarea id="person-children" rows="4"></textarea>
+            </label>
+            <label>
+              Note
+              <textarea id="person-note" rows="3"></textarea>
+            </label>
+            <p class="help-text">Use one child per line. This appears as a floating list beside the mother's box. Box notes are stored in YAML as `note:` and currently render inside the box for generations 0-2.</p>
+          </section>
+
+        </aside>
+      </main>
+    </div>
+
+    <div id="import-modal" class="modal-shell" hidden>
+      <div class="modal-backdrop" data-close-modal="import"></div>
+      <section class="modal-card">
+        <div class="modal-header">
+          <h2>Import YAML</h2>
+          <button id="close-import" type="button">Close</button>
+        </div>
+        <div class="modal-body">
+          <label>
+            YAML File
+            <input id="import-yaml-file" type="file" accept=".yaml,.yml,text/yaml">
+          </label>
+          <label>
+            Paste YAML
+            <textarea id="import-yaml-text" rows="16" spellcheck="false"></textarea>
+          </label>
+          <p class="help-text">Import from a file or paste YAML directly. Either source works.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="apply-import" type="button">Import YAML</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="export-modal" class="modal-shell" hidden>
+      <div class="modal-backdrop" data-close-modal="export"></div>
+      <section class="modal-card">
+        <div class="modal-header">
+          <h2>Export</h2>
+          <button id="close-export" type="button">Close</button>
+        </div>
+        <div class="modal-body">
+          <div class="field-row export-grid">
+            <label>
+              Format
+              <select id="image-format">
+                <option value="pdf">PDF</option>
+                <option value="png" selected>PNG</option>
+                <option value="jpeg">JPG</option>
+                <option value="svg">SVG</option>
+                <option value="yaml">YAML</option>
+              </select>
+            </label>
+            <label>
+              Orientation
+              <select id="export-orientation">
+                <option value="landscape" selected>Landscape</option>
+                <option value="portrait">Portrait</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row export-grid">
+            <label>
+              Width (in)
+              <input id="export-width-in" type="number" min="1" step="0.1" value="11">
+            </label>
+            <label>
+              Height (in)
+              <input id="export-height-in" type="number" min="1" step="0.1" value="8.5">
+            </label>
+          </div>
+          <div class="field-row export-grid">
+            <label>
+              DPI
+              <input id="export-dpi" type="number" min="72" max="1200" step="1" value="600">
+            </label>
+            <label>
+              JPG Quality
+              <input id="image-quality" type="number" min="10" max="100" step="1" value="100">
+            </label>
+          </div>
+          <label class="checkbox-row">
+            <input id="lock-aspect" type="checkbox" checked>
+            <span>Lock Aspect Ratio</span>
+          </label>
+          <p id="export-summary" class="help-text"></p>
+        </div>
+        <div class="modal-actions">
+          <button id="download-export" type="button">Export File</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>

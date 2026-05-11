@@ -1,0 +1,582 @@
+settings:
+  fontFamily: "Palatino Linotype"
+  fauxBold: true
+  generationStyles:
+    generation0:
+      nameSize: 14
+      nameColor: "#314A9C"
+      dateSize: 13
+      dateColor: "#C7281C"
+      childrenSize: 13
+      childrenColor: "#000000"
+    generation1:
+      nameSize: 12
+      nameColor: "#314A9C"
+      dateSize: 11
+      dateColor: "#C7281C"
+      childrenSize: 11
+      childrenColor: "#000000"
+    generation2:
+      nameSize: 10.5
+      nameColor: "#314A9C"
+      dateSize: 9.5
+      dateColor: "#C7281C"
+      childrenSize: 9.5
+      childrenColor: "#000000"
+    generation3:
+      nameSize: 9
+      nameColor: "#314A9C"
+      dateSize: 8
+      dateColor: "#C7281C"
+      childrenSize: 8
+      childrenColor: "#000000"
+    generation4:
+      nameSize: 7.5
+      nameColor: "#314A9C"
+      dateSize: 6.5
+      dateColor: "#C7281C"
+      childrenSize: 6.5
+      childrenColor: "#000000"
+    generation5:
+      nameSize: 6.5
+      nameColor: "#314A9C"
+      dateSize: 5.5
+      dateColor: "#C7281C"
+      childrenSize: 5.5
+      childrenColor: "#000000"
+    generation6:
+      nameSize: 5.5
+      nameColor: "#314A9C"
+      dateSize: 4.5
+      dateColor: "#C7281C"
+      childrenSize: 4.5
+      childrenColor: "#000000"
+  titleBox:
+    enabled: true
+    title: "Johnson Family Tree"
+    subtitle: "Demo export layout\nDraft lineage with placeholder crest"
+rootPersonId: root
+people:
+  root:
+    name: "Eleanor Grace Johnson"
+    birthYear: "?"
+    deathYear: "?"
+  father:
+    name: "Edward Johnson"
+    birthYear: "?"
+    deathYear: "?"
+  mother:
+    name: "Mary Carter"
+    birthYear: "1926"
+    deathYear: "1996"
+    childrenNote: "Eleanor Grace Johnson (?-?)"
+  father_father:
+    name: "George Johnson"
+    birthYear: "?"
+    deathYear: "?"
+  father_mother:
+    name: "Helen Johnson"
+    birthYear: "1898"
+    deathYear: "1969"
+    childrenNote: "Edward Johnson (?-?)"
+  mother_father:
+    name: "Joseph Carter"
+    birthYear: "1900"
+    deathYear: "1972"
+  mother_mother:
+    name: "Louise Carter"
+    birthYear: "1902"
+    deathYear: "1975"
+    childrenNote: "Mary Carter (1926-1996)\nCaroline Carter (1925-1996)\nDaniel Carter (1928-2000)"
+  father_father_father:
+    name: "Walter Hughes"
+    birthYear: "?"
+    deathYear: "?"
+  father_father_mother:
+    name: "Sarah Hughes"
+    birthYear: "1870"
+    deathYear: "1942"
+    childrenNote: "George Johnson (?-?)"
+  father_mother_father:
+    name: "Arthur Hughes"
+    birthYear: "1872"
+    deathYear: "1945"
+  father_mother_mother:
+    name: "Grace Hughes"
+    birthYear: "1874"
+    deathYear: "1948"
+    childrenNote: "Helen Johnson (1898-1969)\nDorothy Johnson (1897-1968)\nFrederick Johnson (1900-1972)"
+  mother_father_father:
+    name: "David Whitmore"
+    birthYear: "1876"
+    deathYear: "1951"
+  mother_father_mother:
+    name: "Julia Whitmore"
+    birthYear: "1878"
+    deathYear: "1954"
+    childrenNote: "Joseph Carter (1900-1972)\nEliza Carter (1899-1970)\nIsaac Carter (1902-1974)\nEliza Carter (1905-1978)\nIsaac Carter (1908-1982)"
+  mother_mother_father:
+    name: "Michael Whitmore"
+    birthYear: "1880"
+    deathYear: "1957"
+  mother_mother_mother:
+    name: "Elizabeth Whitmore"
+    birthYear: "1882"
+    deathYear: "1950"
+    childrenNote: "Louise Carter (1902-1975)\nFrances Carter (1901-1972)\nNicholas Carter (1904-1976)\nFrances Carter (1907-1980)\nNicholas Carter (1910-1984)\nFrances Carter (1913-1983)\nNicholas Carter (1916-1987)"
+  father_father_father_father:
+    name: "Robert Miller"
+    birthYear: "?"
+    deathYear: "?"
+  father_father_father_mother:
+    name: "Alice Miller"
+    birthYear: "1842"
+    deathYear: "1915"
+    childrenNote: "Walter Hughes (?-?)"
+  father_father_mother_father:
+    name: "John Miller"
+    birthYear: "1844"
+    deathYear: "1918"
+  father_father_mother_mother:
+    name: "Martha Miller"
+    birthYear: "1846"
+    deathYear: "1921"
+    childrenNote: "Sarah Hughes (1870-1942)\nEliza Hughes (1869-1940)\nIsaac Hughes (1872-1944)"
+  father_mother_father_father:
+    name: "Thomas Miller"
+    birthYear: "1848"
+    deathYear: "1924"
+  father_mother_father_mother:
+    name: "Margaret Miller"
+    birthYear: "1850"
+    deathYear: "1927"
+    childrenNote: "Arthur Hughes (1872-1945)\nFrances Hughes (1871-1942)\nNicholas Hughes (1874-1946)\nFrances Hughes (1877-1950)\nNicholas Hughes (1880-1954)"
+  father_mother_mother_father:
+    name: "Charles Miller"
+    birthYear: "1852"
+    deathYear: "1920"
+  father_mother_mother_mother:
+    name: "Catherine Miller"
+    birthYear: "1854"
+    deathYear: "1923"
+    childrenNote: "Grace Hughes (1874-1948)\nHarriet Hughes (1873-1944)\nOwen Hughes (1876-1948)\nHarriet Hughes (1879-1952)\nOwen Hughes (1882-1956)\nHarriet Hughes (1885-1955)\nOwen Hughes (1888-1959)"
+  mother_father_father_father:
+    name: "Henry Bishop"
+    birthYear: "1856"
+    deathYear: "1926"
+  mother_father_father_mother:
+    name: "Eleanor Bishop"
+    birthYear: "1858"
+    deathYear: "1929"
+    childrenNote: "David Whitmore (1876-1951)\nLillian Whitmore (1875-1946)\nPeter Whitmore (1878-1950)\nLillian Whitmore (1881-1954)\nPeter Whitmore (1884-1958)\nLillian Whitmore (1887-1957)\nPeter Whitmore (1890-1961)\nLillian Whitmore (1893-1965)\nPeter Whitmore (1896-1969)"
+  mother_father_mother_father:
+    name: "George Bishop"
+    birthYear: "1860"
+    deathYear: "1932"
+  mother_father_mother_mother:
+    name: "Helen Bishop"
+    birthYear: "?"
+    deathYear: "?"
+    childrenNote: "Julia Whitmore (1878-1954)"
+  mother_mother_father_father:
+    name: "Joseph Bishop"
+    birthYear: "1864"
+    deathYear: "1938"
+  mother_mother_father_mother:
+    name: "Louise Bishop"
+    birthYear: "1866"
+    deathYear: "1941"
+    childrenNote: "Michael Whitmore (1880-1957)\nBeatrice Whitmore (1879-1950)\nBenjamin Whitmore (1882-1954)"
+  mother_mother_mother_father:
+    name: "James Bishop"
+    birthYear: "1868"
+    deathYear: "1944"
+  mother_mother_mother_mother:
+    name: "Emma Bishop"
+    birthYear: "1870"
+    deathYear: "1947"
+    childrenNote: "Elizabeth Whitmore (1882-1950)\nCaroline Whitmore (1881-1952)\nDaniel Whitmore (1884-1956)\nCaroline Whitmore (1887-1960)\nDaniel Whitmore (1890-1964)"
+  father_father_father_father_father:
+    name: "Michael Bennett"
+    birthYear: "?"
+    deathYear: "?"
+  father_father_father_father_mother:
+    name: "Elizabeth Bennett"
+    birthYear: "1814"
+    deathYear: "1888"
+  father_father_father_mother_father:
+    name: "William Bennett"
+    birthYear: "1816"
+    deathYear: "1891"
+  father_father_father_mother_mother:
+    name: "Anna Bennett"
+    birthYear: "1818"
+    deathYear: "1894"
+  father_father_mother_father_father:
+    name: "Edward Bennett"
+    birthYear: "1820"
+    deathYear: "1897"
+  father_father_mother_father_mother:
+    name: "Mary Bennett"
+    birthYear: "1822"
+    deathYear: "1890"
+  father_father_mother_mother_father:
+    name: "Samuel Bennett"
+    birthYear: "1824"
+    deathYear: "1893"
+  father_father_mother_mother_mother:
+    name: "Rose Bennett"
+    birthYear: "1826"
+    deathYear: "1896"
+  father_mother_father_father_father:
+    name: "Frank Bennett"
+    birthYear: "1828"
+    deathYear: "1899"
+  father_mother_father_father_mother:
+    name: "Clara Bennett"
+    birthYear: "1830"
+    deathYear: "1902"
+  father_mother_father_mother_father:
+    name: "Walter Bennett"
+    birthYear: "1832"
+    deathYear: "1905"
+  father_mother_father_mother_mother:
+    name: "Sarah Bennett"
+    birthYear: "?"
+    deathYear: "?"
+  father_mother_mother_father_father:
+    name: "Arthur Bennett"
+    birthYear: "1836"
+    deathYear: "1911"
+  father_mother_mother_father_mother:
+    name: "Grace Bennett"
+    birthYear: "1838"
+    deathYear: "1914"
+  father_mother_mother_mother_father:
+    name: "David Bennett"
+    birthYear: "1840"
+    deathYear: "1917"
+  father_mother_mother_mother_mother:
+    name: "Julia Bennett"
+    birthYear: "1842"
+    deathYear: "1910"
+  mother_father_father_father_father:
+    name: "Michael Sinclair"
+    birthYear: "1844"
+    deathYear: "1913"
+  mother_father_father_father_mother:
+    name: "Elizabeth Sinclair"
+    birthYear: "1846"
+    deathYear: "1916"
+  mother_father_father_mother_father:
+    name: "William Sinclair"
+    birthYear: "1848"
+    deathYear: "1919"
+  mother_father_father_mother_mother:
+    name: "Anna Sinclair"
+    birthYear: "1850"
+    deathYear: "1922"
+  mother_father_mother_father_father:
+    name: "Edward Sinclair"
+    birthYear: "1852"
+    deathYear: "1925"
+  mother_father_mother_father_mother:
+    name: "Mary Sinclair"
+    birthYear: "1854"
+    deathYear: "1928"
+  mother_father_mother_mother_father:
+    name: "Samuel Sinclair"
+    birthYear: "?"
+    deathYear: "?"
+  mother_father_mother_mother_mother:
+    name: "Rose Sinclair"
+    birthYear: "1858"
+    deathYear: "1934"
+  mother_mother_father_father_father:
+    name: "Frank Sinclair"
+    birthYear: "1860"
+    deathYear: "1937"
+  mother_mother_father_father_mother:
+    name: "Clara Sinclair"
+    birthYear: "1862"
+    deathYear: "1930"
+  mother_mother_father_mother_father:
+    name: "Walter Sinclair"
+    birthYear: "1864"
+    deathYear: "1933"
+  mother_mother_father_mother_mother:
+    name: "Sarah Sinclair"
+    birthYear: "1866"
+    deathYear: "1936"
+  mother_mother_mother_father_father:
+    name: "Arthur Sinclair"
+    birthYear: "1868"
+    deathYear: "1939"
+  mother_mother_mother_father_mother:
+    name: "Grace Sinclair"
+    birthYear: "1870"
+    deathYear: "1942"
+  mother_mother_mother_mother_father:
+    name: "David Sinclair"
+    birthYear: "1872"
+    deathYear: "1945"
+  mother_mother_mother_mother_mother:
+    name: "Julia Sinclair"
+    birthYear: "1874"
+    deathYear: "1948"
+  father_father_father_father_father_father:
+    name: "Charles Parker"
+    birthYear: "?"
+    deathYear: "?"
+  father_father_father_father_father_mother:
+    name: "Catherine Parker"
+    birthYear: "1786"
+    deathYear: "1861"
+  father_father_father_father_mother_father:
+    name: "Henry Parker"
+    birthYear: "1788"
+    deathYear: "1864"
+  father_father_father_father_mother_mother:
+    name: "Eleanor Parker"
+    birthYear: "1790"
+    deathYear: "1867"
+  father_father_father_mother_father_father:
+    name: "George Parker"
+    birthYear: "1792"
+    deathYear: "1860"
+  father_father_father_mother_father_mother:
+    name: "Helen Parker"
+    birthYear: "1794"
+    deathYear: "1863"
+  father_father_father_mother_mother_father:
+    name: "Joseph Parker"
+    birthYear: "1796"
+    deathYear: "1866"
+  father_father_father_mother_mother_mother:
+    name: "Louise Parker"
+    birthYear: "1798"
+    deathYear: "1869"
+  father_father_mother_father_father_father:
+    name: "James Parker"
+    birthYear: "1800"
+    deathYear: "1872"
+  father_father_mother_father_father_mother:
+    name: "Emma Parker"
+    birthYear: "1802"
+    deathYear: "1875"
+  father_father_mother_father_mother_father:
+    name: "Robert Parker"
+    birthYear: "1804"
+    deathYear: "1878"
+  father_father_mother_father_mother_mother:
+    name: "Alice Parker"
+    birthYear: "?"
+    deathYear: "?"
+  father_father_mother_mother_father_father:
+    name: "John Parker"
+    birthYear: "1808"
+    deathYear: "1884"
+  father_father_mother_mother_father_mother:
+    name: "Martha Parker"
+    birthYear: "1810"
+    deathYear: "1887"
+  father_father_mother_mother_mother_father:
+    name: "Thomas Parker"
+    birthYear: "1812"
+    deathYear: "1880"
+  father_father_mother_mother_mother_mother:
+    name: "Margaret Parker"
+    birthYear: "1814"
+    deathYear: "1883"
+  father_mother_father_father_father_father:
+    name: "Charles Parker"
+    birthYear: "1816"
+    deathYear: "1886"
+  father_mother_father_father_father_mother:
+    name: "Catherine Parker"
+    birthYear: "1818"
+    deathYear: "1889"
+  father_mother_father_father_mother_father:
+    name: "Henry Parker"
+    birthYear: "1820"
+    deathYear: "1892"
+  father_mother_father_father_mother_mother:
+    name: "Eleanor Parker"
+    birthYear: "1822"
+    deathYear: "1895"
+  father_mother_father_mother_father_father:
+    name: "George Parker"
+    birthYear: "1824"
+    deathYear: "1898"
+  father_mother_father_mother_father_mother:
+    name: "Helen Parker"
+    birthYear: "1826"
+    deathYear: "1901"
+  father_mother_father_mother_mother_father:
+    name: "Joseph Parker"
+    birthYear: "?"
+    deathYear: "?"
+  father_mother_father_mother_mother_mother:
+    name: "Louise Parker"
+    birthYear: "1830"
+    deathYear: "1907"
+  father_mother_mother_father_father_father:
+    name: "James Parker"
+    birthYear: "1832"
+    deathYear: "1900"
+  father_mother_mother_father_father_mother:
+    name: "Emma Parker"
+    birthYear: "1834"
+    deathYear: "1903"
+  father_mother_mother_father_mother_father:
+    name: "Robert Parker"
+    birthYear: "1836"
+    deathYear: "1906"
+  father_mother_mother_father_mother_mother:
+    name: "Alice Parker"
+    birthYear: "1838"
+    deathYear: "1909"
+  father_mother_mother_mother_father_father:
+    name: "John Parker"
+    birthYear: "1840"
+    deathYear: "1912"
+  father_mother_mother_mother_father_mother:
+    name: "Martha Parker"
+    birthYear: "1842"
+    deathYear: "1915"
+  father_mother_mother_mother_mother_father:
+    name: "Thomas Parker"
+    birthYear: "1844"
+    deathYear: "1918"
+  father_mother_mother_mother_mother_mother:
+    name: "Margaret Parker"
+    birthYear: "1846"
+    deathYear: "1921"
+  mother_father_father_father_father_father:
+    name: "Charles Turner"
+    birthYear: "1848"
+    deathYear: "1924"
+  mother_father_father_father_father_mother:
+    name: "Catherine Turner"
+    birthYear: "?"
+    deathYear: "?"
+  mother_father_father_father_mother_father:
+    name: "Henry Turner"
+    birthYear: "1852"
+    deathYear: "1920"
+  mother_father_father_father_mother_mother:
+    name: "Eleanor Turner"
+    birthYear: "1854"
+    deathYear: "1923"
+  mother_father_father_mother_father_father:
+    name: "George Turner"
+    birthYear: "1856"
+    deathYear: "1926"
+  mother_father_father_mother_father_mother:
+    name: "Helen Turner"
+    birthYear: "1858"
+    deathYear: "1929"
+  mother_father_father_mother_mother_father:
+    name: "Joseph Turner"
+    birthYear: "1860"
+    deathYear: "1932"
+  mother_father_father_mother_mother_mother:
+    name: "Louise Turner"
+    birthYear: "1862"
+    deathYear: "1935"
+  mother_father_mother_father_father_father:
+    name: "James Turner"
+    birthYear: "1864"
+    deathYear: "1938"
+  mother_father_mother_father_father_mother:
+    name: "Emma Turner"
+    birthYear: "1866"
+    deathYear: "1941"
+  mother_father_mother_father_mother_father:
+    name: "Robert Turner"
+    birthYear: "1868"
+    deathYear: "1944"
+  mother_father_mother_father_mother_mother:
+    name: "Alice Turner"
+    birthYear: "1870"
+    deathYear: "1947"
+  mother_father_mother_mother_father_father:
+    name: "John Turner"
+    birthYear: "?"
+    deathYear: "?"
+  mother_father_mother_mother_father_mother:
+    name: "Martha Turner"
+    birthYear: "1874"
+    deathYear: "1943"
+  mother_father_mother_mother_mother_father:
+    name: "Thomas Turner"
+    birthYear: "1876"
+    deathYear: "1946"
+  mother_father_mother_mother_mother_mother:
+    name: "Margaret Turner"
+    birthYear: "1878"
+    deathYear: "1949"
+  mother_mother_father_father_father_father:
+    name: "Charles Turner"
+    birthYear: "1880"
+    deathYear: "1952"
+  mother_mother_father_father_father_mother:
+    name: "Catherine Turner"
+    birthYear: "1882"
+    deathYear: "1955"
+  mother_mother_father_father_mother_father:
+    name: "Henry Turner"
+    birthYear: "1884"
+    deathYear: "1958"
+  mother_mother_father_father_mother_mother:
+    name: "Eleanor Turner"
+    birthYear: "1886"
+    deathYear: "1961"
+  mother_mother_father_mother_father_father:
+    name: "George Turner"
+    birthYear: "1888"
+    deathYear: "1964"
+  mother_mother_father_mother_father_mother:
+    name: "Helen Turner"
+    birthYear: "1890"
+    deathYear: "1967"
+  mother_mother_father_mother_mother_father:
+    name: "Joseph Turner"
+    birthYear: "1892"
+    deathYear: "1960"
+  mother_mother_father_mother_mother_mother:
+    name: "Louise Turner"
+    birthYear: "?"
+    deathYear: "?"
+  mother_mother_mother_father_father_father:
+    name: "James Turner"
+    birthYear: "1896"
+    deathYear: "1966"
+  mother_mother_mother_father_father_mother:
+    name: "Emma Turner"
+    birthYear: "1898"
+    deathYear: "1969"
+  mother_mother_mother_father_mother_father:
+    name: "Robert Turner"
+    birthYear: "1900"
+    deathYear: "1972"
+  mother_mother_mother_father_mother_mother:
+    name: "Alice Turner"
+    birthYear: "1902"
+    deathYear: "1975"
+  mother_mother_mother_mother_father_father:
+    name: "John Turner"
+    birthYear: "1904"
+    deathYear: "1978"
+  mother_mother_mother_mother_father_mother:
+    name: "Martha Turner"
+    birthYear: "1906"
+    deathYear: "1981"
+  mother_mother_mother_mother_mother_father:
+    name: "Thomas Turner"
+    birthYear: "1908"
+    deathYear: "1984"
+  mother_mother_mother_mother_mother_mother:
+    name: "Margaret Turner"
+    birthYear: "1910"
+    deathYear: "1987"

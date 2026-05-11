@@ -1,0 +1,62 @@
+{
+  "name": "treegen",
+  "version": "0.2.0",
+  "description": "Local family tree editor and deterministic export tool.",
+  "author": "Local TreeGen Workspace",
+  "private": true,
+  "type": "module",
+  "main": "src/desktop/main.js",
+  "scripts": {
+    "render": "node src/render-cli.js",
+    "start": "node src/server.js",
+    "desktop:rebuild": "node build/desktop-runner.js rebuild",
+    "desktop:dev": "node build/desktop-runner.js dev",
+    "desktop:dist": "node build/desktop-runner.js dist",
+    "desktop:dist:mac": "node build/desktop-runner.js dist --mac --publish never",
+    "desktop:dist:win": "node build/desktop-runner.js dist --win --publish never",
+    "desktop:dist:linux": "node build/desktop-runner.js dist --linux --publish never"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "pdfkit": "^0.18.0",
+    "sharp": "^0.34.5",
+    "svg-to-pdfkit": "^0.1.8"
+  },
+  "devDependencies": {
+    "electron": "^42.0.1",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "local.treegen.desktop",
+    "productName": "TreeGen",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "public/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office"
+    }
+  }
+}
