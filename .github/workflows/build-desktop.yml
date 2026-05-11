@@ -1,0 +1,50 @@
+name: Build Desktop
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            script: npm run desktop:dist:mac
+            artifact: dist
+          - os: windows-latest
+            script: npm run desktop:dist:win
+            artifact: dist
+          - os: ubuntu-latest
+            script: npm run desktop:dist:linux
+            artifact: dist
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild native app deps for Electron
+        run: npm run desktop:rebuild
+
+      - name: Build desktop package
+        run: ${{ matrix.script }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: treegen-${{ matrix.os }}
+          path: dist/**
