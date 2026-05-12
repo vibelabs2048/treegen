@@ -519,16 +519,31 @@ function fitVerticalNodeText(node, style, name) {
   for (let scale = 1; scale >= 0.16; scale -= 0.02) {
     const nameSize = round2(style.nameSize * scale);
     const lineHeight = Math.max(nameSize * 0.94, nameSize - 0.1);
-    const lineWidth = estimateLineWidth(name, nameSize, true);
-    if (lineHeight <= availableThickness && lineWidth <= availableExtent) {
-      return { nameSize, dateSize: Math.max(3.1, style.dateSize - 2), nameLines: [name], lineHeight, height: lineHeight };
+    const maxChars = Math.max(3, Math.floor(availableExtent / (nameSize * 0.58)));
+    const nameLines = fitWrappedLinesPreferred(name, maxChars, 2, 2);
+    const widest = Math.max(...nameLines.map((line) => estimateLineWidth(line, nameSize, true)));
+    const height = nameLines.length * lineHeight;
+    if (height <= availableThickness && widest <= availableExtent) {
+      return { nameSize, dateSize: Math.max(3.1, style.dateSize - 2), nameLines, lineHeight, height };
     }
   }
   for (let scale = 0.16; scale >= 0.1; scale -= 0.01) {
     const nameSize = round2(style.nameSize * scale);
     const lineHeight = Math.max(nameSize * 0.94, nameSize - 0.1);
+    const maxChars = Math.max(3, Math.floor(availableExtent / (nameSize * 0.58)));
+    const nameLines = fitWrappedLinesPreferred(name, maxChars, 2, 2);
+    const widest = Math.max(...nameLines.map((line) => estimateLineWidth(line, nameSize, true)));
+    const height = nameLines.length * lineHeight;
+    if (height <= availableThickness && widest <= availableExtent) {
+      return {
+        nameSize,
+        dateSize: Math.max(3.1, style.dateSize - 2),
+        nameLines,
+        lineHeight,
+        height,
+      };
+    }
     if (lineHeight <= availableThickness) {
-      const maxChars = Math.max(3, Math.floor(availableExtent / (nameSize * 0.58)));
       return {
         nameSize,
         dateSize: Math.max(3.1, style.dateSize - 2),
@@ -780,11 +795,11 @@ function getExternalDateLayout(node, style, slot, person, settings = DEFAULT_SET
     const isMother = slot.path[slot.path.length - 1] === "mother";
     return {
       lines,
-      x: getConnectorAnchorX(node, isMother ? "mother" : "father") + (isMother ? 1.5 : -1.5),
+      x: getConnectorAnchorX(node, isMother ? "mother" : "father") - 1.5,
       y: node.y + node.height + fontSize + 2.6,
       lineHeight,
       fontSize,
-      anchor: isMother ? "start" : "end",
+      anchor: "end",
     };
   }
   const isMother = slot.path[slot.path.length - 1] === "mother";

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.15 - 2026-05-11
+
+- moved generation 5 and 6 maternal-side external dates to the left side of their connector line
+- kept late-generation father dates aligned on the left side as before so the top rows read consistently
+- verified the change with fresh PNG and PDF renders
+
 ## 0.2.14 - 2026-05-11
 
 - changed the generation 4 name fitter to prefer three wrapped lines before shrinking

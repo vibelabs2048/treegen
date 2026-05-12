@@ -18,7 +18,7 @@
    Status: Done in v0.2.14
 
 5. Generation 5 and 6 maternal-side birth/death dates should move to the left side of their tree line to avoid overlap.
-   Status: Open
+   Status: Done in v0.2.15
 
 6. Generation 5 and 6 should wrap to two lines instead of one to avoid overflow.
    Status: Open
