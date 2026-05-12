@@ -3,7 +3,7 @@ const PAGE_WIDTH_PT = 792;
 const PAGE_HEIGHT_PT = 612;
 const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
 const BOX_WIDTHS = [108, 88, 70, 54, 40, 14, 11];
-const BOX_HEIGHTS = [54, 46, 36, 30, 24, 72, 64];
+const BOX_HEIGHTS = [54, 46, 36, 30, 28, 72, 64];
 const BASE_ROW_STEPS = [0, 24, 26, 28, 30, 36, 40];
 const CHART_WIDTH = 748;
 const MARGIN_X = 22;
@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS = {
   generationStyles: buildDefaultGenerationStyles(),
   titleBox: {
     enabled: true,
-    title: "Johnson Family Tree",
+    title: "Famiglia Bellandi-Castelluccio",
     subtitle: "Demo export layout\nDraft lineage with placeholder crest",
     author: "Prepared with TreeGen",
     crestDataUrl: "",
@@ -395,10 +395,10 @@ function fitBoxNameOnly(node, style, name, generation) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
   if (generation === 4) {
-    for (let scale = 1; scale >= 0.42; scale -= 0.025) {
+    for (let scale = 1; scale >= 0.34; scale -= 0.025) {
       const nameSize = round2(style.nameSize * scale);
       const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
-      const nameLines = fitWrappedLines(name, nameChars, 2);
+      const nameLines = fitWrappedLines(name, nameChars, 3);
       const lineHeight = Math.max(nameSize * 0.96, nameSize + 0.06);
       const height = nameLines.length * lineHeight;
       const widest = Math.max(...nameLines.map((line) => estimateLineWidth(line, nameSize, true)));
@@ -407,7 +407,7 @@ function fitBoxNameOnly(node, style, name, generation) {
       }
     }
   }
-  const maxWrapLines = generation === 4 ? 2 : 2;
+  const maxWrapLines = generation === 4 ? 3 : 2;
   const minSingleScale = generation === 4 ? 0.38 : 0.28;
   for (let scale = 1; scale >= minSingleScale; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);

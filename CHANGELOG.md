@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 - 2026-05-11
+
+- changed the demo family to use longer Italian-style names and surnames
+- improved generation 4 box fitting for longer wrapped names
+- added visible version info in the UI and an About modal with version/runtime details
+
 ## 0.2.3 - 2026-05-11
 
 - scrubbed hardcoded repo-owner references from tracked files

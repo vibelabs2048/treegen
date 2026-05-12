@@ -2,6 +2,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
 
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
+  const APP_META = {
+    version: "0.2.4",
+    lastUpdated: "2026-05-11",
+  };
   const MAX_GENERATION = 6;
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
   const PAGE_WIDTH_PT = 792;
@@ -23,7 +27,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     generationStyles: buildDefaultGenerationStyles(),
     titleBox: {
       enabled: true,
-      title: "Johnson Family Tree",
+      title: "Famiglia Bellandi-Castelluccio",
       subtitle: "Demo export layout\nDraft lineage with placeholder crest",
       author: "Prepared with TreeGen",
       crestDataUrl: "",
@@ -92,11 +96,14 @@ import { renderYamlToSvg } from "./renderer-core.js";
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
     openExport: document.getElementById("open-export"),
+    openAbout: document.getElementById("open-about"),
     downloadDesktop: document.getElementById("download-desktop"),
     importModal: document.getElementById("import-modal"),
     exportModal: document.getElementById("export-modal"),
+    aboutModal: document.getElementById("about-modal"),
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
+    closeAbout: document.getElementById("close-about"),
     importYamlFile: document.getElementById("import-yaml-file"),
     importYamlChoose: document.getElementById("import-yaml-choose"),
     importYamlText: document.getElementById("import-yaml-text"),
@@ -106,6 +113,12 @@ import { renderYamlToSvg } from "./renderer-core.js";
     zoomOut: document.getElementById("zoom-out"),
     zoomIn: document.getElementById("zoom-in"),
     zoomPercent: document.getElementById("zoom-percent"),
+    appVersionBadge: document.getElementById("app-version-badge"),
+    aboutVersion: document.getElementById("about-version"),
+    aboutLastUpdated: document.getElementById("about-last-updated"),
+    aboutRuntime: document.getElementById("about-runtime"),
+    aboutReleaseLinkWrap: document.getElementById("about-release-link-wrap"),
+    aboutReleaseLink: document.getElementById("about-release-link"),
   };
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
@@ -134,8 +147,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
     });
     elements.openImport.addEventListener("click", () => openModal("import"));
     elements.openExport.addEventListener("click", () => openModal("export"));
+    elements.openAbout.addEventListener("click", () => openModal("about"));
     elements.closeImport.addEventListener("click", () => closeModal("import"));
     elements.closeExport.addEventListener("click", () => closeModal("export"));
+    elements.closeAbout.addEventListener("click", () => closeModal("about"));
     document.querySelectorAll("[data-close-modal]").forEach((node) => {
       node.addEventListener("click", () => closeModal(node.getAttribute("data-close-modal")));
     });
@@ -332,7 +347,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     refreshYamlEditor();
     renderChart();
     fitWidth();
-    setStatus("Loaded Johnson family demo");
+    setStatus("Loaded Italian family demo");
   }
 
   function hydrateControls() {
@@ -904,7 +919,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function openModal(kind) {
-    const modal = kind === "import" ? elements.importModal : elements.exportModal;
+    const modal =
+      kind === "import" ? elements.importModal :
+      kind === "export" ? elements.exportModal :
+      elements.aboutModal;
     modal.hidden = false;
     if (kind === "import") {
       elements.importYamlText.value = state.yamlText || serializeCurrentState();
@@ -912,7 +930,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function closeModal(kind) {
-    const modal = kind === "import" ? elements.importModal : elements.exportModal;
+    const modal =
+      kind === "import" ? elements.importModal :
+      kind === "export" ? elements.exportModal :
+      elements.aboutModal;
     modal.hidden = true;
   }
 
@@ -1096,12 +1117,36 @@ import { renderYamlToSvg } from "./renderer-core.js";
     if (desktopBridge && fileLabel) {
       fileLabel.hidden = true;
     }
+    if (elements.appVersionBadge) {
+      elements.appVersionBadge.textContent = `v${APP_META.version}`;
+    }
+    if (elements.aboutVersion) {
+      elements.aboutVersion.textContent = `v${APP_META.version}`;
+    }
+    if (elements.aboutLastUpdated) {
+      elements.aboutLastUpdated.textContent = APP_META.lastUpdated;
+    }
+    if (elements.aboutRuntime) {
+      elements.aboutRuntime.textContent = desktopBridge
+        ? "Desktop app"
+        : canExactServerExport
+          ? "Local browser app"
+          : "Hosted browser demo";
+    }
     if (elements.downloadDesktop) {
       if (latestReleaseUrl) {
         elements.downloadDesktop.href = latestReleaseUrl;
         elements.downloadDesktop.hidden = false;
       } else {
         elements.downloadDesktop.hidden = true;
+      }
+    }
+    if (elements.aboutReleaseLinkWrap && elements.aboutReleaseLink) {
+      if (latestReleaseUrl) {
+        elements.aboutReleaseLink.href = latestReleaseUrl;
+        elements.aboutReleaseLinkWrap.hidden = false;
+      } else {
+        elements.aboutReleaseLinkWrap.hidden = true;
       }
     }
   }
@@ -1324,11 +1369,63 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function demoNameForSlot(slot) {
-    const maleNames = ["Thomas", "William", "Charles", "Edward", "Henry", "Samuel", "George", "Frank", "Joseph", "Walter", "James", "Arthur", "Robert", "David", "John", "Michael"];
-    const femaleNames = ["Elizabeth", "Margaret", "Anna", "Catherine", "Mary", "Eleanor", "Rose", "Helen", "Clara", "Louise", "Sarah", "Emma", "Grace", "Alice", "Julia", "Martha"];
-    const paternalSurnames = ["Johnson", "Johnson", "Johnson", "Hughes", "Miller", "Bennett", "Parker", "Reed"];
-    const maternalSurnames = ["Carter", "Carter", "Carter", "Whitmore", "Bishop", "Sinclair", "Turner", "Walsh"];
-    if (slot.id === "root") return "Eleanor Grace Johnson";
+    const maleNames = [
+      "Alessandro",
+      "Francescantonio",
+      "Giandomenico",
+      "Marcantonio",
+      "Sebastiano",
+      "Gianlorenzo",
+      "Michelangelo",
+      "Costantino",
+      "Bartolomeo",
+      "Salvatore",
+      "Raffaele",
+      "Domenicantonio",
+      "Ferdinando",
+      "Giovambattista",
+      "Ludovico",
+      "Pasqualino",
+    ];
+    const femaleNames = [
+      "Mariacristina",
+      "Annunziata",
+      "Francescamaria",
+      "Giuseppina",
+      "Michelina",
+      "Caterinella",
+      "Alessandrina",
+      "Vittoriana",
+      "Serafina",
+      "Domenica",
+      "Mariangela",
+      "Antonietta",
+      "Eleonorina",
+      "Beatricella",
+      "Ludovica",
+      "Rosalinda",
+    ];
+    const paternalSurnames = [
+      "Bellandi-Castelluccio",
+      "Bellandi-Castelluccio",
+      "Bellandi-Castelluccio",
+      "Sannazzaro-Farnesini",
+      "Pietrantonio-Valentini",
+      "Montemurro-Casalvecchio",
+      "Zaccagnini-Boncompagni",
+      "Campolongo-Serravalle",
+    ];
+    const maternalSurnames = [
+      "Della Rovere-Malatesta",
+      "Della Rovere-Malatesta",
+      "Della Rovere-Malatesta",
+      "Fioravanti-Bartolomei",
+      "Brancaleoni-Sforzeschi",
+      "Santamaria-Viscontelli",
+      "Valguarnera-Monteleone",
+      "Caracciolo-Raverdino",
+    ];
+    if (slot.id === "root") return "Eleonora Mariacristina Bellandi-Castelluccio";
     const last = slot.path[slot.path.length - 1];
     const firstNamePool = last === "father" ? maleNames : femaleNames;
     const firstName = firstNamePool[(slot.index + slot.generation * 3) % firstNamePool.length];
@@ -1338,8 +1435,8 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function siblingNameForSlot(slot, offset) {
-    const maleNames = ["Andrew", "Benjamin", "Daniel", "Frederick", "Isaac", "Nicholas", "Owen", "Peter"];
-    const femaleNames = ["Abigail", "Beatrice", "Caroline", "Dorothy", "Eliza", "Frances", "Harriet", "Lillian"];
+    const maleNames = ["Adriano", "Beniamino", "Daniele", "Federicantonio", "Ignazio", "Nicodemo", "Orazio", "Pierluigi"];
+    const femaleNames = ["Adelina", "Beatrice", "Carlotta", "Dorotea", "Elisabetta", "Francesca", "Ginevra", "Ludovica"];
     const rootLastName = demoNameForSlot(slot).split(" ").slice(-1)[0];
     const pool = offset === "older" ? maleNames : femaleNames;
     const firstName = pool[(slot.index + slot.generation) % pool.length];
