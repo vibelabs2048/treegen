@@ -287,27 +287,9 @@ label > textarea {
   margin: 0;
 }
 
-.platform-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+.downloads-target-field {
+  max-width: 20rem;
   margin-top: 0.8rem;
-}
-
-.platform-chip {
-  min-height: 2.1rem;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid #8e8579;
-  border-radius: 999px;
-  background: #fffdfa;
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.platform-chip.active {
-  border-color: #314a9c;
-  background: #e9eefc;
-  color: #1d2d67;
 }
 
 .download-card {

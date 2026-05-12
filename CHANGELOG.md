@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.29 - 2026-05-12
+
+- refined the downloads page so operating system and architecture are explicit
+- added a concrete target selector for Windows x64, macOS arm64, and Linux x64
+- changed the downloads page to default to the current device target and show only the selected target's links
+
 ## 0.2.28 - 2026-05-12
 
 - added a real `downloads.html` page for the hosted web version with direct navigation back to the editor

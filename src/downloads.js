@@ -1,5 +1,5 @@
 const APP_META = {
-  version: "0.2.28",
+  version: "0.2.29",
   lastUpdated: "2026-05-12",
 };
 
@@ -12,9 +12,9 @@ const versionBadge = document.getElementById("downloads-version-badge");
 const summary = document.getElementById("downloads-summary");
 const updated = document.getElementById("downloads-updated");
 const grid = document.getElementById("downloads-grid");
-const platformPicker = document.getElementById("downloads-platform-picker");
-let selectedPlatform = "";
-let latestDownloads = [];
+const targetSelect = document.getElementById("downloads-target-select");
+let selectedTarget = "";
+let latestTargets = [];
 let latestTag = "latest";
 
 init().catch((error) => {
@@ -24,7 +24,7 @@ init().catch((error) => {
 
 async function init() {
   versionBadge.textContent = `Site v${APP_META.version}`;
-  selectedPlatform = selectedPlatform || detectPlatform();
+  selectedTarget = selectedTarget || detectTarget();
   const release = await fetchLatestRelease();
   renderRelease(release);
 }
@@ -51,44 +51,45 @@ function renderRelease(release) {
     ? `Published ${published.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}`
     : `Latest release`;
 
-  latestDownloads = [
+  latestTargets = [
     {
-      key: "windows",
-      title: "Windows",
+      key: "windows-x64",
+      title: "Windows x64",
       icon: "Win",
-      description: "Installer for most Windows PCs, plus a portable executable.",
+      description: "64-bit Windows installer plus a portable executable.",
       primaryName: "TreeGen-Windows-Setup.exe",
       primaryLabel: "Download Setup",
       secondaryName: "TreeGen-Windows-Portable.exe",
       secondaryLabel: "Portable EXE",
     },
     {
-      key: "macos",
-      title: "macOS",
+      key: "macos-arm64",
+      title: "macOS arm64",
       icon: "Mac",
-      description: "Disk image for Apple silicon Macs, plus a zip package.",
+      description: "Apple silicon Mac build, with DMG and ZIP packages.",
       primaryName: "TreeGen-macOS.dmg",
       primaryLabel: "Download DMG",
       secondaryName: "TreeGen-macOS.zip",
       secondaryLabel: "ZIP Package",
     },
     {
-      key: "linux",
-      title: "Linux",
+      key: "linux-x64",
+      title: "Linux x64",
       icon: "Lin",
-      description: "AppImage for most desktops, plus a Debian package.",
+      description: "64-bit Linux build, with AppImage and Debian package.",
       primaryName: "TreeGen-Linux.AppImage",
       primaryLabel: "Download AppImage",
       secondaryName: "TreeGen-Linux.deb",
       secondaryLabel: "DEB Package",
     },
   ].map((item) => attachReleaseMetadata(item, release.assets || []));
-  renderPlatformPicker();
+  renderTargetSelect();
   renderCards();
 }
 
 function renderCards() {
-  grid.innerHTML = latestDownloads.map((item) => renderCard(item, latestTag, selectedPlatform === item.key)).join("");
+  const activeTarget = latestTargets.find((item) => item.key === selectedTarget) || latestTargets[0];
+  grid.innerHTML = activeTarget ? [renderCard(activeTarget, latestTag, true)].join("") : "";
   grid.querySelectorAll("[data-hash-target]").forEach((button) => {
     button.addEventListener("click", () => toggleHash(button.getAttribute("data-hash-target")));
   });
@@ -129,41 +130,64 @@ function renderFallback() {
   summary.textContent = "Desktop downloads are still available even if release details cannot be loaded right now.";
   updated.textContent = "Direct download links are shown below.";
   latestTag = "latest";
-  latestDownloads = [
+  latestTargets = [
     {
-      key: "windows",
-      title: "Windows",
+      key: "windows-x64",
+      title: "Windows x64",
       icon: "Win",
-      description: "Installer for most Windows PCs, plus a portable executable.",
+      description: "64-bit Windows installer plus a portable executable.",
       primaryName: "TreeGen-Windows-Setup.exe",
       primaryLabel: "Download Setup",
       secondaryName: "TreeGen-Windows-Portable.exe",
       secondaryLabel: "Portable EXE",
     },
     {
-      key: "macos",
-      title: "macOS",
+      key: "macos-arm64",
+      title: "macOS arm64",
       icon: "Mac",
-      description: "Disk image for Apple silicon Macs, plus a zip package.",
+      description: "Apple silicon Mac build, with DMG and ZIP packages.",
       primaryName: "TreeGen-macOS.dmg",
       primaryLabel: "Download DMG",
       secondaryName: "TreeGen-macOS.zip",
       secondaryLabel: "ZIP Package",
     },
     {
-      key: "linux",
-      title: "Linux",
+      key: "linux-x64",
+      title: "Linux x64",
       icon: "Lin",
-      description: "AppImage for most desktops, plus a Debian package.",
+      description: "64-bit Linux build, with AppImage and Debian package.",
       primaryName: "TreeGen-Linux.AppImage",
       primaryLabel: "Download AppImage",
       secondaryName: "TreeGen-Linux.deb",
       secondaryLabel: "DEB Package",
     },
   ];
-  selectedPlatform = selectedPlatform || detectPlatform();
-  renderPlatformPicker();
+  selectedTarget = selectedTarget || detectTarget();
+  renderTargetSelect();
   renderCards();
+}
+
+function detectTarget() {
+  const platform = String(
+    window.navigator.userAgentData?.platform ||
+    window.navigator.platform ||
+    window.navigator.userAgent ||
+    ""
+  ).toLowerCase();
+  const architecture = String(window.navigator.userAgentData?.architecture || "").toLowerCase();
+  if (platform.includes("mac")) {
+    return "macos-arm64";
+  }
+  if (platform.includes("win")) {
+    return "windows-x64";
+  }
+  if (platform.includes("linux") || platform.includes("x11")) {
+    return "linux-x64";
+  }
+  if (architecture.includes("arm")) {
+    return "macos-arm64";
+  }
+  return "windows-x64";
 }
 
 function detectPlatform() {
@@ -179,24 +203,16 @@ function detectPlatform() {
   return "";
 }
 
-function renderPlatformPicker() {
-  if (!platformPicker) return;
-  const options = [
-    { key: "windows", label: "Windows" },
-    { key: "macos", label: "macOS" },
-    { key: "linux", label: "Linux" },
-  ];
-  platformPicker.innerHTML = options.map((option) => {
-    const active = selectedPlatform === option.key;
-    return `<button class="platform-chip${active ? " active" : ""}" type="button" data-platform="${option.key}" title="Prefer ${option.label} downloads on this page">${option.label}</button>`;
+function renderTargetSelect() {
+  if (!targetSelect) return;
+  targetSelect.innerHTML = latestTargets.map((item) => {
+    const selected = item.key === selectedTarget ? " selected" : "";
+    return `<option value="${item.key}"${selected}>${item.title}</option>`;
   }).join("");
-  platformPicker.querySelectorAll("[data-platform]").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedPlatform = button.getAttribute("data-platform") || "";
-      renderPlatformPicker();
-      renderCards();
-    });
-  });
+  targetSelect.onchange = () => {
+    selectedTarget = targetSelect.value;
+    renderCards();
+  };
 }
 
 function attachReleaseMetadata(item, assets) {

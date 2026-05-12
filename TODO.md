@@ -2,14 +2,17 @@
 
 ## Priority Order
 
-1. Add a real downloads page to the hosted web version. It should be directly navigable, show Windows/macOS/Linux options with platform symbols, display the release version being downloaded, provide a clear way back to the editor/home screen, auto-detect the user's operating system, allow manual platform selection, and expose the GitHub-provided SHA-256 digest on demand.
-   Status: Done in v0.2.28
+1. Refine the downloads page so OS and architecture are explicit. Show a selector for concrete targets such as Windows x64, macOS arm64, and Linux x64/AppImage (or whatever the actual release artifacts support), default it from the current device, and show only the links for the selected target.
+   Status: Done in v0.2.29
 
-2. Raise the preview zoom ceiling from 300 percent to 500 percent across the slider, numeric input, and zoom controls.
-   Status: Done in v0.2.28
-
-3. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
+2. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
    Status: Open
+
+3. Add a real downloads page to the hosted web version. It should be directly navigable, show Windows/macOS/Linux options with platform symbols, display the release version being downloaded, provide a clear way back to the editor/home screen, auto-detect the user's operating system, allow manual platform selection, and expose the GitHub-provided SHA-256 digest on demand.
+   Status: Done in v0.2.28
+
+4. Raise the preview zoom ceiling from 300 percent to 500 percent across the slider, numeric input, and zoom controls.
+   Status: Done in v0.2.28
 
 4. Fix the release pipeline failure in the publish step.
    Error:
