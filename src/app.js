@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.25",
+    version: "0.2.26",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -106,16 +106,22 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
     openExport: document.getElementById("open-export"),
+    openHelp: document.getElementById("open-help"),
     openAbout: document.getElementById("open-about"),
     openDownloads: document.getElementById("open-downloads"),
+    menuToggle: document.getElementById("menu-toggle"),
+    topbarMenu: document.getElementById("topbar-menu"),
     importModal: document.getElementById("import-modal"),
     exportModal: document.getElementById("export-modal"),
     aboutModal: document.getElementById("about-modal"),
     downloadsModal: document.getElementById("downloads-modal"),
+    helpModal: document.getElementById("help-modal"),
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
+    closeHelp: document.getElementById("close-help"),
     closeAbout: document.getElementById("close-about"),
     closeDownloads: document.getElementById("close-downloads"),
+    acceptHelp: document.getElementById("accept-help"),
     importYamlFile: document.getElementById("import-yaml-file"),
     importYamlChoose: document.getElementById("import-yaml-choose"),
     importYamlText: document.getElementById("import-yaml-text"),
@@ -133,6 +139,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     aboutReleaseLink: document.getElementById("about-release-link"),
     downloadSuggestion: document.getElementById("download-suggestion"),
     downloadOptions: document.getElementById("download-options"),
+    inspectorActiveLabel: document.getElementById("inspector-active-label"),
   };
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
@@ -145,13 +152,21 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     bindTabs();
     enablePreviewDragging();
     loadDemoData();
+    maybeShowHelpModal();
     window.addEventListener("resize", handleWindowResize);
   }
 
   function bindEvents() {
-    document.getElementById("load-demo").addEventListener("click", loadDemoData);
-    document.getElementById("clear-tree").addEventListener("click", clearTree);
+    document.getElementById("load-demo").addEventListener("click", () => {
+      closeTopbarMenu();
+      loadDemoData();
+    });
+    document.getElementById("clear-tree").addEventListener("click", () => {
+      closeTopbarMenu();
+      clearTree();
+    });
     document.getElementById("fit-view").addEventListener("click", fitWidth);
+    elements.menuToggle.addEventListener("click", toggleTopbarMenu);
     elements.zoomOut.addEventListener("click", () => stepZoom(-5));
     elements.zoomIn.addEventListener("click", () => stepZoom(5));
     elements.zoomPercent.addEventListener("input", () => {
@@ -162,14 +177,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.openImport.addEventListener("click", () => openModal("import"));
     elements.openExport.addEventListener("click", () => openModal("export"));
     elements.openDownloads.addEventListener("click", () => openModal("downloads"));
+    elements.openHelp.addEventListener("click", () => openModal("help"));
     elements.openAbout.addEventListener("click", () => openModal("about"));
     elements.closeImport.addEventListener("click", () => closeModal("import"));
     elements.closeExport.addEventListener("click", () => closeModal("export"));
+    elements.closeHelp.addEventListener("click", acknowledgeHelpModal);
     elements.closeAbout.addEventListener("click", () => closeModal("about"));
     elements.closeDownloads.addEventListener("click", () => closeModal("downloads"));
+    elements.acceptHelp.addEventListener("click", acknowledgeHelpModal);
     document.querySelectorAll("[data-close-modal]").forEach((node) => {
       node.addEventListener("click", () => closeModal(node.getAttribute("data-close-modal")));
     });
+    document.addEventListener("click", handleDocumentMenuClick);
     elements.importYamlFile.addEventListener("change", handleImportFile);
     elements.importYamlChoose.addEventListener("click", chooseImportFile);
     elements.applyImport.addEventListener("click", applyImportModal);
@@ -325,6 +344,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.sidebarTabs.forEach((button) => {
       button.classList.toggle("active", button.dataset.targetPanel === target);
     });
+    if (elements.inspectorActiveLabel) {
+      const active = elements.sidebarTabs.find((button) => button.dataset.targetPanel === target);
+      elements.inspectorActiveLabel.textContent = active ? active.textContent : "Editor";
+    }
   }
 
   function clearTree() {
@@ -982,9 +1005,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function openModal(kind) {
+    closeTopbarMenu();
     const modal =
       kind === "import" ? elements.importModal :
       kind === "export" ? elements.exportModal :
+      kind === "help" ? elements.helpModal :
       kind === "downloads" ? elements.downloadsModal :
       elements.aboutModal;
     modal.hidden = false;
@@ -994,12 +1019,52 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function closeModal(kind) {
+    if (kind === "help") {
+      try {
+        window.localStorage.setItem("treegen-help-seen-v1", "1");
+      } catch {}
+    }
     const modal =
       kind === "import" ? elements.importModal :
       kind === "export" ? elements.exportModal :
+      kind === "help" ? elements.helpModal :
       kind === "downloads" ? elements.downloadsModal :
       elements.aboutModal;
     modal.hidden = true;
+  }
+
+  function toggleTopbarMenu(event) {
+    event.stopPropagation();
+    const nextHidden = !elements.topbarMenu.hidden;
+    elements.topbarMenu.hidden = nextHidden;
+    elements.menuToggle.setAttribute("aria-expanded", String(!nextHidden));
+  }
+
+  function closeTopbarMenu() {
+    elements.topbarMenu.hidden = true;
+    elements.menuToggle.setAttribute("aria-expanded", "false");
+  }
+
+  function handleDocumentMenuClick(event) {
+    if (elements.topbarMenu.hidden) return;
+    if (event.target === elements.menuToggle || elements.menuToggle.contains(event.target)) return;
+    if (elements.topbarMenu.contains(event.target)) return;
+    closeTopbarMenu();
+  }
+
+  function maybeShowHelpModal() {
+    const key = "treegen-help-seen-v1";
+    try {
+      if (window.localStorage.getItem(key)) return;
+      openModal("help");
+    } catch {}
+  }
+
+  function acknowledgeHelpModal() {
+    try {
+      window.localStorage.setItem("treegen-help-seen-v1", "1");
+    } catch {}
+    closeModal("help");
   }
 
   async function chooseImportFile() {
@@ -1207,6 +1272,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
     }
     renderDownloadOptions();
+    if (elements.personName) {
+      elements.personName.disabled = false;
+      elements.personName.title = "Direct full text rendered for this box. This field should be editable in both the browser and the desktop app.";
+    }
   }
 
   function renderDownloadOptions() {

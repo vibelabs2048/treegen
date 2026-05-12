@@ -60,3 +60,39 @@
 
 18. Generation 4 long hyphenated surnames can still overflow even after the three-line fitter runs. Break those names at hyphen boundaries before shrinking.
     Status: Done in v0.2.24
+
+19. Rework the app shell for more chart space. Replace the wide top menu with a compact hamburger menu, remove the header logo/description, and shrink the header footprint.
+    Status: Done in v0.2.26
+
+20. Merge the editor tab chooser into the inspector itself and reduce the inspector footprint so the preview gets more width.
+    Status: Done in v0.2.26
+
+21. Normalize menu names and make the selected inspector section visually explicit.
+    Status: Done in v0.2.26
+
+22. Add broader tooltips across menu items and editor fields, especially where "inherit" and generation-scoped controls are not obvious.
+    Status: First pass done in v0.2.26
+
+23. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
+    Status: Open
+
+24. Increase preview zoom controls to at least 300 percent everywhere, including the slider ceiling.
+    Status: Done in v0.2.26
+
+25. Add a simple first-run help modal for the desktop app and browser demo, shown only on initial launch.
+    Status: Done in v0.2.26
+
+26. Add undo and redo for editing actions.
+    Status: Open
+
+27. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
+    Status: Open
+
+28. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
+    Status: Open
+
+29. Widen generation 0-3 boxes slightly to use available width more effectively.
+    Status: Open
+
+30. Remove the TreeGen logo from the menu bar.
+    Status: Done in v0.2.26

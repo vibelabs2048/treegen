@@ -12,23 +12,23 @@
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div class="brand">
-          <img src="public/treegen-logo.webp" alt="TreeGen logo" class="brand-mark">
-          <div>
-            <div class="brand-title-row">
-              <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.25</span>
-            </div>
-            <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
+        <div class="brand compact-brand">
+          <div class="brand-title-row">
+            <h1>TreeGen</h1>
+              <span id="app-version-badge" class="version-badge">v0.2.26</span>
           </div>
         </div>
-        <div class="topbar-actions">
-          <button id="load-demo" title="Load the example family tree">Load Placeholder Demo</button>
-          <button id="open-import" title="Import a YAML family tree from a file or pasted text">Import</button>
-          <button id="open-export" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
-          <button id="open-downloads" title="Download TreeGen for Windows, macOS, or Linux">Download</button>
-          <button id="open-about" title="View version and release information">About</button>
-          <button id="clear-tree" title="Clear every person and reset the current tree">Clear Tree</button>
+        <div class="menu-shell">
+          <button id="menu-toggle" type="button" class="menu-toggle" title="Open the main menu" aria-expanded="false" aria-controls="topbar-menu">☰</button>
+          <div id="topbar-menu" class="topbar-menu" hidden>
+            <button id="load-demo" type="button" title="Load the example family tree into the editor">Load Demo</button>
+            <button id="open-import" type="button" title="Import a YAML family tree from a file or pasted text">Import YAML</button>
+            <button id="open-export" type="button" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
+            <button id="open-downloads" type="button" title="Open direct desktop downloads for Windows, macOS, and Linux">Downloads</button>
+            <button id="open-help" type="button" title="Open a quick guide to editing and exporting family trees">How To</button>
+            <button id="open-about" type="button" title="View version and release information">About</button>
+            <button id="clear-tree" type="button" title="Clear every person and reset the current tree">Clear Tree</button>
+          </div>
         </div>
       </header>
 
@@ -43,7 +43,7 @@
               <button id="zoom-out" type="button" title="Zoom out">-</button>
               <label class="preview-zoom">
                 <span>Zoom</span>
-                <input id="zoom-range" type="range" min="5" max="150" step="5" value="70">
+                <input id="zoom-range" type="range" min="5" max="300" step="5" value="70">
               </label>
               <label class="preview-zoom-value">
                 <span>%</span>
@@ -58,161 +58,162 @@
           </div>
         </section>
 
-        <aside class="sidebar inspector-panel">
-          <section class="panel section-nav" aria-label="Editor tabs">
-            <div class="sidebar-tabs">
-              <button class="sidebar-tab active" data-target-panel="person" type="button" title="Edit the selected person">Person</button>
-              <button class="sidebar-tab" data-target-panel="type" type="button" title="Adjust generation fonts, colors, and sizing">Format</button>
-              <button class="sidebar-tab" data-target-panel="title" type="button" title="Edit the title box, author, crest, and numbering">Title</button>
+        <aside class="sidebar inspector-panel panel">
+          <div class="inspector-header">
+            <strong id="inspector-active-label">Person</strong>
+            <div class="sidebar-tabs" aria-label="Editor sections">
+              <button class="sidebar-tab active" data-target-panel="person" type="button" title="Edit the currently selected box and its person data">Person</button>
+              <button class="sidebar-tab" data-target-panel="type" type="button" title="Adjust generation styles, sizes, colors, and prefix rules">Styles</button>
+              <button class="sidebar-tab" data-target-panel="title" type="button" title="Edit the title box, numbering, and crest area">Title Box</button>
             </div>
-          </section>
+          </div>
 
-          <section class="panel tab-panel" data-panel="type">
-            <h2>Typography</h2>
+          <section class="tab-panel" data-panel="type">
+            <h2>Styles</h2>
             <label>
               Font Family
-              <input id="font-family" type="text" autocomplete="off">
+              <input id="font-family" type="text" autocomplete="off" title="Global font family used for the chart text.">
             </label>
-            <label class="checkbox-row">
+            <label class="checkbox-row" title="Adds a stroke behind text to simulate heavier printed lettering.">
               <input id="faux-bold" type="checkbox">
               <span>Faux Bold</span>
             </label>
             <label>
               Generation
-              <select id="generation-style-select"></select>
+              <select id="generation-style-select" title="Choose which generation's default style settings you are editing."></select>
             </label>
             <div class="field-row export-grid">
               <label>
                 Name Size
-                <input id="gen-name-size" type="number" min="4" max="36" step="0.5">
+                <input id="gen-name-size" type="number" min="4" max="36" step="0.5" title="Requested default font size for names in this generation. Auto-fit may reduce the applied size if the text is too long.">
               </label>
               <label>
                 Name Color
-                <input id="gen-name-color" type="color">
+                <input id="gen-name-color" type="color" title="Default color for names in this generation.">
               </label>
             </div>
             <div class="field-row export-grid">
               <label>
                 Date Size
-                <input id="gen-date-size" type="number" min="4" max="36" step="0.5">
+                <input id="gen-date-size" type="number" min="4" max="36" step="0.5" title="Requested default font size for dates in this generation. External dates may still be fit down automatically.">
               </label>
               <label>
                 Date Color
-                <input id="gen-date-color" type="color">
+                <input id="gen-date-color" type="color" title="Default color for dates in this generation.">
               </label>
             </div>
-            <label class="checkbox-row">
+            <label class="checkbox-row" title="When enabled, this generation uses the same requested size for names and dates.">
               <input id="gen-sync-name-date" type="checkbox">
               <span>Sync Name/Date Size</span>
             </label>
             <div class="field-row export-grid">
               <label>
                 Children Size
-                <input id="gen-children-size" type="number" min="4" max="36" step="0.5">
+                <input id="gen-children-size" type="number" min="4" max="36" step="0.5" title="Default font size for child annotation text in this generation band.">
               </label>
               <label>
                 Children Color
-                <input id="gen-children-color" type="color">
+                <input id="gen-children-color" type="color" title="Default color for child annotation text in this generation band.">
               </label>
             </div>
             <div class="field-row export-grid">
               <label>
                 Birth Prefix
-                <input id="date-prefix-birth" type="text" maxlength="1" autocomplete="off" placeholder="N">
+                <input id="date-prefix-birth" type="text" maxlength="1" autocomplete="off" placeholder="N" title="Optional one-character prefix shown before birth dates for this generation.">
               </label>
               <label>
                 Death Prefix
-                <input id="date-prefix-death" type="text" maxlength="1" autocomplete="off" placeholder="S">
+                <input id="date-prefix-death" type="text" maxlength="1" autocomplete="off" placeholder="S" title="Optional one-character prefix shown before death dates for this generation.">
               </label>
             </div>
             <label>
               Marriage Prefix
-              <input id="date-prefix-marriage" type="text" maxlength="1" autocomplete="off" placeholder="M">
+              <input id="date-prefix-marriage" type="text" maxlength="1" autocomplete="off" placeholder="M" title="Optional one-character prefix shown before marriage labels for this generation.">
             </label>
             <p class="help-text">Styles apply to the selected generation only.</p>
             <p id="generation-fit-report" class="help-text"></p>
           </section>
 
-          <section class="panel tab-panel" data-panel="title">
+          <section class="tab-panel" data-panel="title">
             <h2>Title Box</h2>
-            <label class="checkbox-row">
+            <label class="checkbox-row" title="Show or hide the title box in the lower-left corner of the chart.">
               <input id="title-enabled" type="checkbox" checked>
               <span>Show Title Box</span>
             </label>
             <label>
               Title
-              <input id="title-main" type="text" autocomplete="off" placeholder="Johnson Family Tree">
+              <input id="title-main" type="text" autocomplete="off" placeholder="Johnson Family Tree" title="Main title rendered in the title box.">
             </label>
             <label>
               Subtitle / Notes
-              <textarea id="title-sub" rows="3" placeholder="Research draft&#10;Updated 2026"></textarea>
+              <textarea id="title-sub" rows="3" placeholder="Research draft&#10;Updated 2026" title="Smaller supporting text rendered under the title."></textarea>
             </label>
-            <label class="checkbox-row">
+            <label class="checkbox-row" title="Show tiny reference numbers in the corner of each box.">
               <input id="box-numbering-enabled" type="checkbox">
               <span>Show Tiny Box Numbers</span>
             </label>
             <label>
               Numbering Start
-              <select id="box-numbering-start">
+              <select id="box-numbering-start" title="Choose whether box numbering starts at 0 or 1.">
                 <option value="0">0-based</option>
                 <option value="1">1-based</option>
               </select>
             </label>
             <label>
               Crest Image
-              <input id="title-crest" type="file" accept="image/*">
+              <input id="title-crest" type="file" accept="image/*" title="Optional uploaded image for the title-box crest.">
             </label>
-            <button id="clear-crest" type="button">Clear Crest</button>
+            <button id="clear-crest" type="button" title="Remove the custom crest and return to the default generated crest.">Clear Crest</button>
             <p id="crest-status" class="help-text">No crest image loaded.</p>
           </section>
 
-          <section class="panel tab-panel active" data-panel="person">
+          <section class="tab-panel active" data-panel="person">
             <h2>Selected Person</h2>
             <p id="selected-slot-label" class="slot-title"></p>
             <label>
               Display Name
-              <input id="person-name" type="text" autocomplete="off">
+              <input id="person-name" type="text" autocomplete="off" title="Direct full text rendered for this box. This will later be split into first and last name controls.">
             </label>
             <div class="field-row">
               <label>
                 Birth
-                <input id="person-birth" type="text" autocomplete="off" placeholder="14 marzo 1926">
+                <input id="person-birth" type="text" autocomplete="off" placeholder="14 marzo 1926" title="Birth date text stored for this person. Later generations may render only the year.">
               </label>
               <label>
                 Death
-                <input id="person-death" type="text" autocomplete="off" placeholder="9 novembre 1996">
+                <input id="person-death" type="text" autocomplete="off" placeholder="9 novembre 1996" title="Death date text stored for this person. Later generations may render only the year.">
               </label>
             </div>
             <label>
               Marriage
-              <input id="person-marriage" type="text" autocomplete="off" placeholder="3 giugno 1948">
+              <input id="person-marriage" type="text" autocomplete="off" placeholder="3 giugno 1948" title="Marriage label for this couple. Earlier generations can show the full date.">
             </label>
             <label>
               Child Annotation
-              <textarea id="person-children" rows="4"></textarea>
+              <textarea id="person-children" rows="4" title="Floating child list tied to the mother-side box. Use one child per line."></textarea>
             </label>
             <label>
               Note
-              <textarea id="person-note" rows="3"></textarea>
+              <textarea id="person-note" rows="3" title="Optional note rendered in or near this box, depending on generation."></textarea>
             </label>
             <div class="field-row export-grid">
               <label>
                 Local Name Size
-                <input id="person-name-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit">
+                <input id="person-name-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit" title="Leave blank to inherit the selected generation's default name size. Enter a number here to override only this box.">
               </label>
               <label>
                 Local Name Color
-                <input id="person-name-color-override" type="text" autocomplete="off" placeholder="Inherit">
+                <input id="person-name-color-override" type="text" autocomplete="off" placeholder="Inherit" title="Leave blank to inherit the selected generation's default name color. Enter a hex color to override only this box.">
               </label>
             </div>
             <div class="field-row export-grid">
               <label>
                 Local Date Size
-                <input id="person-date-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit">
+                <input id="person-date-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit" title="Leave blank to inherit the selected generation's default date size. Enter a number here to override only this box.">
               </label>
               <label>
                 Local Date Color
-                <input id="person-date-color-override" type="text" autocomplete="off" placeholder="Inherit">
+                <input id="person-date-color-override" type="text" autocomplete="off" placeholder="Inherit" title="Leave blank to inherit the selected generation's default date color. Enter a hex color to override only this box.">
               </label>
             </div>
             <p class="help-text">Use one child per line. Marriage is stored in YAML as `marriageDate:` on the mother-side record for that couple. Box notes are stored in YAML as `note:` and render inside the box for generations 0-2.</p>
@@ -316,7 +317,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.25</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.26</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p id="about-release-link-wrap"><strong>Latest release:</strong> <a id="about-release-link" href="#" target="_blank" rel="noopener noreferrer">Open releases page</a></p>
@@ -335,6 +336,26 @@
           <p id="download-suggestion" class="help-text"></p>
           <div id="download-options" class="download-options"></div>
           <p class="help-text">Use the desktop app for exact PDF, PNG, JPG, and SVG export on your machine.</p>
+        </div>
+      </section>
+    </div>
+
+    <div id="help-modal" class="modal-shell" hidden>
+      <div class="modal-backdrop" data-close-modal="help"></div>
+      <section class="modal-card">
+        <div class="modal-header">
+          <h2>How TreeGen Works</h2>
+          <button id="close-help" type="button">Close</button>
+        </div>
+        <div class="modal-body">
+          <p>1. Select a box in the chart or use the default root person.</p>
+          <p>2. Edit person details in the inspector on the right.</p>
+          <p>3. Use <strong>Styles</strong> to adjust defaults for a generation.</p>
+          <p>4. Import or export YAML to save and continue later.</p>
+          <p>5. Use the desktop app when you need exact PDF, PNG, or JPG output.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="accept-help" type="button">Got It</button>
         </div>
       </section>
     </div>

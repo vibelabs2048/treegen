@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.26 - 2026-05-12
+
+- replaced the wide top action row with a compact hamburger menu and removed the header logo/description to free more preview space
+- merged the inspector tabs into the inspector itself, tightened the inspector width, and made the active section explicit
+- added first-pass tooltips across the main editor controls, including clearer explanations for per-box inheritance fields
+- raised the preview zoom slider ceiling to 300 percent
+- added a first-run help modal for the browser demo and desktop app
+
 ## 0.2.25 - 2026-05-12
 
 - tightened generation 4 name fitting again with a real safety margin so long surnames stay inside the box in the hosted browser demo
