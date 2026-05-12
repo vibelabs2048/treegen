@@ -17,7 +17,7 @@
           <div>
             <div class="brand-title-row">
               <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.24</span>
+              <span id="app-version-badge" class="version-badge">v0.2.25</span>
             </div>
             <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
           </div>
@@ -26,8 +26,8 @@
           <button id="load-demo" title="Load the example family tree">Load Placeholder Demo</button>
           <button id="open-import" title="Import a YAML family tree from a file or pasted text">Import</button>
           <button id="open-export" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
+          <button id="open-downloads" title="Download TreeGen for Windows, macOS, or Linux">Download</button>
           <button id="open-about" title="View version and release information">About</button>
-          <a id="download-desktop" href="#" target="_blank" rel="noopener noreferrer" hidden title="Download the latest desktop release">Download Desktop App</a>
           <button id="clear-tree" title="Clear every person and reset the current tree">Clear Tree</button>
         </div>
       </header>
@@ -316,10 +316,25 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.24</span></p>
-          <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-11</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.25</span></p>
+          <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p id="about-release-link-wrap"><strong>Latest release:</strong> <a id="about-release-link" href="#" target="_blank" rel="noopener noreferrer">Open releases page</a></p>
+        </div>
+      </section>
+    </div>
+
+    <div id="downloads-modal" class="modal-shell" hidden>
+      <div class="modal-backdrop" data-close-modal="downloads"></div>
+      <section class="modal-card">
+        <div class="modal-header">
+          <h2>Download TreeGen</h2>
+          <button id="close-downloads" type="button">Close</button>
+        </div>
+        <div class="modal-body">
+          <p id="download-suggestion" class="help-text"></p>
+          <div id="download-options" class="download-options"></div>
+          <p class="help-text">Use the desktop app for exact PDF, PNG, JPG, and SVG export on your machine.</p>
         </div>
       </section>
     </div>

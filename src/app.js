@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.24",
+    version: "0.2.25",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -107,13 +107,15 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     openImport: document.getElementById("open-import"),
     openExport: document.getElementById("open-export"),
     openAbout: document.getElementById("open-about"),
-    downloadDesktop: document.getElementById("download-desktop"),
+    openDownloads: document.getElementById("open-downloads"),
     importModal: document.getElementById("import-modal"),
     exportModal: document.getElementById("export-modal"),
     aboutModal: document.getElementById("about-modal"),
+    downloadsModal: document.getElementById("downloads-modal"),
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
     closeAbout: document.getElementById("close-about"),
+    closeDownloads: document.getElementById("close-downloads"),
     importYamlFile: document.getElementById("import-yaml-file"),
     importYamlChoose: document.getElementById("import-yaml-choose"),
     importYamlText: document.getElementById("import-yaml-text"),
@@ -129,6 +131,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     aboutRuntime: document.getElementById("about-runtime"),
     aboutReleaseLinkWrap: document.getElementById("about-release-link-wrap"),
     aboutReleaseLink: document.getElementById("about-release-link"),
+    downloadSuggestion: document.getElementById("download-suggestion"),
+    downloadOptions: document.getElementById("download-options"),
   };
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
@@ -157,10 +161,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     });
     elements.openImport.addEventListener("click", () => openModal("import"));
     elements.openExport.addEventListener("click", () => openModal("export"));
+    elements.openDownloads.addEventListener("click", () => openModal("downloads"));
     elements.openAbout.addEventListener("click", () => openModal("about"));
     elements.closeImport.addEventListener("click", () => closeModal("import"));
     elements.closeExport.addEventListener("click", () => closeModal("export"));
     elements.closeAbout.addEventListener("click", () => closeModal("about"));
+    elements.closeDownloads.addEventListener("click", () => closeModal("downloads"));
     document.querySelectorAll("[data-close-modal]").forEach((node) => {
       node.addEventListener("click", () => closeModal(node.getAttribute("data-close-modal")));
     });
@@ -979,6 +985,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const modal =
       kind === "import" ? elements.importModal :
       kind === "export" ? elements.exportModal :
+      kind === "downloads" ? elements.downloadsModal :
       elements.aboutModal;
     modal.hidden = false;
     if (kind === "import") {
@@ -990,6 +997,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const modal =
       kind === "import" ? elements.importModal :
       kind === "export" ? elements.exportModal :
+      kind === "downloads" ? elements.downloadsModal :
       elements.aboutModal;
     modal.hidden = true;
   }
@@ -1190,14 +1198,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
           ? "Local browser app"
           : "Hosted browser demo";
     }
-    if (elements.downloadDesktop) {
-      if (latestReleaseUrl) {
-        elements.downloadDesktop.href = latestReleaseUrl;
-        elements.downloadDesktop.hidden = false;
-      } else {
-        elements.downloadDesktop.hidden = true;
-      }
-    }
     if (elements.aboutReleaseLinkWrap && elements.aboutReleaseLink) {
       if (latestReleaseUrl) {
         elements.aboutReleaseLink.href = latestReleaseUrl;
@@ -1206,6 +1206,69 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         elements.aboutReleaseLinkWrap.hidden = true;
       }
     }
+    renderDownloadOptions();
+  }
+
+  function renderDownloadOptions() {
+    if (!elements.downloadOptions) return;
+    if (!latestReleaseUrl) {
+      elements.downloadSuggestion.textContent = "Release downloads are not available right now.";
+      elements.downloadOptions.innerHTML = "";
+      return;
+    }
+    const platform = detectPlatform();
+    const options = [
+      {
+        key: "windows",
+        label: "Windows",
+        icon: "W",
+        description: "Installer for most Windows PCs.",
+        href: `${latestReleaseUrl}/download/TreeGen-Windows-Setup.exe`,
+        secondaryLabel: "Portable",
+        secondaryHref: `${latestReleaseUrl}/download/TreeGen-Windows-Portable.exe`,
+      },
+      {
+        key: "macos",
+        label: "macOS",
+        icon: "M",
+        description: "Native desktop app for Apple silicon Macs.",
+        href: `${latestReleaseUrl}/download/TreeGen-macOS.dmg`,
+        secondaryLabel: "ZIP",
+        secondaryHref: `${latestReleaseUrl}/download/TreeGen-macOS.zip`,
+      },
+      {
+        key: "linux",
+        label: "Linux",
+        icon: "L",
+        description: "AppImage for most Linux desktops.",
+        href: `${latestReleaseUrl}/download/TreeGen-Linux.AppImage`,
+        secondaryLabel: "DEB",
+        secondaryHref: `${latestReleaseUrl}/download/TreeGen-Linux.deb`,
+      },
+    ];
+    const recommendedKey = platform === "macos" ? "macos" : platform === "windows" ? "windows" : platform === "linux" ? "linux" : "";
+    elements.downloadSuggestion.textContent = recommendedKey
+      ? `Recommended for this device: ${options.find((option) => option.key === recommendedKey)?.label}.`
+      : "Choose the desktop download that matches your operating system.";
+    elements.downloadOptions.innerHTML = options.map((option) => {
+      const recommended = option.key === recommendedKey;
+      return `
+        <section class="download-card${recommended ? " recommended" : ""}">
+          <div class="download-card-header">
+            <div class="download-card-title">
+              <span class="download-icon" aria-hidden="true">${option.icon}</span>
+              <span>${option.label}</span>
+            </div>
+            ${recommended ? '<span class="download-badge">Recommended</span>' : ""}
+          </div>
+          <p>${option.description}</p>
+          <div class="download-actions">
+            <a class="download-link" href="${option.href}" target="_blank" rel="noopener noreferrer">Download</a>
+            <a class="download-link" href="${option.secondaryHref}" target="_blank" rel="noopener noreferrer">${option.secondaryLabel}</a>
+          </div>
+        </section>
+      `;
+    }).join("");
   }
 
   function syncExactExportAvailability() {
@@ -1223,6 +1286,19 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   function isLikelyLocalHost() {
     const host = window.location.hostname;
     return host === "127.0.0.1" || host === "localhost" || host === "";
+  }
+
+  function detectPlatform() {
+    const value = String(
+      window.navigator.userAgentData?.platform ||
+      window.navigator.platform ||
+      window.navigator.userAgent ||
+      ""
+    ).toLowerCase();
+    if (value.includes("mac")) return "macos";
+    if (value.includes("win")) return "windows";
+    if (value.includes("linux") || value.includes("x11")) return "linux";
+    return "";
   }
 
   function resolveLatestReleaseUrl() {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.25 - 2026-05-12
+
+- tightened generation 4 name fitting again with a real safety margin so long surnames stay inside the box in the hosted browser demo
+- replaced the top-bar desktop download link with a download modal that offers direct Windows, macOS, and Linux packages
+- added client-side OS detection so the hosted demo recommends the best desktop download for the current device
+
 ## 0.2.24 - 2026-05-12
 
 - fixed stale version/example strings in the About modal, developer notes, and release workflow input description

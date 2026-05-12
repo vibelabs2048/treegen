@@ -555,10 +555,12 @@ function fitWrappedLinesPreferred(text, maxChars, maxLines, preferredLines) {
 }
 
 function fitBoxNameOnly(node, style, name, generation) {
-  const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
-  const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
+  const widthSafety = generation === 4 ? 1.6 : 0;
+  const heightSafety = generation === 4 ? 0.4 : 0;
+  const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2 - widthSafety);
+  const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2 - heightSafety);
   const preferThreeNameLines = generation === 4;
-  const preferredBaseNameSize = round2(style.nameSize * (preferThreeNameLines ? 1.12 : 1));
+  const preferredBaseNameSize = round2(style.nameSize * (preferThreeNameLines ? 1.05 : 1));
   const baseChars = maxCharsForWidth(availableWidth, preferredBaseNameSize, true);
   const baseLines = preferThreeNameLines
     ? fitWrappedLinesPreferred(name, baseChars, 3, 3)
@@ -570,7 +572,7 @@ function fitBoxNameOnly(node, style, name, generation) {
     return { nameSize: preferredBaseNameSize, nameLines: baseLines, lineHeight: baseLineHeight, height: baseHeight };
   }
   const maxWrapLines = 3;
-  for (let scale = (preferThreeNameLines ? 1.12 : 1); scale >= 0.38; scale -= 0.025) {
+  for (let scale = (preferThreeNameLines ? 1.05 : 1); scale >= 0.34; scale -= 0.02) {
     const nameSize = round2(style.nameSize * scale);
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
     const nameLines = preferThreeNameLines
@@ -584,10 +586,10 @@ function fitBoxNameOnly(node, style, name, generation) {
     }
   }
   return {
-    nameSize: 3.8,
-    nameLines: fitWrappedLines(name, maxCharsForWidth(availableWidth, 3.8, true), maxWrapLines),
-    lineHeight: 3.7,
-    height: fitWrappedLines(name, maxCharsForWidth(availableWidth, 3.8, true), maxWrapLines).length * 3.7,
+    nameSize: 3.4,
+    nameLines: fitWrappedLines(name, maxCharsForWidth(availableWidth, 3.4, true), maxWrapLines),
+    lineHeight: 3.35,
+    height: fitWrappedLines(name, maxCharsForWidth(availableWidth, 3.4, true), maxWrapLines).length * 3.35,
   };
 }
 
