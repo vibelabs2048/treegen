@@ -1,9 +1,12 @@
 # TreeGen Backlog
 
-## Open
+## Priority Order
 
-1. Remove the line in the title box.
-   Status: Done in v0.2.9
+1. Fix the release pipeline failure in the publish step.
+   Error:
+   `Run gh release upload "$TAG" release-assets/* --clobber`
+   `failed to run git: fatal: not a git repository (or any of the parent directories): .git`
+   Status: Done locally, needs verification in GitHub Actions
 
 2. Generation 1, 2, and 3 child annotations should show full child name and full date.
    Status: Open
@@ -22,3 +25,6 @@
 
 7. The SVG preview is still vulnerable to top-edge clipping. Add a general fit/margin solution so the full SVG is always shown.
    Status: Open
+
+8. Remove the line in the title box.
+   Status: Done in v0.2.9

@@ -47,7 +47,7 @@ npm run desktop:dist:linux
 ## GitHub automation
 
 - pushes to `main` update the GitHub Pages demo
-- pushing a version tag like `v0.2.8` creates or updates a GitHub release
+- pushing a version tag like `v0.2.10` creates or updates a GitHub release
 - the release workflow builds desktop packages and uploads them as release assets
 
 ## Manual repo setup
@@ -61,4 +61,4 @@ npm run desktop:dist:linux
 
 ## Current version
 
-`0.2.8`
+`0.2.10`

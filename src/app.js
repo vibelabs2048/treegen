@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.9",
+    version: "0.2.10",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;

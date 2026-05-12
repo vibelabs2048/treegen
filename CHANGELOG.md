@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.10 - 2026-05-11
+
+- fixed the release workflow so the publish-assets job checks out the repo and sets `GH_REPO` before `gh release upload`
+- updated the backlog status for the release-pipeline issue
+
 ## 0.2.9 - 2026-05-11
 
 - added `TODO.md` with the current renderer and preview backlog
