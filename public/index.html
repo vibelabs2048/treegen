@@ -17,7 +17,7 @@
           <div>
             <div class="brand-title-row">
               <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.20</span>
+              <span id="app-version-badge" class="version-badge">v0.2.21</span>
             </div>
             <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
           </div>
@@ -195,7 +195,28 @@
               Note
               <textarea id="person-note" rows="3"></textarea>
             </label>
+            <div class="field-row export-grid">
+              <label>
+                Local Name Size
+                <input id="person-name-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit">
+              </label>
+              <label>
+                Local Name Color
+                <input id="person-name-color-override" type="text" autocomplete="off" placeholder="Inherit">
+              </label>
+            </div>
+            <div class="field-row export-grid">
+              <label>
+                Local Date Size
+                <input id="person-date-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit">
+              </label>
+              <label>
+                Local Date Color
+                <input id="person-date-color-override" type="text" autocomplete="off" placeholder="Inherit">
+              </label>
+            </div>
             <p class="help-text">Use one child per line. Marriage is stored in YAML as `marriageDate:` on the mother-side record for that couple. Box notes are stored in YAML as `note:` and render inside the box for generations 0-2.</p>
+            <p class="help-text">Leave local override fields blank to inherit the selected generation settings.</p>
           </section>
 
         </aside>

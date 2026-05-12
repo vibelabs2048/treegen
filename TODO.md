@@ -44,7 +44,7 @@
     Status: Done in v0.2.20
 
 13. Evaluate per-box text styling overrides. Long names vary enough that some boxes may need individual font size and color overrides beyond generation-level defaults.
-    Status: Open
+    Status: Done in v0.2.21
 
 14. Add a better change-evaluation workflow. TreeGen needs a more deliberate way to inspect formatting changes across preview, SVG, PNG, and PDF before calling a change good.
     Status: Open

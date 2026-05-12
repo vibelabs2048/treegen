@@ -124,9 +124,9 @@ function analyzeStateLayout(state) {
 
   for (const slot of slotDefinitions) {
     const report = reports[slot.generation];
-    const style = getGenerationStyle(state, slot.generation);
     const node = layout.nodes[slot.id];
     const person = state.people[slot.id];
+    const style = getResolvedNodeStyle(state, slot.generation, person);
     const name = displayName(person.name);
     const dateLines = getExternalDateLines(person, slot.generation, state.settings);
     let actualNameSize = style.nameSize;
@@ -218,6 +218,10 @@ function normalizeState(data, overrides) {
       marriageDate: sanitizeDateValue(incoming.marriageDate),
       childrenNote: typeof incoming.childrenNote === "string" ? incoming.childrenNote : "",
       note: typeof incoming.note === "string" ? incoming.note : "",
+      nameSizeOverride: sanitizeOptionalNumber(incoming.nameSizeOverride),
+      nameColorOverride: sanitizeOptionalColor(incoming.nameColorOverride),
+      dateSizeOverride: sanitizeOptionalNumber(incoming.dateSizeOverride),
+      dateColorOverride: sanitizeOptionalColor(incoming.dateColorOverride),
     };
   }
   return { settings: nextSettings, people };
@@ -364,7 +368,7 @@ function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, f
 
 function drawNode(state, slot, node) {
   const person = state.people[slot.id];
-  const style = getGenerationStyle(state, slot.generation);
+  const style = getResolvedNodeStyle(state, slot.generation, person);
   const parts = [];
   parts.push(`<g class="node-box" data-slot-id="${escapeAttribute(slot.id)}">`);
   parts.push(
@@ -655,6 +659,17 @@ function getGenerationStyle(state, generation) {
   return state.settings.generationStyles[generation] || buildDefaultGenerationStyles()[generation];
 }
 
+function getResolvedNodeStyle(state, generation, person) {
+  const base = getGenerationStyle(state, generation);
+  return {
+    ...base,
+    nameSize: sanitizeOptionalNumber(person?.nameSizeOverride) ?? base.nameSize,
+    nameColor: sanitizeOptionalColor(person?.nameColorOverride) || base.nameColor,
+    dateSize: sanitizeOptionalNumber(person?.dateSizeOverride) ?? base.dateSize,
+    dateColor: sanitizeOptionalColor(person?.dateColorOverride) || base.dateColor,
+  };
+}
+
 function buildDefaultGenerationStyles() {
   return GENERATION_SIZES.map((size) => ({
     nameSize: size,
@@ -841,6 +856,17 @@ function sanitizeText(value) {
 
 function sanitizeDateValue(value) {
   return sanitizeText(value);
+}
+
+function sanitizeOptionalNumber(value) {
+  if (value == null || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function sanitizeOptionalColor(value) {
+  const text = String(value ?? "").trim();
+  return text ? normalizeColor(text) : "";
 }
 
 function normalizeColor(value) {

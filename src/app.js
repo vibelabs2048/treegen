@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.20",
+    version: "0.2.21",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -65,6 +65,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     personMarriage: document.getElementById("person-marriage"),
     personChildren: document.getElementById("person-children"),
     personNote: document.getElementById("person-note"),
+    personNameSizeOverride: document.getElementById("person-name-size-override"),
+    personNameColorOverride: document.getElementById("person-name-color-override"),
+    personDateSizeOverride: document.getElementById("person-date-size-override"),
+    personDateColorOverride: document.getElementById("person-date-color-override"),
     fontFamily: document.getElementById("font-family"),
     fauxBold: document.getElementById("faux-bold"),
     generationStyleSelect: document.getElementById("generation-style-select"),
@@ -187,6 +191,22 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     });
     elements.personNote.addEventListener("input", () => {
       state.people[state.selectedId].note = elements.personNote.value;
+      syncAfterChange();
+    });
+    elements.personNameSizeOverride.addEventListener("input", () => {
+      state.people[state.selectedId].nameSizeOverride = sanitizeOptionalNumber(elements.personNameSizeOverride.value);
+      syncAfterChange();
+    });
+    elements.personNameColorOverride.addEventListener("input", () => {
+      state.people[state.selectedId].nameColorOverride = sanitizeOptionalColor(elements.personNameColorOverride.value);
+      syncAfterChange();
+    });
+    elements.personDateSizeOverride.addEventListener("input", () => {
+      state.people[state.selectedId].dateSizeOverride = sanitizeOptionalNumber(elements.personDateSizeOverride.value);
+      syncAfterChange();
+    });
+    elements.personDateColorOverride.addEventListener("input", () => {
+      state.people[state.selectedId].dateColorOverride = sanitizeOptionalColor(elements.personDateColorOverride.value);
       syncAfterChange();
     });
 
@@ -322,6 +342,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         marriageDate: sampleMarriageDate(slot),
         childrenNote: sampleChildrenNote(slot),
         note: sampleNoteForSlot(slot),
+        nameSizeOverride: null,
+        nameColorOverride: "",
+        dateSizeOverride: null,
+        dateColorOverride: "",
       };
     }
     return people;
@@ -337,6 +361,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         marriageDate: "",
         childrenNote: "",
         note: "",
+        nameSizeOverride: null,
+        nameColorOverride: "",
+        dateSizeOverride: null,
+        dateColorOverride: "",
       };
     }
     return people;
@@ -371,6 +399,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.personMarriage.value = person.marriageDate || "";
     elements.personChildren.value = person.childrenNote;
     elements.personNote.value = person.note || "";
+    elements.personNameSizeOverride.value = person.nameSizeOverride == null ? "" : String(person.nameSizeOverride);
+    elements.personNameColorOverride.value = person.nameColorOverride || "";
+    elements.personDateSizeOverride.value = person.dateSizeOverride == null ? "" : String(person.dateSizeOverride);
+    elements.personDateColorOverride.value = person.dateColorOverride || "";
     elements.personChildren.disabled = slot.generation >= 5;
     if (slot.generation >= 5) {
       elements.personChildren.value = "";
@@ -492,6 +524,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         marriageDate: sanitizeDateValue(incoming.marriageDate ?? nextPeople[slot.id].marriageDate),
         childrenNote: typeof incoming.childrenNote === "string" ? incoming.childrenNote : nextPeople[slot.id].childrenNote,
         note: typeof incoming.note === "string" ? incoming.note : nextPeople[slot.id].note,
+        nameSizeOverride: sanitizeOptionalNumber(incoming.nameSizeOverride ?? nextPeople[slot.id].nameSizeOverride),
+        nameColorOverride: sanitizeOptionalColor(incoming.nameColorOverride ?? nextPeople[slot.id].nameColorOverride),
+        dateSizeOverride: sanitizeOptionalNumber(incoming.dateSizeOverride ?? nextPeople[slot.id].dateSizeOverride),
+        dateColorOverride: sanitizeOptionalColor(incoming.dateColorOverride ?? nextPeople[slot.id].dateColorOverride),
       };
     }
 
@@ -1365,6 +1401,17 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     return sanitizeText(value);
   }
 
+  function sanitizeOptionalNumber(value) {
+    if (value == null || value === "") return null;
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0 ? number : null;
+  }
+
+  function sanitizeOptionalColor(value) {
+    const text = String(value ?? "").trim();
+    return text ? normalizeColor(text) : "";
+  }
+
   function normalizeColor(value) {
     const text = String(value || "").trim();
     if (!text) return "#000000";
@@ -1806,6 +1853,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
       if (person.note) {
         lines.push(`    note: ${quoteYaml(person.note)}`);
+      }
+      if (person.nameSizeOverride != null) {
+        lines.push(`    nameSizeOverride: ${person.nameSizeOverride}`);
+      }
+      if (person.nameColorOverride) {
+        lines.push(`    nameColorOverride: ${quoteYaml(person.nameColorOverride)}`);
+      }
+      if (person.dateSizeOverride != null) {
+        lines.push(`    dateSizeOverride: ${person.dateSizeOverride}`);
+      }
+      if (person.dateColorOverride) {
+        lines.push(`    dateColorOverride: ${quoteYaml(person.dateColorOverride)}`);
       }
     }
     return lines.join("\n");

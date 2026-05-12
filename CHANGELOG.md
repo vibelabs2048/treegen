@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.21 - 2026-05-12
+
+- added per-box name and date size/color overrides in the Selected Person panel, with blank meaning inherit from generation
+- wired those overrides through browser state, YAML import/export, and the shared renderer
+- updated the fit report so explicit per-box overrides do not get misreported as auto-fit shrinkage
+
 ## 0.2.20 - 2026-05-12
 
 - added generation-level fit feedback in the Format panel so the UI now shows when auto-fit is reducing the effective name or date size
