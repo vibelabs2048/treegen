@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.20 - 2026-05-12
+
+- added generation-level fit feedback in the Format panel so the UI now shows when auto-fit is reducing the effective name or date size
+- reused the shared renderer’s fitting logic to report requested size versus actual applied size for the selected generation
+- corrected the prefix input placeholders so birth/death/marriage match `N` / `S` / `M`
+
 ## 0.2.19 - 2026-05-12
 
 - changed date prefixes from one global setting to per-generation settings in the browser model, YAML serializer, and shared renderer

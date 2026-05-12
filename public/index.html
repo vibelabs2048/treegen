@@ -17,7 +17,7 @@
           <div>
             <div class="brand-title-row">
               <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.19</span>
+              <span id="app-version-badge" class="version-badge">v0.2.20</span>
             </div>
             <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
           </div>
@@ -122,14 +122,15 @@
               </label>
               <label>
                 Death Prefix
-                <input id="date-prefix-death" type="text" maxlength="1" autocomplete="off" placeholder="M">
+                <input id="date-prefix-death" type="text" maxlength="1" autocomplete="off" placeholder="S">
               </label>
             </div>
             <label>
               Marriage Prefix
-              <input id="date-prefix-marriage" type="text" maxlength="1" autocomplete="off" placeholder="S">
+              <input id="date-prefix-marriage" type="text" maxlength="1" autocomplete="off" placeholder="M">
             </label>
             <p class="help-text">Styles apply to the selected generation only.</p>
+            <p id="generation-fit-report" class="help-text"></p>
           </section>
 
           <section class="panel tab-panel" data-panel="title">

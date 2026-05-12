@@ -1,9 +1,9 @@
-import { renderYamlToSvg } from "./renderer-core.js";
+import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.19",
+    version: "0.2.20",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -44,6 +44,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     settings: clone(DEFAULT_SETTINGS),
     people: buildDefaultPeople(),
     yamlText: "",
+    fitReport: [],
     export: {
       format: "pdf",
       quality: 100,
@@ -77,6 +78,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     datePrefixBirth: document.getElementById("date-prefix-birth"),
     datePrefixDeath: document.getElementById("date-prefix-death"),
     datePrefixMarriage: document.getElementById("date-prefix-marriage"),
+    generationFitReport: document.getElementById("generation-fit-report"),
     zoomRange: document.getElementById("zoom-range"),
     imageFormat: document.getElementById("image-format"),
     imageQuality: document.getElementById("image-quality"),
@@ -503,11 +505,13 @@ import { renderYamlToSvg } from "./renderer-core.js";
     state.yamlText = yaml;
     try {
       const svgText = applyPreviewMargin(renderYamlToSvg(yaml), 36);
+      state.fitReport = analyzeYamlLayout(yaml);
       const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
       const svg = doc.documentElement;
       bindRenderedSvg(svg);
       elements.svgWrapper.replaceChildren(svg);
       applyZoom();
+      updateGenerationFitReport();
       setStatus("Preview updated");
     } catch (error) {
       setStatus("Render error: " + error.message);
@@ -1308,6 +1312,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     elements.datePrefixBirth.value = prefixes.birth || "";
     elements.datePrefixDeath.value = prefixes.death || "";
     elements.datePrefixMarriage.value = prefixes.marriage || "";
+    updateGenerationFitReport();
   }
 
   function updateGenerationStyle(key, value) {
@@ -1323,6 +1328,33 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const generation = Number(elements.generationStyleSelect.value || "0");
     state.settings.datePrefixes[generation][kind] = sanitizePrefix(value);
     syncAfterChange();
+  }
+
+  function updateGenerationFitReport() {
+    const generation = Number(elements.generationStyleSelect.value || "0");
+    const report = state.fitReport[generation];
+    if (!report) {
+      elements.generationFitReport.textContent = "";
+      return;
+    }
+    const parts = [];
+    if (report.limited.nameCount > 0) {
+      parts.push(
+        `Name auto-fit active: requested ${report.requested.nameSize}pt, effective ${report.actual.nameMin}-${report.actual.nameMax}pt across ${report.limited.nameCount}/${report.boxCount} boxes.`
+      );
+    } else {
+      parts.push(`Names fit at the requested ${report.requested.nameSize}pt in this generation.`);
+    }
+    if (report.actual.dateMax > 0) {
+      if (report.limited.dateCount > 0) {
+        parts.push(
+          `Date labels are using ${report.actual.dateMin}-${report.actual.dateMax}pt instead of the requested ${report.requested.dateSize}pt in ${report.limited.dateCount} box${report.limited.dateCount === 1 ? "" : "es"}.`
+        );
+      } else {
+        parts.push(`Date labels fit at the requested ${report.requested.dateSize}pt in this generation.`);
+      }
+    }
+    elements.generationFitReport.textContent = parts.join(" ");
   }
 
   function sanitizeText(value) {

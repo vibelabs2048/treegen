@@ -41,7 +41,7 @@
     Status: Done in v0.2.19
 
 12. Font-size controls need clearer limit feedback. The auto-fit behavior is useful, but the UI should show when a requested size is being capped by box-fit logic instead of letting the control imply it is fully applied.
-    Status: Open
+    Status: Done in v0.2.20
 
 13. Evaluate per-box text styling overrides. Long names vary enough that some boxes may need individual font size and color overrides beyond generation-level defaults.
     Status: Open

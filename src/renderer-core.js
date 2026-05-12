@@ -43,6 +43,12 @@ export function renderYamlToSvg(yamlText, overrides = {}) {
   return renderStateToSvg(state);
 }
 
+export function analyzeYamlLayout(yamlText, overrides = {}) {
+  const parsed = parseYaml(yamlText);
+  const state = normalizeState(parsed, overrides);
+  return analyzeStateLayout(state);
+}
+
 export function renderStateToSvg(state) {
   const slotDefinitions = buildSlotDefinitions(MAX_GENERATION);
   const layout = buildLayout(slotDefinitions, state);
@@ -89,6 +95,82 @@ export function renderStateToSvg(state) {
 
   parts.push(`</svg>`);
   return parts.join("");
+}
+
+function analyzeStateLayout(state) {
+  const slotDefinitions = buildSlotDefinitions(MAX_GENERATION);
+  const layout = buildLayout(slotDefinitions, state);
+  const reports = Array.from({ length: MAX_GENERATION + 1 }, (_, generation) => {
+    const style = getGenerationStyle(state, generation);
+    return {
+      generation,
+      boxCount: 0,
+      requested: {
+        nameSize: style.nameSize,
+        dateSize: style.dateSize,
+      },
+      actual: {
+        nameMin: Number.POSITIVE_INFINITY,
+        nameMax: 0,
+        dateMin: Number.POSITIVE_INFINITY,
+        dateMax: 0,
+      },
+      limited: {
+        nameCount: 0,
+        dateCount: 0,
+      },
+    };
+  });
+
+  for (const slot of slotDefinitions) {
+    const report = reports[slot.generation];
+    const style = getGenerationStyle(state, slot.generation);
+    const node = layout.nodes[slot.id];
+    const person = state.people[slot.id];
+    const name = displayName(person.name);
+    const dateLines = getExternalDateLines(person, slot.generation, state.settings);
+    let actualNameSize = style.nameSize;
+    let actualDateSize = 0;
+
+    if (node.verticalText) {
+      const layoutInfo = fitVerticalNodeText(node, style, name);
+      actualNameSize = layoutInfo.nameSize;
+      actualDateSize = getExternalDateLayout(node, style, slot, person, state.settings).fontSize || 0;
+    } else if (slot.generation >= 4) {
+      const layoutInfo = fitBoxNameOnly(node, style, name, slot.generation);
+      actualNameSize = layoutInfo.nameSize;
+      actualDateSize = slot.generation >= 5 ? (getExternalDateLayout(node, style, slot, person, state.settings).fontSize || 0) : Math.max(3.7, style.dateSize - 1.4);
+    } else {
+      const layoutInfo = fitHorizontalNodeText(node, style, name, compactLines(person.note || "").slice(0, 2), slot.generation);
+      actualNameSize = layoutInfo.nameSize;
+      actualDateSize = getExternalDateLayout(node, style, slot, person, state.settings).fontSize || 0;
+    }
+
+    report.boxCount += 1;
+    report.actual.nameMin = Math.min(report.actual.nameMin, actualNameSize);
+    report.actual.nameMax = Math.max(report.actual.nameMax, actualNameSize);
+    if (actualNameSize < style.nameSize - 0.01) {
+      report.limited.nameCount += 1;
+    }
+
+    if (dateLines.length && actualDateSize > 0) {
+      report.actual.dateMin = Math.min(report.actual.dateMin, actualDateSize);
+      report.actual.dateMax = Math.max(report.actual.dateMax, actualDateSize);
+      if (actualDateSize < style.dateSize - 0.01) {
+        report.limited.dateCount += 1;
+      }
+    }
+  }
+
+  return reports.map((report) => ({
+    ...report,
+    actual: {
+      nameMin: Number.isFinite(report.actual.nameMin) ? round2(report.actual.nameMin) : 0,
+      nameMax: Number.isFinite(report.actual.nameMax) ? round2(report.actual.nameMax) : 0,
+      dateMin: Number.isFinite(report.actual.dateMin) ? round2(report.actual.dateMin) : 0,
+      dateMax: Number.isFinite(report.actual.dateMax) ? round2(report.actual.dateMax) : 0,
+    },
+  }));
 }
 
 function normalizeState(data, overrides) {
