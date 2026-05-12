@@ -3,8 +3,8 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.17",
-    lastUpdated: "2026-05-11",
+    version: "0.2.18",
+    lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
@@ -33,9 +33,9 @@ import { renderYamlToSvg } from "./renderer-core.js";
       crestDataUrl: "",
     },
     datePrefixes: {
-      birth: "",
-      death: "",
-      marriage: "",
+      birth: "N",
+      death: "S",
+      marriage: "M",
     },
     boxNumbering: {
       enabled: false,

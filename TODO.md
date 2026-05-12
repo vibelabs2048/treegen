@@ -31,3 +31,23 @@
 
 9. Refresh the shipped demo title-box subtitle so it no longer says "placeholder crest".
    Status: Done in v0.2.17
+
+10. Make date prefixes generation-aware by default:
+    use `N` for birth, `M` for marriage, and `S` for death on generations 0-3 only,
+    and suppress those prefixes on generations 4-6 by default.
+    Status: Done in v0.2.18
+
+11. Prefix editing is still global. Adding or removing `N`, `M`, and `S` should work per generation in the UI, YAML model, and renderer.
+    Status: Open
+
+12. Font-size controls need clearer limit feedback. The auto-fit behavior is useful, but the UI should show when a requested size is being capped by box-fit logic instead of letting the control imply it is fully applied.
+    Status: Open
+
+13. Evaluate per-box text styling overrides. Long names vary enough that some boxes may need individual font size and color overrides beyond generation-level defaults.
+    Status: Open
+
+14. Add a better change-evaluation workflow. TreeGen needs a more deliberate way to inspect formatting changes across preview, SVG, PNG, and PDF before calling a change good.
+    Status: Open
+
+15. Add a safer pre-publish release path for the demo and desktop artifacts. The goal is to validate a production-like Pages build and release package before publishing to official GitHub Pages and tagged releases.
+    Status: Open

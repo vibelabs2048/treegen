@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.18 - 2026-05-12
+
+- changed the default date prefixes to `N` for birth, `M` for marriage, and `S` for death
+- made those prefixes generation-aware so they render only on generations 0-3 and are suppressed on generations 4-6
+- kept the current global prefix model in place while documenting the remaining per-generation editing issue in the backlog
+
 ## 0.2.17 - 2026-05-11
 
 - changed preview fitting to use a larger preview-only margin and a top-aligned fit scroll so the full SVG is shown more reliably

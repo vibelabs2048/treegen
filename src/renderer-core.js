@@ -22,9 +22,9 @@ const DEFAULT_SETTINGS = {
     crestDataUrl: "",
   },
   datePrefixes: {
-    birth: "",
-    death: "",
-    marriage: "",
+    birth: "N",
+    death: "S",
+    marriage: "M",
   },
   boxNumbering: {
     enabled: false,
@@ -754,15 +754,15 @@ function getExternalDateLines(person, generation, settings = DEFAULT_SETTINGS) {
   const death = sanitizeDateValue(person?.deathYear);
   if (generation <= 2) {
     return [
-      formatPrefixedDate(settings.datePrefixes?.birth, birth),
-      formatPrefixedDate(settings.datePrefixes?.death, death),
+      formatPrefixedDate(getActiveDatePrefix("birth", generation, settings), birth),
+      formatPrefixedDate(getActiveDatePrefix("death", generation, settings), death),
     ].filter(Boolean);
   }
   const birthYear = extractYear(birth);
   const deathYear = extractYear(death);
   return [
-    formatPrefixedDate(settings.datePrefixes?.birth, birthYear),
-    formatPrefixedDate(settings.datePrefixes?.death, deathYear),
+    formatPrefixedDate(getActiveDatePrefix("birth", generation, settings), birthYear),
+    formatPrefixedDate(getActiveDatePrefix("death", generation, settings), deathYear),
   ].filter(Boolean);
 }
 
@@ -822,11 +822,17 @@ function getMarriageReserve(marriageDate, generation, style, settings = DEFAULT_
 function formatMarriageForGeneration(marriageDate, generation, style, settings = DEFAULT_SETTINGS) {
   const full = sanitizeDateValue(marriageDate);
   if (!full || generation >= 5) return { text: "", fontSize: 0 };
-  const formattedFull = formatPrefixedDate(settings.datePrefixes?.marriage, full);
+  const prefix = getActiveDatePrefix("marriage", generation, settings);
+  const formattedFull = formatPrefixedDate(prefix, full);
   if (generation <= 2) {
     return { text: formattedFull, fontSize: 4.6 };
   }
-  return { text: formatPrefixedDate(settings.datePrefixes?.marriage, extractYear(full)), fontSize: generation === 4 ? 3.2 : 3.8 };
+  return { text: formatPrefixedDate(prefix, extractYear(full)), fontSize: generation === 4 ? 3.2 : 3.8 };
+}
+
+function getActiveDatePrefix(kind, generation, settings = DEFAULT_SETTINGS) {
+  if (generation >= 4) return "";
+  return sanitizePrefix(settings.datePrefixes?.[kind]);
 }
 
 function formatPrefixedDate(prefix, value) {
