@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.35 - 2026-05-12
+
+- changed external date sizing so the requested generation date size is now the actual target across the renderer
+- fit external dates down only when the available date lane is too narrow, and updated fit-report wording to reflect that behavior
+- when surname inheritance is enabled, the inherited surname now stays visible in the disabled surname field so the editor state is clearer
+
 ## 0.2.34 - 2026-05-12
 
 - added desktop-only project open/save actions in the main menu

@@ -139,7 +139,7 @@ function analyzeStateLayout(state) {
     } else if (slot.generation >= 4) {
       const layoutInfo = fitBoxNameOnly(node, style, name, slot.generation);
       actualNameSize = layoutInfo.nameSize;
-      actualDateSize = slot.generation >= 5 ? (getExternalDateLayout(node, style, slot, person, state.settings).fontSize || 0) : Math.max(3.7, style.dateSize - 1.4);
+      actualDateSize = getExternalDateLayout(node, style, slot, person, state.settings).fontSize || 0;
     } else {
       const layoutInfo = fitHorizontalNodeText(node, style, name, compactLines(person.note || "").slice(0, 2), slot.generation);
       actualNameSize = layoutInfo.nameSize;
@@ -955,8 +955,8 @@ function getExternalDateLines(person, generation, settings = DEFAULT_SETTINGS) {
 function getExternalDateReserve(person, generation, style, settings = DEFAULT_SETTINGS) {
   const lines = getExternalDateLines(person, generation, settings);
   if (!lines.length) return 0;
-  const fontSize = generation >= 5 ? Math.max(3.1, style.dateSize - 1.6) : generation >= 3 ? Math.max(3.8, Math.min(4.4, style.dateSize - 0.8)) : 4.6;
-  const lineHeight = generation <= 2 ? Math.max(fontSize + 1, fontSize * 1.08) : Math.max(fontSize * 0.92, fontSize + 0.1);
+  const fontSize = Math.max(3, style.dateSize);
+  const lineHeight = getExternalDateLineHeight(fontSize, generation);
   return round2(fontSize + 4 + (lines.length - 1) * lineHeight + 2);
 }
 
@@ -965,8 +965,13 @@ function getExternalDateLayout(node, style, slot, person, settings = DEFAULT_SET
   if (!lines.length) {
     return { lines: [], x: node.centerX, y: node.y + node.height + 5, lineHeight: 0, fontSize: 0, anchor: "middle" };
   }
-  const fontSize = slot.generation >= 3 ? Math.max(3.8, Math.min(4.4, style.dateSize - 0.8)) : 4.6;
-  const lineHeight = slot.generation <= 2 ? Math.max(fontSize + 1, fontSize * 1.08) : Math.max(fontSize * 0.92, fontSize + 0.1);
+  const anchorX = slot.generation === 0
+    ? node.centerX
+    : getConnectorAnchorX(node, slot.path[slot.path.length - 1] === "mother" ? "mother" : "father");
+  const anchor = slot.generation === 0 ? "middle" : slot.path[slot.path.length - 1] === "mother" ? "start" : "end";
+  const availableWidth = getExternalDateAvailableWidth(node, slot, anchorX, anchor);
+  const fontSize = fitExternalDateFontSize(lines, style.dateSize, availableWidth);
+  const lineHeight = getExternalDateLineHeight(fontSize, slot.generation);
   if (slot.generation === 0) {
     return {
       lines,
@@ -997,6 +1002,36 @@ function getExternalDateLayout(node, style, slot, person, settings = DEFAULT_SET
     fontSize,
     anchor: isMother ? "start" : "end",
   };
+}
+
+function fitExternalDateFontSize(lines, requestedSize, availableWidth) {
+  const target = Math.max(3, requestedSize || 0);
+  for (let fontSize = target; fontSize >= 3; fontSize -= 0.2) {
+    const widest = Math.max(...lines.map((line) => estimateLineWidth(line, fontSize, false)));
+    if (widest <= availableWidth) {
+      return round2(fontSize);
+    }
+  }
+  return 3;
+}
+
+function getExternalDateAvailableWidth(node, slot, anchorX, anchor) {
+  if (slot.generation === 0) {
+    return Math.max(node.width * 2.2, 110);
+  }
+  if (anchor === "start") {
+    return Math.max(32, PAGE_WIDTH_PT - anchorX - 6);
+  }
+  if (anchor === "end") {
+    return Math.max(32, anchorX - 6);
+  }
+  return Math.max(node.width * 2, 96);
+}
+
+function getExternalDateLineHeight(fontSize, generation) {
+  return generation <= 2
+    ? Math.max(fontSize + 1, fontSize * 1.08)
+    : Math.max(fontSize * 0.92, fontSize + 0.1);
 }
 
 function getMarriageReserve(marriageDate, generation, style, settings = DEFAULT_SETTINGS) {

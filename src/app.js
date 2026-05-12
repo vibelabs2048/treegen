@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.34",
+    version: "0.2.35",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -538,9 +538,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   function hydrateControls() {
     const person = state.people[state.selectedId];
     const slot = getSlot(state.selectedId);
+    const resolvedSurname = person.inheritSurname ? resolvePersonSurname(state.selectedId) : sanitizeText(person.lastName);
     elements.selectedSlotLabel.textContent = slot.label;
     elements.personFirstName.value = person.firstName || "";
-    elements.personLastName.value = person.lastName || "";
+    elements.personLastName.value = resolvedSurname || "";
     elements.personInheritSurname.checked = !!person.inheritSurname;
     elements.personInheritSurname.disabled = slot.generation === 0;
     elements.personInheritSurname.title = slot.generation === 0
@@ -550,7 +551,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.personName.value = person.displayNameOverride || "";
     elements.personLastName.disabled = !!person.inheritSurname;
     elements.personLastName.title = person.inheritSurname
-      ? "This box is currently inheriting its surname from the linked descendant branch. Turn off surname inheritance to edit the local last name."
+      ? "This box is currently inheriting its surname from the linked descendant branch. The inherited surname is shown here; turn off surname inheritance to edit the local last name."
       : "Family name used when surname inheritance is off for this box.";
     elements.personName.disabled = !person.displayNameOverrideEnabled;
     elements.personName.title = person.displayNameOverrideEnabled
@@ -1906,7 +1907,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     if (report.actual.dateMax > 0) {
       if (report.limited.dateCount > 0) {
         parts.push(
-          `Date labels are using ${report.actual.dateMin}-${report.actual.dateMax}pt instead of the requested ${report.requested.dateSize}pt in ${report.limited.dateCount} box${report.limited.dateCount === 1 ? "" : "es"}.`
+          `Date labels are targeting ${report.requested.dateSize}pt and fitting down to ${report.actual.dateMin}-${report.actual.dateMax}pt in ${report.limited.dateCount} box${report.limited.dateCount === 1 ? "" : "es"} where the date lane is narrower.`
         );
       } else {
         parts.push(`Date labels fit at the requested ${report.requested.dateSize}pt in this generation.`);
