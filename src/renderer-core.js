@@ -345,7 +345,7 @@ function drawNode(state, slot, node) {
     });
   } else {
     const noteLines = slot.generation <= 2 ? compactLines(person.note || "").slice(0, 2) : [];
-    const layout = fitHorizontalNodeText(node, style, name, noteLines);
+    const layout = fitHorizontalNodeText(node, style, name, noteLines, slot.generation);
     let y = node.centerY - layout.height / 2 + layout.nameSize * 0.76;
     layout.nameLines.forEach((lineText) => {
       parts.push(text(node.centerX, y, lineText, style.nameColor, layout.nameSize, true, "middle", state.settings));
@@ -382,12 +382,16 @@ function drawNode(state, slot, node) {
   return parts.join("");
 }
 
-function fitHorizontalNodeText(node, style, name, noteLines) {
+function fitHorizontalNodeText(node, style, name, noteLines, generation) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
-  const baseNameChars = maxCharsForWidth(availableWidth, style.nameSize, true);
-  const baseNameLines = fitWrappedLines(name, baseNameChars, 3);
-  const baseNameLineHeight = Math.max(style.nameSize * 0.97, style.nameSize + 0.08);
+  const preferThreeNameLines = generation >= 1 && generation <= 3;
+  const preferredBaseNameSize = round2(style.nameSize * (preferThreeNameLines ? 1.14 : 1));
+  const baseNameChars = maxCharsForWidth(availableWidth, preferredBaseNameSize, true);
+  const baseNameLines = preferThreeNameLines
+    ? fitWrappedLinesPreferred(name, baseNameChars, 3, 3)
+    : fitWrappedLines(name, baseNameChars, 3);
+  const baseNameLineHeight = Math.max(preferredBaseNameSize * 0.97, preferredBaseNameSize + 0.08);
   const baseNoteSize = Math.max(3.5, style.dateSize * 0.82);
   const baseNoteChars = maxCharsForWidth(availableWidth, baseNoteSize, false);
   const baseWrappedNotes = noteLines.flatMap((line) => fitWrappedLines(line, baseNoteChars, 1)).slice(0, 2);
@@ -398,12 +402,12 @@ function fitHorizontalNodeText(node, style, name, noteLines) {
     baseWrappedNotes.length * baseNoteLineHeight +
     baseNameNoteGap;
   const baseWidest = Math.max(
-    ...baseNameLines.map((line) => estimateLineWidth(line, style.nameSize, true)),
+    ...baseNameLines.map((line) => estimateLineWidth(line, preferredBaseNameSize, true)),
     ...(baseWrappedNotes.length ? baseWrappedNotes.map((line) => estimateLineWidth(line, baseNoteSize, false)) : [0])
   );
   if (baseHeight <= availableHeight && baseWidest <= availableWidth) {
     return {
-      nameSize: style.nameSize,
+      nameSize: preferredBaseNameSize,
       noteSize: round2(baseNoteSize),
       nameLines: baseNameLines,
       noteLines: baseWrappedNotes,
@@ -413,12 +417,14 @@ function fitHorizontalNodeText(node, style, name, noteLines) {
       height: baseHeight,
     };
   }
-  for (let scale = 1; scale >= 0.38; scale -= 0.025) {
+  for (let scale = (preferThreeNameLines ? 1.14 : 1); scale >= 0.38; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);
     const noteSize = round2(Math.max(3.5, style.dateSize * Math.min(scale, 0.82)));
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
     const noteChars = maxCharsForWidth(availableWidth, noteSize, false);
-    const nameLines = fitWrappedLines(name, nameChars, 3);
+    const nameLines = preferThreeNameLines
+      ? fitWrappedLinesPreferred(name, nameChars, 3, 3)
+      : fitWrappedLines(name, nameChars, 3);
     const wrappedNotes = noteLines.flatMap((line) => fitWrappedLines(line, noteChars, 1)).slice(0, 2);
     const nameLineHeight = Math.max(nameSize * 0.97, nameSize + 0.08);
     const noteLineHeight = Math.max(noteSize * 0.9, noteSize + 0.04);
@@ -454,6 +460,20 @@ function fitHorizontalNodeText(node, style, name, noteLines) {
     nameNoteGap: noteLines.length ? 0.55 : 0,
     height: availableHeight,
   };
+}
+
+function fitWrappedLinesPreferred(text, maxChars, maxLines, preferredLines) {
+  const initial = fitWrappedLines(text, maxChars, maxLines);
+  if (preferredLines <= 1 || initial.length >= preferredLines) {
+    return initial;
+  }
+  for (let candidateChars = Math.max(3, maxChars - 1); candidateChars >= 3; candidateChars -= 1) {
+    const wrapped = fitWrappedLines(text, candidateChars, maxLines);
+    if (wrapped.length >= preferredLines) {
+      return wrapped;
+    }
+  }
+  return initial;
 }
 
 function fitBoxNameOnly(node, style, name, generation) {

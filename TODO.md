@@ -12,7 +12,7 @@
    Status: Done in v0.2.12
 
 3. Generation 1, 2, and 3 should use all three lines in the box for names with a larger default font.
-   Status: Open
+   Status: Done in v0.2.13
 
 4. Generation 4 should use all three lines in the box before overflowing. Ensure wrapping works correctly.
    Status: Open

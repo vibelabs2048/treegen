@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.13 - 2026-05-11
+
+- changed the horizontal name fitter so generations 1-3 prefer three wrapped name lines before shrinking
+- increased the effective starting size for generation 1-3 name fitting to use more of the box height
+- kept the fitter constrained to the box so the larger names still render inside the borders
+
 ## 0.2.12 - 2026-05-11
 
 - updated the built-in demo so generation 1-3 child annotations show full names and full dates
