@@ -47,7 +47,7 @@
     Status: Done in v0.2.21
 
 14. Add a better change-evaluation workflow. TreeGen needs a more deliberate way to inspect formatting changes across preview, SVG, PNG, and PDF before calling a change good.
-    Status: Open
+    Status: Done in v0.2.22
 
 15. Add a safer pre-publish release path for the demo and desktop artifacts. The goal is to validate a production-like Pages build and release package before publishing to official GitHub Pages and tagged releases.
     Status: Open

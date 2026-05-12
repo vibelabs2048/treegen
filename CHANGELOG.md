@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.22 - 2026-05-12
+
+- added `npm run qa:review` to build the static demo and generate a review bundle with SVG, PNG, PDF, and a fit report
+- added `build/review-artifacts.js` so formatting changes can be evaluated from one repeatable artifact set instead of ad hoc exports
+- documented the QA review bundle in `DEVELOPER.md`
+
 ## 0.2.21 - 2026-05-12
 
 - added per-box name and date size/color overrides in the Selected Person panel, with blank meaning inherit from generation

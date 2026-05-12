@@ -42,6 +42,18 @@ npm run desktop:dist
 npm run desktop:dist:mac
 npm run desktop:dist:win
 npm run desktop:dist:linux
+
+QA review bundle:
+
+```bash
+npm run qa:review
+```
+
+That writes a comparable demo bundle to `artifacts/qa-review/` with:
+- `demo.svg`
+- `demo.png`
+- `demo.pdf`
+- `fit-report.json`
 ```
 
 ## GitHub automation
