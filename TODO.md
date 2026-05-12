@@ -3,10 +3,10 @@
 ## Priority Order
 
 1. When surname inheritance is enabled, the inherited surname is not shown in the last-name editor field. Show the inherited surname in the editor in a disabled/read-only state so it is obvious why the field cannot be edited.
-   Status: Open
+   Status: Done in v0.2.35
 
 2. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
-   Status: Open
+   Status: Done in v0.2.36
 
 3. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
    Status: Done in v0.2.35

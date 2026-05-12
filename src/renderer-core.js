@@ -473,7 +473,7 @@ function fitHorizontalNodeText(node, style, name, noteLines, generation) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
   const preferThreeNameLines = generation >= 1 && generation <= 3;
-  const preferredBaseNameSize = round2(style.nameSize * (preferThreeNameLines ? 1.14 : 1));
+  const preferredBaseNameSize = round2(style.nameSize);
   const baseNameChars = maxCharsForWidth(availableWidth, preferredBaseNameSize, true);
   const baseNameLines = preferThreeNameLines
     ? fitWrappedLinesPreferred(name, baseNameChars, 3, 3)
@@ -504,7 +504,7 @@ function fitHorizontalNodeText(node, style, name, noteLines, generation) {
       height: baseHeight,
     };
   }
-  for (let scale = (preferThreeNameLines ? 1.14 : 1); scale >= 0.38; scale -= 0.025) {
+  for (let scale = 1; scale >= 0.38; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);
     const noteSize = round2(Math.max(3.5, style.dateSize * Math.min(scale, 0.82)));
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
@@ -569,7 +569,7 @@ function fitBoxNameOnly(node, style, name, generation) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2 - widthSafety);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2 - heightSafety);
   const preferThreeNameLines = generation === 4;
-  const preferredBaseNameSize = round2(style.nameSize * (preferThreeNameLines ? 1.05 : 1));
+  const preferredBaseNameSize = round2(style.nameSize);
   const baseChars = maxCharsForWidth(availableWidth, preferredBaseNameSize, true);
   const baseLines = preferThreeNameLines
     ? fitWrappedLinesPreferred(name, baseChars, 3, 3)
@@ -581,7 +581,7 @@ function fitBoxNameOnly(node, style, name, generation) {
     return { nameSize: preferredBaseNameSize, nameLines: baseLines, lineHeight: baseLineHeight, height: baseHeight };
   }
   const maxWrapLines = 3;
-  for (let scale = (preferThreeNameLines ? 1.05 : 1); scale >= 0.34; scale -= 0.02) {
+  for (let scale = 1; scale >= 0.34; scale -= 0.02) {
     const nameSize = round2(style.nameSize * scale);
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
     const nameLines = preferThreeNameLines
@@ -605,7 +605,7 @@ function fitBoxNameOnly(node, style, name, generation) {
 function fitVerticalNodeText(node, style, name) {
   const availableExtent = Math.max(10, node.height - INNER_MARGIN * 2);
   const availableThickness = Math.max(4, node.width - INNER_MARGIN * 2);
-  for (let scale = 1.08; scale >= 0.16; scale -= 0.02) {
+  for (let scale = 1; scale >= 0.16; scale -= 0.02) {
     const nameSize = round2(style.nameSize * scale);
     const lineHeight = Math.max(nameSize * 0.94, nameSize - 0.1);
     const maxChars = Math.max(3, Math.floor(availableExtent / (nameSize * 0.58)));

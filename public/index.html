@@ -15,7 +15,7 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.35</span>
+              <span id="app-version-badge" class="version-badge">v0.2.36</span>
           </div>
         </div>
         <div class="menu-shell">
@@ -92,7 +92,7 @@
             <div class="field-row export-grid">
               <label>
                 Name Size
-                <input id="gen-name-size" type="number" min="4" max="36" step="0.5" title="Requested default font size for names in this generation. Auto-fit may reduce the applied size if the text is too long.">
+                <input id="gen-name-size" type="number" min="4" max="36" step="0.5" title="Requested target font size for names in this generation. TreeGen treats this as the maximum size and only fits down when the box cannot hold the text.">
               </label>
               <label>
                 Name Color
@@ -224,7 +224,7 @@
             <div class="field-row export-grid">
               <label>
                 Local Name Size
-                <input id="person-name-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit" title="Leave blank to inherit the selected generation's default name size. Enter a number here to override only this box.">
+                <input id="person-name-size-override" type="number" min="1" max="36" step="0.5" placeholder="Inherit" title="Leave blank to inherit the selected generation's target name size. Enter a number here to override only this box; TreeGen treats it as the maximum size and only fits down when needed.">
               </label>
               <label>
                 Local Name Color
@@ -343,7 +343,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.35</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.36</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>

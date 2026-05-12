@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.36 - 2026-05-12
+
+- changed name-size fitting so the requested name size is now a real ceiling instead of a boosted starting hint
+- removed generation-specific size boosts from the box and vertical name fitters so auto-fit can only hold or reduce the requested size
+- updated tooltips and fit-report text to describe name size as a maximum target rather than an open-ended hint
+
 ## 0.2.35 - 2026-05-12
 
 - changed external date sizing so the requested generation date size is now the actual target across the renderer

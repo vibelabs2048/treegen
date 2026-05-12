@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.35",
+    version: "0.2.36",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -1899,7 +1899,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const parts = [];
     if (report.limited.nameCount > 0) {
       parts.push(
-        `Name auto-fit active: requested ${report.requested.nameSize}pt, effective ${report.actual.nameMin}-${report.actual.nameMax}pt across ${report.limited.nameCount}/${report.boxCount} boxes.`
+        `Name labels are targeting ${report.requested.nameSize}pt as a ceiling and fitting down to ${report.actual.nameMin}-${report.actual.nameMax}pt in ${report.limited.nameCount}/${report.boxCount} boxes where the text is too long.`
       );
     } else {
       parts.push(`Names fit at the requested ${report.requested.nameSize}pt in this generation.`);
