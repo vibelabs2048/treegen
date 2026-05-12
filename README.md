@@ -2,7 +2,11 @@
 
 [Open the demo website](https://vibelabs2048.github.io/treegen/)
 
-[Download the desktop app](https://github.com/vibelabs2048/treegen/releases/latest)
+[Download for Windows](https://github.com/vibelabs2048/treegen/releases/latest/download/TreeGen-Windows-Setup.exe)
+
+[Download for macOS](https://github.com/vibelabs2048/treegen/releases/latest/download/TreeGen-macOS.dmg)
+
+[Download for Linux](https://github.com/vibelabs2048/treegen/releases/latest/download/TreeGen-Linux.AppImage)
 
 TreeGen is a family-tree editor for building ancestor charts and exporting them as clean print-ready files.
 
@@ -18,6 +22,9 @@ TreeGen is a family-tree editor for building ancestor charts and exporting them 
 
 - Use the **desktop app** for exact PDF, PNG, and JPG export.
 - Use the **demo website** for previewing, editing, YAML import/export, and SVG export.
+- On **Windows**, use the setup installer unless you specifically want the portable build from the release page.
+- On **macOS**, open the DMG and drag TreeGen into Applications.
+- On **Linux**, the AppImage is the simplest option. Mark it executable before opening if needed.
 
 ## Example
 

@@ -6,7 +6,7 @@
    Error:
    `Run gh release upload "$TAG" release-assets/* --clobber`
    `failed to run git: fatal: not a git repository (or any of the parent directories): .git`
-   Status: Done locally, needs verification in GitHub Actions
+   Status: Done and verified in GitHub Actions
 
 2. Generation 1, 2, and 3 child annotations should show full child name and full date.
    Status: Open

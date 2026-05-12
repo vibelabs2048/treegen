@@ -106,6 +106,16 @@ jobs:
           path: release-assets
           merge-multiple: true
 
+      - name: Create stable asset aliases
+        run: |
+          set -euo pipefail
+          cp "$(find release-assets -maxdepth 1 -type f -name '*Setup*.exe' | head -n 1)" release-assets/TreeGen-Windows-Setup.exe
+          cp "$(find release-assets -maxdepth 1 -type f -name 'TreeGen *.exe' ! -name '*Setup*' | head -n 1)" release-assets/TreeGen-Windows-Portable.exe
+          cp "$(find release-assets -maxdepth 1 -type f -name '*.dmg' | head -n 1)" release-assets/TreeGen-macOS.dmg
+          cp "$(find release-assets -maxdepth 1 -type f -name '*.zip' ! -name '*.blockmap' | head -n 1)" release-assets/TreeGen-macOS.zip
+          cp "$(find release-assets -maxdepth 1 -type f -name '*.AppImage' | head -n 1)" release-assets/TreeGen-Linux.AppImage
+          cp "$(find release-assets -maxdepth 1 -type f -name '*.deb' | head -n 1)" release-assets/TreeGen-Linux.deb
+
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}

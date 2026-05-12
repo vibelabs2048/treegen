@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.11 - 2026-05-11
+
+- added stable GitHub Release asset aliases so the latest release has exact per-OS download URLs
+- updated the README to link directly to Windows, macOS, and Linux downloads
+- marked the release-pipeline backlog item verified
+
 ## 0.2.10 - 2026-05-11
 
 - fixed the release workflow so the publish-assets job checks out the repo and sets `GH_REPO` before `gh release upload`
