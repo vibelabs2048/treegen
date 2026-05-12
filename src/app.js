@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.27",
+    version: "0.2.28",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -170,13 +170,16 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.zoomOut.addEventListener("click", () => stepZoom(-5));
     elements.zoomIn.addEventListener("click", () => stepZoom(5));
     elements.zoomPercent.addEventListener("input", () => {
-      const value = clamp(Number(elements.zoomPercent.value) || 100, 5, 300);
+      const value = clamp(Number(elements.zoomPercent.value) || 100, 5, 500);
       elements.zoomRange.value = String(value);
       applyZoom();
     });
     elements.openImport.addEventListener("click", () => openModal("import"));
     elements.openExport.addEventListener("click", () => openModal("export"));
-    elements.openDownloads.addEventListener("click", () => openModal("downloads"));
+    elements.openDownloads.addEventListener("click", () => {
+      closeTopbarMenu();
+      window.location.href = resolveDownloadsPageUrl();
+    });
     elements.openHelp.addEventListener("click", () => openModal("help"));
     elements.openAbout.addEventListener("click", () => openModal("about"));
     elements.closeImport.addEventListener("click", () => closeModal("import"));
@@ -999,7 +1002,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function stepZoom(delta) {
-    const value = clamp(Number(elements.zoomRange.value) + delta, 5, 300);
+    const value = clamp(Number(elements.zoomRange.value) + delta, 5, 500);
     elements.zoomRange.value = String(value);
     applyZoom();
   }
@@ -1380,6 +1383,17 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
     }
     return null;
+  }
+
+  function resolveDownloadsPageUrl() {
+    const url = new URL(window.location.href);
+    if (url.pathname.endsWith("/downloads.html")) return url.toString();
+    if (url.pathname.endsWith("/index.html")) {
+      url.pathname = url.pathname.replace(/index\.html$/, "downloads.html");
+      return url.toString();
+    }
+    url.pathname = url.pathname.replace(/\/?$/, "/downloads.html");
+    return url.toString();
   }
 
   function loadImage(url) {

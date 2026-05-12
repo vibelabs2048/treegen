@@ -173,6 +173,10 @@ label > textarea {
   display: block;
 }
 
+.topbar-menu[hidden] {
+  display: none;
+}
+
 .inspector-header {
   display: grid;
   gap: 0.55rem;
@@ -263,6 +267,49 @@ label > textarea {
   gap: 0.8rem;
 }
 
+.downloads-layout {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.85rem;
+}
+
+.downloads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.8rem;
+}
+
+.downloads-hero h2 {
+  margin: 0 0 0.4rem;
+}
+
+.downloads-hero p {
+  margin: 0;
+}
+
+.platform-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
+}
+
+.platform-chip {
+  min-height: 2.1rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #8e8579;
+  border-radius: 999px;
+  background: #fffdfa;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.platform-chip.active {
+  border-color: #314a9c;
+  background: #e9eefc;
+  color: #1d2d67;
+}
+
 .download-card {
   display: grid;
   gap: 0.45rem;
@@ -316,6 +363,74 @@ label > textarea {
   line-height: 1.35;
 }
 
+.hash-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hash-toggle {
+  min-height: 1.95rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #8e8579;
+  border-radius: 999px;
+  background: #fffdfa;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.hash-value {
+  display: none;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 1px dashed var(--panel-border);
+  border-radius: 6px;
+  background: #fffdfa;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.hash-value.visible {
+  display: block;
+}
+
+.hash-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hash-toggle {
+  min-height: 1.95rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #8e8579;
+  border-radius: 999px;
+  background: #fffdfa;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.hash-value {
+  display: none;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 1px dashed var(--panel-border);
+  border-radius: 6px;
+  background: #fffdfa;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.hash-value.visible {
+  display: block;
+}
+
 .download-actions {
   display: flex;
   flex-wrap: wrap;
@@ -339,6 +454,14 @@ label > textarea {
 
 .download-link:hover {
   background: #f4efe7;
+}
+
+.topbar-link {
+  min-width: 7.5rem;
+}
+
+.topbar-link {
+  min-width: 7.5rem;
 }
 
 .slot-title {

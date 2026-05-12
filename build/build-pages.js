@@ -13,6 +13,7 @@ await copyDir(path.join(repoRoot, "public"), path.join(outDir, "public"));
 await copyDir(path.join(repoRoot, "src"), path.join(outDir, "src"));
 
 await fs.copyFile(path.join(repoRoot, "public", "index.html"), path.join(outDir, "index.html"));
+await fs.copyFile(path.join(repoRoot, "public", "downloads.html"), path.join(outDir, "downloads.html"));
 await fs.copyFile(path.join(repoRoot, "public", "index.html"), path.join(outDir, "404.html"));
 
 console.log(`Built static Pages demo in ${outDir}`);

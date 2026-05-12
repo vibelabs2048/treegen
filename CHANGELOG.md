@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.28 - 2026-05-12
+
+- added a real `downloads.html` page for the hosted web version with direct navigation back to the editor
+- changed the menu-bar Downloads action to navigate to the downloads page instead of opening an in-app modal
+- added OS auto-detection, manual platform selection, and on-demand SHA-256 digest display for desktop downloads
+- raised the preview zoom ceiling from 300 percent to 500 percent
+- fixed the hamburger menu so it stays collapsed by default until opened
+- added an author link in the shared About modal pointing to `https://vibelabs2048.github.io/`
+
 ## 0.2.27 - 2026-05-12
 
 - widened generations 0-3 and synced the browser-side preview geometry with the shared renderer so early-generation boxes use more of the available width consistently

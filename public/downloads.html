@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TreeGen Downloads</title>
+    <link rel="icon" type="image/png" href="public/favicon-32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="public/favicon-64.png" sizes="64x64">
+    <link rel="apple-touch-icon" href="public/apple-touch-icon.png">
+    <link rel="stylesheet" href="public/styles.css">
+  </head>
+  <body class="downloads-page">
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand compact-brand">
+          <div class="brand-title-row">
+            <h1>TreeGen Downloads</h1>
+            <span id="downloads-version-badge" class="version-badge">Loading…</span>
+          </div>
+        </div>
+        <div class="menu-shell static-menu">
+          <a class="download-link topbar-link" href="./index.html" title="Return to the TreeGen editor">Open Editor</a>
+        </div>
+      </header>
+
+      <main class="downloads-layout">
+        <section class="panel downloads-hero">
+          <h2>Desktop Downloads</h2>
+          <p id="downloads-summary">Loading release details…</p>
+          <p id="downloads-updated" class="help-text"></p>
+          <div id="downloads-platform-picker" class="platform-picker" aria-label="Preferred platform"></div>
+        </section>
+
+        <section class="downloads-grid" id="downloads-grid">
+          <article class="download-card">
+            <div class="download-card-header">
+              <div class="download-card-title">
+                <span class="download-icon" aria-hidden="true">Win</span>
+                <span>Windows</span>
+              </div>
+            </div>
+            <p>Loading…</p>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="src/downloads.js"></script>
+  </body>
+</html>
