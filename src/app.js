@@ -3,13 +3,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.31",
+    version: "0.2.32",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
   const PAGE_WIDTH_PT = 792;
   const PAGE_HEIGHT_PT = 612;
+  const HISTORY_LIMIT = 120;
   const BOX_WIDTHS = [108, 88, 70, 54, 40, 14, 11];
   const BOX_HEIGHTS = [54, 46, 36, 30, 28, 72, 64];
   const ROW_STEPS = [0, 24, 26, 28, 30, 36, 40];
@@ -45,6 +46,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     people: buildDefaultPeople(),
     yamlText: "",
     fitReport: [],
+    history: {
+      undoStack: [],
+      redoStack: [],
+    },
     export: {
       format: "pdf",
       quality: 100,
@@ -109,6 +114,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     openHelp: document.getElementById("open-help"),
     openAbout: document.getElementById("open-about"),
     openDownloads: document.getElementById("open-downloads"),
+    undoAction: document.getElementById("undo-action"),
+    redoAction: document.getElementById("redo-action"),
     menuToggle: document.getElementById("menu-toggle"),
     topbarMenu: document.getElementById("topbar-menu"),
     importModal: document.getElementById("import-modal"),
@@ -169,8 +176,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   function bindEvents() {
     document.getElementById("load-demo").addEventListener("click", () => {
       closeTopbarMenu();
-      loadDemoData();
+      loadDemoData(true);
     });
+    elements.undoAction.addEventListener("click", undoChange);
+    elements.redoAction.addEventListener("click", redoChange);
     document.getElementById("clear-tree").addEventListener("click", () => {
       closeTopbarMenu();
       clearTree();
@@ -217,53 +226,65 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.downloadExport.addEventListener("click", handleExportAction);
 
     elements.personName.addEventListener("input", () => {
-      state.people[state.selectedId].name = elements.personName.value;
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].name = elements.personName.value;
+      }, { rehydrate: false });
     });
     elements.personBirth.addEventListener("input", () => {
-      state.people[state.selectedId].birthYear = sanitizeDateValue(elements.personBirth.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].birthYear = sanitizeDateValue(elements.personBirth.value);
+      }, { rehydrate: false });
     });
     elements.personDeath.addEventListener("input", () => {
-      state.people[state.selectedId].deathYear = sanitizeDateValue(elements.personDeath.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].deathYear = sanitizeDateValue(elements.personDeath.value);
+      }, { rehydrate: false });
     });
     elements.personMarriage.addEventListener("input", () => {
-      state.people[state.selectedId].marriageDate = sanitizeDateValue(elements.personMarriage.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].marriageDate = sanitizeDateValue(elements.personMarriage.value);
+      }, { rehydrate: false });
     });
     elements.personChildren.addEventListener("input", () => {
-      state.people[state.selectedId].childrenNote = elements.personChildren.value;
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].childrenNote = elements.personChildren.value;
+      }, { rehydrate: false });
     });
     elements.personNote.addEventListener("input", () => {
-      state.people[state.selectedId].note = elements.personNote.value;
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].note = elements.personNote.value;
+      }, { rehydrate: false });
     });
     elements.personNameSizeOverride.addEventListener("input", () => {
-      state.people[state.selectedId].nameSizeOverride = sanitizeOptionalNumber(elements.personNameSizeOverride.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].nameSizeOverride = sanitizeOptionalNumber(elements.personNameSizeOverride.value);
+      }, { rehydrate: false });
     });
     elements.personNameColorOverride.addEventListener("input", () => {
-      state.people[state.selectedId].nameColorOverride = sanitizeOptionalColor(elements.personNameColorOverride.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].nameColorOverride = sanitizeOptionalColor(elements.personNameColorOverride.value);
+      }, { rehydrate: false });
     });
     elements.personDateSizeOverride.addEventListener("input", () => {
-      state.people[state.selectedId].dateSizeOverride = sanitizeOptionalNumber(elements.personDateSizeOverride.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].dateSizeOverride = sanitizeOptionalNumber(elements.personDateSizeOverride.value);
+      }, { rehydrate: false });
     });
     elements.personDateColorOverride.addEventListener("input", () => {
-      state.people[state.selectedId].dateColorOverride = sanitizeOptionalColor(elements.personDateColorOverride.value);
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.people[state.selectedId].dateColorOverride = sanitizeOptionalColor(elements.personDateColorOverride.value);
+      }, { rehydrate: false });
     });
 
     elements.fontFamily.addEventListener("input", () => {
-      state.settings.fontFamily = elements.fontFamily.value.trim() || DEFAULT_SETTINGS.fontFamily;
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.settings.fontFamily = elements.fontFamily.value.trim() || DEFAULT_SETTINGS.fontFamily;
+      }, { rehydrate: false });
     });
     elements.fauxBold.addEventListener("change", () => {
-      state.settings.fauxBold = elements.fauxBold.checked;
-      syncAfterChange();
+      commitStateChange(() => {
+        state.settings.fauxBold = elements.fauxBold.checked;
+      });
     });
     elements.generationStyleSelect.addEventListener("change", hydrateGenerationStyleControls);
     elements.genNameSize.addEventListener("input", () => updateGenerationStyle("nameSize", Number(elements.genNameSize.value) || 8));
@@ -271,12 +292,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.genDateSize.addEventListener("input", () => updateGenerationStyle("dateSize", Number(elements.genDateSize.value) || 8));
     elements.genDateColor.addEventListener("input", () => updateGenerationStyle("dateColor", normalizeColor(elements.genDateColor.value)));
     elements.genSyncNameDate.addEventListener("change", () => {
-      const generation = Number(elements.generationStyleSelect.value || "0");
-      state.settings.generationStyles[generation].syncNameDate = elements.genSyncNameDate.checked;
-      if (elements.genSyncNameDate.checked) {
-        state.settings.generationStyles[generation].dateSize = state.settings.generationStyles[generation].nameSize;
-      }
-      syncAfterChange();
+      commitStateChange(() => {
+        const generation = Number(elements.generationStyleSelect.value || "0");
+        state.settings.generationStyles[generation].syncNameDate = elements.genSyncNameDate.checked;
+        if (elements.genSyncNameDate.checked) {
+          state.settings.generationStyles[generation].dateSize = state.settings.generationStyles[generation].nameSize;
+        }
+      });
     });
     elements.genChildrenSize.addEventListener("input", () => updateGenerationStyle("childrenSize", Number(elements.genChildrenSize.value) || 8));
     elements.genChildrenColor.addEventListener("input", () => updateGenerationStyle("childrenColor", normalizeColor(elements.genChildrenColor.value)));
@@ -284,30 +306,36 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.datePrefixDeath.addEventListener("input", () => updateDatePrefix("death", elements.datePrefixDeath.value));
     elements.datePrefixMarriage.addEventListener("input", () => updateDatePrefix("marriage", elements.datePrefixMarriage.value));
     elements.titleEnabled.addEventListener("change", () => {
-      state.settings.titleBox.enabled = elements.titleEnabled.checked;
-      syncAfterChange();
+      commitStateChange(() => {
+        state.settings.titleBox.enabled = elements.titleEnabled.checked;
+      });
     });
     elements.titleMain.addEventListener("input", () => {
-      state.settings.titleBox.title = elements.titleMain.value;
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.settings.titleBox.title = elements.titleMain.value;
+      }, { rehydrate: false });
     });
     elements.titleSub.addEventListener("input", () => {
-      state.settings.titleBox.subtitle = elements.titleSub.value;
-      syncAfterChange({ rehydrate: false });
+      commitStateChange(() => {
+        state.settings.titleBox.subtitle = elements.titleSub.value;
+      }, { rehydrate: false });
     });
     elements.boxNumberingEnabled.addEventListener("change", () => {
-      state.settings.boxNumbering.enabled = elements.boxNumberingEnabled.checked;
-      syncAfterChange();
+      commitStateChange(() => {
+        state.settings.boxNumbering.enabled = elements.boxNumberingEnabled.checked;
+      });
     });
     elements.boxNumberingStart.addEventListener("change", () => {
-      state.settings.boxNumbering.startAt = Number(elements.boxNumberingStart.value || "0");
-      syncAfterChange();
+      commitStateChange(() => {
+        state.settings.boxNumbering.startAt = Number(elements.boxNumberingStart.value || "0");
+      });
     });
     elements.titleCrest.addEventListener("change", handleCrestUpload);
     elements.clearCrest.addEventListener("click", () => {
-      state.settings.titleBox.crestDataUrl = "";
-      elements.titleCrest.value = "";
-      syncAfterChange();
+      commitStateChange(() => {
+        state.settings.titleBox.crestDataUrl = "";
+        elements.titleCrest.value = "";
+      });
     });
     elements.zoomRange.addEventListener("input", applyZoom);
     elements.imageFormat.addEventListener("change", () => {
@@ -374,11 +402,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   function clearTree() {
     if (!window.confirm("Clear the whole tree and replace all values with blanks?")) return;
+    recordUndoSnapshot();
     state.people = buildBlankPeople();
     state.selectedId = "root";
+    state.history.redoStack = [];
     hydrateControls();
     renderChart();
     refreshYamlEditor();
+    updateHistoryControls();
     setStatus("Cleared tree");
   }
 
@@ -421,7 +452,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     return people;
   }
 
-  function loadDemoData() {
+  function loadDemoData(recordHistory = false) {
+    if (recordHistory) {
+      recordUndoSnapshot();
+      state.history.redoStack = [];
+    } else {
+      resetHistory();
+    }
     state.settings = clone(DEFAULT_SETTINGS);
     state.people = buildDefaultPeople();
     state.selectedId = "root";
@@ -437,6 +474,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     refreshYamlEditor();
     renderChart();
     fitWidth();
+    updateHistoryControls();
     setStatus("Loaded Italian family demo");
   }
 
@@ -487,6 +525,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     state.selectedId = id;
     hydrateControls();
     renderChart();
+    updateHistoryControls();
   }
 
   function syncAfterChange(options = {}) {
@@ -496,6 +535,81 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
     refreshYamlEditor();
     renderChart();
+    updateHistoryControls();
+  }
+
+  function captureHistoryState() {
+    return clone({
+      selectedId: state.selectedId,
+      settings: state.settings,
+      people: state.people,
+      export: state.export,
+    });
+  }
+
+  function snapshotsEqual(left, right) {
+    return JSON.stringify(left) === JSON.stringify(right);
+  }
+
+  function recordUndoSnapshot() {
+    const snapshot = captureHistoryState();
+    const previous = state.history.undoStack[state.history.undoStack.length - 1];
+    if (previous && snapshotsEqual(previous, snapshot)) {
+      return;
+    }
+    state.history.undoStack.push(snapshot);
+    if (state.history.undoStack.length > HISTORY_LIMIT) {
+      state.history.undoStack.shift();
+    }
+  }
+
+  function resetHistory() {
+    state.history.undoStack = [];
+    state.history.redoStack = [];
+  }
+
+  function commitStateChange(mutator, options = {}) {
+    recordUndoSnapshot();
+    state.history.redoStack = [];
+    mutator();
+    syncAfterChange(options);
+  }
+
+  function applyHistorySnapshot(snapshot, statusText) {
+    state.selectedId = snapshot.selectedId;
+    state.settings = clone(snapshot.settings);
+    state.people = clone(snapshot.people);
+    state.export = clone(snapshot.export);
+    hydrateControls();
+    refreshYamlEditor();
+    renderChart();
+    updateHistoryControls();
+    if (statusText) {
+      setStatus(statusText);
+    }
+  }
+
+  function undoChange() {
+    if (!state.history.undoStack.length) return;
+    const previous = state.history.undoStack.pop();
+    state.history.redoStack.push(captureHistoryState());
+    applyHistorySnapshot(previous, "Undid change");
+  }
+
+  function redoChange() {
+    if (!state.history.redoStack.length) return;
+    const next = state.history.redoStack.pop();
+    state.history.undoStack.push(captureHistoryState());
+    applyHistorySnapshot(next, "Redid change");
+  }
+
+  function updateHistoryControls() {
+    if (elements.undoAction) {
+      elements.undoAction.disabled = state.history.undoStack.length === 0;
+    }
+    if (elements.redoAction) {
+      elements.redoAction.disabled = state.history.redoStack.length === 0;
+    }
   }
 
   function refreshYamlEditor() {
@@ -515,11 +629,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   function applyYamlFromEditor(yamlText = "") {
     try {
+      recordUndoSnapshot();
+      state.history.redoStack = [];
       const parsed = parseYaml(yamlText || elements.importYamlText.value);
       applyImportedState(parsed);
       hydrateControls();
       renderChart();
       refreshYamlEditor();
+      updateHistoryControls();
       setStatus("Imported YAML");
     } catch (error) {
       setStatus("YAML error: " + error.message);
@@ -1182,8 +1299,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const [file] = event.target.files || [];
     if (!file) return;
     const dataUrl = await readFileAsDataUrl(file);
-    state.settings.titleBox.crestDataUrl = dataUrl;
-    syncAfterChange();
+    commitStateChange(() => {
+      state.settings.titleBox.crestDataUrl = dataUrl;
+    });
   }
 
   function updateExportControls() {
@@ -1562,18 +1680,20 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function updateGenerationStyle(key, value) {
-    const generation = Number(elements.generationStyleSelect.value || "0");
-    state.settings.generationStyles[generation][key] = value;
-    if (key === "nameSize" && state.settings.generationStyles[generation].syncNameDate) {
-      state.settings.generationStyles[generation].dateSize = value;
-    }
-    syncAfterChange();
+    commitStateChange(() => {
+      const generation = Number(elements.generationStyleSelect.value || "0");
+      state.settings.generationStyles[generation][key] = value;
+      if (key === "nameSize" && state.settings.generationStyles[generation].syncNameDate) {
+        state.settings.generationStyles[generation].dateSize = value;
+      }
+    });
   }
 
   function updateDatePrefix(kind, value) {
-    const generation = Number(elements.generationStyleSelect.value || "0");
-    state.settings.datePrefixes[generation][kind] = sanitizePrefix(value);
-    syncAfterChange();
+    commitStateChange(() => {
+      const generation = Number(elements.generationStyleSelect.value || "0");
+      state.settings.datePrefixes[generation][kind] = sanitizePrefix(value);
+    });
   }
 
   function updateGenerationFitReport() {

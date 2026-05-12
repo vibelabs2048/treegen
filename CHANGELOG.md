@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.32 - 2026-05-12
+
+- added first-pass undo and redo controls in the main menu
+- implemented bounded full-state history snapshots for tree edits, imports, clear/reset actions, style changes, and crest changes
+- kept native text-field undo untouched by avoiding global keyboard shortcut interception in this first pass
+
 ## 0.2.31 - 2026-05-12
 
 - replaced the old Fit button with a fullscreen-preview control that opens a dedicated modal preview

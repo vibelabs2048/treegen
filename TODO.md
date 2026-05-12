@@ -9,7 +9,7 @@
    Status: Done in v0.2.31
 
 3. Add undo and redo for editing actions.
-   Status: Open
+   Status: Done in v0.2.32
 
 4. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
    Status: Open

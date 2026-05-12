@@ -45,6 +45,12 @@ button:hover {
   background: #f4efe7;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: #f5f1e8;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
