@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.23 - 2026-05-12
+
+- added a non-publishing `Preview Validation` GitHub Actions workflow for pull requests and manual runs
+- the preview workflow builds the Pages bundle, the QA review bundle, and desktop packages for macOS, Windows, and Linux as workflow artifacts only
+- updated developer notes to document the safer pre-publish validation path
+
 ## 0.2.22 - 2026-05-12
 
 - added `npm run qa:review` to build the static demo and generate a review bundle with SVG, PNG, PDF, and a fit report

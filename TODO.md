@@ -50,4 +50,4 @@
     Status: Done in v0.2.22
 
 15. Add a safer pre-publish release path for the demo and desktop artifacts. The goal is to validate a production-like Pages build and release package before publishing to official GitHub Pages and tagged releases.
-    Status: Open
+    Status: Done in v0.2.23

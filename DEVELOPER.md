@@ -42,6 +42,7 @@ npm run desktop:dist
 npm run desktop:dist:mac
 npm run desktop:dist:win
 npm run desktop:dist:linux
+```
 
 QA review bundle:
 
@@ -54,7 +55,14 @@ That writes a comparable demo bundle to `artifacts/qa-review/` with:
 - `demo.png`
 - `demo.pdf`
 - `fit-report.json`
-```
+
+Pre-publish validation in GitHub Actions:
+
+- `Preview Validation` runs on pull requests to `main` and on manual dispatch
+- it uploads:
+  - a built Pages artifact
+  - the QA review bundle
+  - non-publishing desktop build artifacts for macOS, Windows, and Linux
 
 ## GitHub automation
 
@@ -71,6 +79,4 @@ That writes a comparable demo bundle to `artifacts/qa-review/` with:
 - push `main`
 - push version tags
 
-## Current version
-
-`0.2.10`
+Use the preview-validation workflow before pushing a release tag when you want a production-like check without touching the public demo or official release page.

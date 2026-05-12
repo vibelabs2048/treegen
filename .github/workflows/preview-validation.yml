@@ -1,0 +1,90 @@
+name: Preview Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pages-and-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build preview demo and QA bundle
+        run: npm run qa:review
+
+      - name: Upload preview site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: treegen-preview-site
+          path: site
+
+      - name: Upload QA review bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: treegen-qa-review
+          path: artifacts/qa-review
+
+  desktop-preview:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            script: npm run desktop:dist:mac
+          - os: windows-latest
+            script: npm run desktop:dist:win
+          - os: ubuntu-latest
+            script: npm run desktop:dist:linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild native app deps for Electron
+        run: npm run desktop:rebuild
+
+      - name: Build desktop preview package
+        run: ${{ matrix.script }}
+
+      - name: Upload desktop preview artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: treegen-preview-${{ matrix.os }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.AppImage
+            dist/*.deb
+            dist/*Setup*.exe
+            dist/TreeGen*.exe
