@@ -5,3 +5,10 @@ artifacts/
 site/
 .DS_Store
 *.log
+coverage/
+release-assets/
+*.tmp
+*.swp
+*.swo
+Thumbs.db
+ehthumbs.db

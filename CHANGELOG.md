@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.3 - 2026-05-11
+
+- scrubbed hardcoded repo-owner references from tracked files
+- replaced repo metadata fields with neutral placeholder values
+- removed the old binary favicon and switched fully to generated PNG favicon assets
+- added raster metadata stripping for tracked image assets
+- fixed the release workflow so release creation checks out the repo before generating notes
+
+## 0.2.2 - 2026-05-11
+
+- added generated raster logo, favicon, and desktop app icon assets from `treegen.png`
+- switched the site header and favicon set to the new TreeGen branding
+- updated desktop packaging to use the generated icon assets
+- added a repeatable logo asset generation script
+
 ## 0.2.1 - 2026-05-11
 
 - added native desktop file-open and file-save dialogs with browser fallback

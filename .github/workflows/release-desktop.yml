@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build, for example v0.2.2"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -12,11 +17,28 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag
+        run: |
+          case "$TAG" in
+            v*) ;;
+            *)
+              echo "Expected a version tag starting with v, got: $TAG"
+              exit 1
+              ;;
+          esac
+
       - name: Create GitHub release if needed
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
 
@@ -64,11 +86,13 @@ jobs:
             dist/*.AppImage
             dist/*.deb
             dist/*Setup*.exe
-            dist/TreeGen *.exe
+            dist/TreeGen*.exe
 
   publish-assets:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - name: Download built artifacts
         uses: actions/download-artifact@v4
@@ -79,5 +103,4 @@ jobs:
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: gh release upload "$TAG" release-assets/* --clobber

@@ -1,17 +1,18 @@
 {
   "name": "treegen",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Local family tree editor and deterministic export tool.",
   "author": {
-    "name": "codex",
-    "email": "codex@treegen.local"
+    "name": "TreeGen",
+    "email": "noreply@example.invalid"
   },
-  "homepage": "https://treegen.local/",
+  "homepage": "https://example.invalid/treegen",
   "private": true,
   "type": "module",
   "main": "src/desktop/main.js",
   "scripts": {
     "build:pages": "node build/build-pages.js",
+    "build:logo-assets": "node build/generate-logo-assets.js",
     "render": "node src/render-cli.js",
     "start": "node src/server.js",
     "desktop:rebuild": "node build/desktop-runner.js rebuild",
@@ -43,7 +44,9 @@
       "package.json"
     ],
     "asar": true,
+    "icon": "build/icons/icon-512.png",
     "mac": {
+      "icon": "build/icons/icon-512.png",
       "target": [
         "dmg",
         "zip"
@@ -51,18 +54,20 @@
       "category": "public.app-category.productivity"
     },
     "win": {
+      "icon": "build/icons/icon-512.png",
       "target": [
         "nsis",
         "portable"
       ]
     },
     "linux": {
+      "icon": "build/icons/icon-512.png",
       "target": [
         "AppImage",
         "deb"
       ],
       "category": "Office",
-      "maintainer": "codex@treegen.local"
+      "maintainer": "noreply@example.invalid"
     }
   }
 }
