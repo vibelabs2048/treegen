@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.27 - 2026-05-12
+
+- widened generations 0-3 and synced the browser-side preview geometry with the shared renderer so early-generation boxes use more of the available width consistently
+
 ## 0.2.26 - 2026-05-12
 
 - replaced the wide top action row with a compact hamburger menu and removed the header logo/description to free more preview space

@@ -92,7 +92,7 @@
     Status: Open
 
 29. Widen generation 0-3 boxes slightly to use available width more effectively.
-    Status: Open
+    Status: Done in v0.2.27
 
 30. Remove the TreeGen logo from the menu bar.
     Status: Done in v0.2.26
