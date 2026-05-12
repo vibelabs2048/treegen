@@ -45,6 +45,21 @@ button:hover {
   background: #f4efe7;
 }
 
+.topbar-actions a {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #8e8579;
+  background: #fffdfa;
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  text-decoration: none;
+}
+
+.topbar-actions a:hover {
+  background: #f4efe7;
+}
+
 input,
 select,
 textarea {

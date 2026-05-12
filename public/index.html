@@ -4,15 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TreeGen</title>
-    <link rel="icon" href="/public/favicon.ico" sizes="any">
-    <link rel="icon" type="image/svg+xml" href="/public/treegen-mark.svg">
-    <link rel="stylesheet" href="/public/styles.css">
+    <link rel="icon" href="public/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="public/treegen-mark.svg">
+    <link rel="stylesheet" href="public/styles.css">
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <img src="/public/treegen-mark.svg" alt="TreeGen logo" class="brand-mark">
+          <img src="public/treegen-mark.svg" alt="TreeGen logo" class="brand-mark">
           <div>
             <h1>TreeGen</h1>
             <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
@@ -22,6 +22,7 @@
           <button id="load-demo" title="Load the example family tree">Load Placeholder Demo</button>
           <button id="open-import" title="Import a YAML family tree from a file or pasted text">Import</button>
           <button id="open-export" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
+          <a id="download-desktop" href="#" target="_blank" rel="noopener noreferrer" hidden title="Download the latest desktop release">Download Desktop App</a>
           <button id="clear-tree" title="Clear every person and reset the current tree">Clear Tree</button>
         </div>
       </header>
@@ -257,6 +258,7 @@
             <input id="lock-aspect" type="checkbox" checked>
             <span>Lock Aspect Ratio</span>
           </label>
+          <p id="export-capabilities" class="help-text"></p>
           <p id="export-summary" class="help-text"></p>
         </div>
         <div class="modal-actions">
@@ -265,6 +267,6 @@
       </section>
     </div>
 
-    <script type="module" src="/src/app.js"></script>
+    <script type="module" src="src/app.js"></script>
   </body>
 </html>

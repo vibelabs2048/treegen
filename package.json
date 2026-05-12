@@ -1,6 +1,6 @@
 {
   "name": "treegen",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local family tree editor and deterministic export tool.",
   "author": {
     "name": "codex",
@@ -11,6 +11,7 @@
   "type": "module",
   "main": "src/desktop/main.js",
   "scripts": {
+    "build:pages": "node build/build-pages.js",
     "render": "node src/render-cli.js",
     "start": "node src/server.js",
     "desktop:rebuild": "node build/desktop-runner.js rebuild",

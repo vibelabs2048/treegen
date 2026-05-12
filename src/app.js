@@ -76,6 +76,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     exportDpi: document.getElementById("export-dpi"),
     lockAspect: document.getElementById("lock-aspect"),
     exportSummary: document.getElementById("export-summary"),
+    exportCapabilities: document.getElementById("export-capabilities"),
     previewStage: document.querySelector(".preview-stage"),
     titleEnabled: document.getElementById("title-enabled"),
     titleMain: document.getElementById("title-main"),
@@ -91,6 +92,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
     openExport: document.getElementById("open-export"),
+    downloadDesktop: document.getElementById("download-desktop"),
     importModal: document.getElementById("import-modal"),
     exportModal: document.getElementById("export-modal"),
     closeImport: document.getElementById("close-import"),
@@ -106,8 +108,11 @@ import { renderYamlToSvg } from "./renderer-core.js";
     zoomPercent: document.getElementById("zoom-percent"),
   };
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
+  const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
+  const latestReleaseUrl = resolveLatestReleaseUrl();
 
   function init() {
+    configureRuntimeMode();
     populateGenerationStyleSelect();
     bindEvents();
     bindTabs();
@@ -316,7 +321,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     state.people = buildDefaultPeople();
     state.selectedId = "root";
     state.export = {
-      format: "pdf",
+      format: canExactServerExport ? "pdf" : "svg",
       quality: 100,
       widthInches: 11,
       heightInches: round2(11 / getChartAspectRatio()),
@@ -977,10 +982,14 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function updateExportControls() {
+    if (!canExactServerExport && ["pdf", "png", "jpeg"].includes(state.export.format)) {
+      state.export.format = "svg";
+    }
     if (state.export.lockAspect) {
       state.export.heightInches = round2(state.export.widthInches / getChartAspectRatio());
     }
     elements.imageQuality.disabled = state.export.format !== "jpeg";
+    syncExactExportAvailability();
     elements.imageFormat.value = state.export.format;
     elements.imageQuality.value = String(state.export.quality);
     elements.exportWidthInches.value = String(round2(state.export.widthInches));
@@ -1034,7 +1043,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   async function requestRenderedArtifact(format, payload, responseType) {
-    const response = await fetch("/api/render", {
+    const response = await fetch("api/render", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1080,6 +1089,50 @@ import { renderYamlToSvg } from "./renderer-core.js";
 
   function basename(value) {
     return String(value || "").split(/[\\/]/).pop() || "";
+  }
+
+  function configureRuntimeMode() {
+    const fileLabel = elements.importYamlFile.closest("label");
+    if (desktopBridge && fileLabel) {
+      fileLabel.hidden = true;
+    }
+    if (elements.downloadDesktop) {
+      if (latestReleaseUrl) {
+        elements.downloadDesktop.href = latestReleaseUrl;
+        elements.downloadDesktop.hidden = false;
+      } else {
+        elements.downloadDesktop.hidden = true;
+      }
+    }
+  }
+
+  function syncExactExportAvailability() {
+    const exactFormats = new Set(["pdf", "png", "jpeg"]);
+    Array.from(elements.imageFormat.options).forEach((option) => {
+      option.disabled = !canExactServerExport && exactFormats.has(option.value);
+    });
+    if (elements.exportCapabilities) {
+      elements.exportCapabilities.textContent = canExactServerExport
+        ? "Exact PDF, PNG, JPG, SVG, and YAML export is available in the desktop app or local server."
+        : "This hosted demo supports preview, YAML import, and SVG/YAML export. For exact PDF, PNG, and JPG export, use the desktop app.";
+    }
+  }
+
+  function isLikelyLocalHost() {
+    const host = window.location.hostname;
+    return host === "127.0.0.1" || host === "localhost" || host === "";
+  }
+
+  function resolveLatestReleaseUrl() {
+    const host = window.location.hostname;
+    if (host.endsWith(".github.io")) {
+      const owner = host.replace(/\.github\.io$/, "");
+      const repo = window.location.pathname.split("/").filter(Boolean)[0];
+      if (owner && repo) {
+        return `https://github.com/${owner}/${repo}/releases/latest`;
+      }
+    }
+    return null;
   }
 
   function loadImage(url) {
