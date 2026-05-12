@@ -516,7 +516,7 @@ function fitBoxNameOnly(node, style, name, generation) {
 function fitVerticalNodeText(node, style, name) {
   const availableExtent = Math.max(10, node.height - INNER_MARGIN * 2);
   const availableThickness = Math.max(4, node.width - INNER_MARGIN * 2);
-  for (let scale = 1; scale >= 0.16; scale -= 0.02) {
+  for (let scale = 1.08; scale >= 0.16; scale -= 0.02) {
     const nameSize = round2(style.nameSize * scale);
     const lineHeight = Math.max(nameSize * 0.94, nameSize - 0.1);
     const maxChars = Math.max(3, Math.floor(availableExtent / (nameSize * 0.58)));

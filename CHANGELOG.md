@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.16 - 2026-05-11
+
+- changed the late-generation vertical name fitter to prefer two wrapped lines before falling back to a single truncated line
+- slightly increased the starting late-generation fitting scale so generations 5 and 6 use more of the available box height
+- reviewed the current demo render and added a backlog item for the stale title-box subtitle copy
+
 ## 0.2.15 - 2026-05-11
 
 - moved generation 5 and 6 maternal-side external dates to the left side of their connector line
