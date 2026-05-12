@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.31 - 2026-05-12
+
+- replaced the old Fit button with a fullscreen-preview control that opens a dedicated modal preview
+- added separate fullscreen zoom controls with drag-to-pan behavior and automatic fit-to-window on open and resize
+- kept the normal editor preview fit behavior for load and resize while freeing the toolbar from the old fit button
+
 ## 0.2.30 - 2026-05-12
 
 - fixed the Windows desktop editing loop so text inputs are no longer re-hydrated on every keystroke while the user is typing

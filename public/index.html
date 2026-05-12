@@ -15,7 +15,7 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.30</span>
+              <span id="app-version-badge" class="version-badge">v0.2.31</span>
           </div>
         </div>
         <div class="menu-shell">
@@ -50,7 +50,10 @@
                 <input id="zoom-percent" type="number" min="5" max="500" step="5" value="70">
               </label>
               <button id="zoom-in" type="button" title="Zoom in">+</button>
-              <button id="fit-view" type="button" title="Fit the whole tree into the preview">Fit</button>
+              <button id="open-fullscreen-preview" type="button" class="icon-button" title="Open a fullscreen preview with dedicated zoom controls">
+                <span aria-hidden="true">⛶</span>
+                <span class="sr-only">Open fullscreen preview</span>
+              </button>
             </div>
           </div>
           <div class="preview-stage">
@@ -317,7 +320,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.30</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.31</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>
@@ -357,6 +360,33 @@
         </div>
         <div class="modal-actions">
           <button id="accept-help" type="button">Got It</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="fullscreen-preview-modal" class="modal-shell" hidden>
+      <div class="modal-backdrop" data-close-modal="fullscreen-preview"></div>
+      <section class="modal-card modal-card-fullscreen">
+        <div class="modal-header fullscreen-preview-header">
+          <h2>Fullscreen Preview</h2>
+          <div class="preview-toolbar-actions fullscreen-toolbar-actions">
+            <button id="fullscreen-zoom-out" type="button" title="Zoom out">-</button>
+            <label class="preview-zoom">
+              <span>Zoom</span>
+              <input id="fullscreen-zoom-range" type="range" min="5" max="500" step="5" value="100">
+            </label>
+            <label class="preview-zoom-value">
+              <span>%</span>
+              <input id="fullscreen-zoom-percent" type="number" min="5" max="500" step="5" value="100">
+            </label>
+            <button id="fullscreen-zoom-in" type="button" title="Zoom in">+</button>
+            <button id="close-fullscreen-preview" type="button" title="Close fullscreen preview">Close</button>
+          </div>
+        </div>
+        <div class="modal-body fullscreen-preview-body">
+          <div id="fullscreen-preview-stage" class="preview-stage fullscreen-preview-stage">
+            <div id="fullscreen-svg-wrapper" class="svg-wrapper fullscreen-svg-wrapper"></div>
+          </div>
         </div>
       </section>
     </div>

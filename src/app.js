@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.30",
+    version: "0.2.31",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -131,6 +131,15 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     zoomOut: document.getElementById("zoom-out"),
     zoomIn: document.getElementById("zoom-in"),
     zoomPercent: document.getElementById("zoom-percent"),
+    openFullscreenPreview: document.getElementById("open-fullscreen-preview"),
+    fullscreenPreviewModal: document.getElementById("fullscreen-preview-modal"),
+    closeFullscreenPreview: document.getElementById("close-fullscreen-preview"),
+    fullscreenPreviewStage: document.getElementById("fullscreen-preview-stage"),
+    fullscreenSvgWrapper: document.getElementById("fullscreen-svg-wrapper"),
+    fullscreenZoomOut: document.getElementById("fullscreen-zoom-out"),
+    fullscreenZoomIn: document.getElementById("fullscreen-zoom-in"),
+    fullscreenZoomRange: document.getElementById("fullscreen-zoom-range"),
+    fullscreenZoomPercent: document.getElementById("fullscreen-zoom-percent"),
     appVersionBadge: document.getElementById("app-version-badge"),
     aboutVersion: document.getElementById("about-version"),
     aboutLastUpdated: document.getElementById("about-last-updated"),
@@ -150,7 +159,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     populateGenerationStyleSelect();
     bindEvents();
     bindTabs();
-    enablePreviewDragging();
+    enableStageDragging(elements.previewStage, ".node-box");
+    enableStageDragging(elements.fullscreenPreviewStage);
     loadDemoData();
     maybeShowHelpModal();
     window.addEventListener("resize", handleWindowResize);
@@ -165,7 +175,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       closeTopbarMenu();
       clearTree();
     });
-    document.getElementById("fit-view").addEventListener("click", fitWidth);
     elements.menuToggle.addEventListener("click", toggleTopbarMenu);
     elements.zoomOut.addEventListener("click", () => stepZoom(-5));
     elements.zoomIn.addEventListener("click", () => stepZoom(5));
@@ -174,6 +183,15 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       elements.zoomRange.value = String(value);
       applyZoom();
     });
+    elements.openFullscreenPreview.addEventListener("click", () => openModal("fullscreen-preview"));
+    elements.fullscreenZoomOut.addEventListener("click", () => stepZoom(-5, "fullscreen"));
+    elements.fullscreenZoomIn.addEventListener("click", () => stepZoom(5, "fullscreen"));
+    elements.fullscreenZoomPercent.addEventListener("input", () => {
+      const value = clamp(Number(elements.fullscreenZoomPercent.value) || 100, 5, 500);
+      elements.fullscreenZoomRange.value = String(value);
+      applyZoom("fullscreen");
+    });
+    elements.fullscreenZoomRange.addEventListener("input", () => applyZoom("fullscreen"));
     elements.openImport.addEventListener("click", () => openModal("import"));
     elements.openExport.addEventListener("click", () => openModal("export"));
     elements.openDownloads.addEventListener("click", () => {
@@ -187,6 +205,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.closeHelp.addEventListener("click", acknowledgeHelpModal);
     elements.closeAbout.addEventListener("click", () => closeModal("about"));
     elements.closeDownloads.addEventListener("click", () => closeModal("downloads"));
+    elements.closeFullscreenPreview.addEventListener("click", () => closeModal("fullscreen-preview"));
     elements.acceptHelp.addEventListener("click", acknowledgeHelpModal);
     document.querySelectorAll("[data-close-modal]").forEach((node) => {
       node.addEventListener("click", () => closeModal(node.getAttribute("data-close-modal")));
@@ -581,6 +600,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       const svg = doc.documentElement;
       bindRenderedSvg(svg);
       elements.svgWrapper.replaceChildren(svg);
+      syncFullscreenPreview(svg);
       applyZoom();
       updateGenerationFitReport();
       setStatus("Preview updated");
@@ -898,14 +918,17 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     };
   }
 
-  function applyZoom() {
-    const zoom = Number(elements.zoomRange.value) / 100;
-    elements.zoomPercent.value = String(Number(elements.zoomRange.value));
-    elements.svgWrapper.style.transform = `scale(${zoom})`;
+  function applyZoom(target = "main") {
+    const isFullscreen = target === "fullscreen";
+    const range = isFullscreen ? elements.fullscreenZoomRange : elements.zoomRange;
+    const percent = isFullscreen ? elements.fullscreenZoomPercent : elements.zoomPercent;
+    const wrapper = isFullscreen ? elements.fullscreenSvgWrapper : elements.svgWrapper;
+    const zoom = Number(range.value) / 100;
+    percent.value = String(Number(range.value));
+    wrapper.style.transform = `scale(${zoom})`;
   }
 
-  function enablePreviewDragging() {
-    const stage = elements.previewStage;
+  function enableStageDragging(stage, ignoreSelector = "") {
     let dragging = false;
     let startX = 0;
     let startY = 0;
@@ -913,7 +936,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     let startTop = 0;
 
     stage.addEventListener("pointerdown", (event) => {
-      if (event.target.closest(".node-box")) return;
+      if (ignoreSelector && event.target.closest(ignoreSelector)) return;
       dragging = true;
       startX = event.clientX;
       startY = event.clientY;
@@ -946,19 +969,24 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function fitWidth() {
-    const stage = elements.previewStage;
-    const svg = elements.svgWrapper.querySelector("svg");
+    fitStage(elements.previewStage, elements.svgWrapper, elements.zoomRange, elements.zoomPercent, 56, 72, 150);
+  }
+
+  function fitFullscreenPreview() {
+    fitStage(elements.fullscreenPreviewStage, elements.fullscreenSvgWrapper, elements.fullscreenZoomRange, elements.fullscreenZoomPercent, 64, 96, 500, "fullscreen");
+  }
+
+  function fitStage(stage, wrapper, range, percent, fitMarginX, fitMarginY, maxZoom, target = "main") {
+    const svg = wrapper.querySelector("svg");
     if (!svg) return;
-    const fitMarginX = 56;
-    const fitMarginY = 72;
     const width = Math.max(1, stage.clientWidth - fitMarginX);
     const height = Math.max(1, stage.clientHeight - fitMarginY);
     const svgWidth = svg.viewBox.baseVal.width || PAGE_WIDTH_PT;
     const svgHeight = svg.viewBox.baseVal.height || PAGE_HEIGHT_PT;
-    const percentage = Math.max(5, Math.min(150, Math.floor(Math.min(width / svgWidth, height / svgHeight) * 100)));
-    elements.zoomRange.value = String(percentage);
-    elements.zoomPercent.value = String(percentage);
-    applyZoom();
+    const percentage = Math.max(5, Math.min(maxZoom, Math.floor(Math.min(width / svgWidth, height / svgHeight) * 100)));
+    range.value = String(percentage);
+    percent.value = String(percentage);
+    applyZoom(target);
     requestAnimationFrame(() => {
       const scaledWidth = (svgWidth * percentage) / 100;
       stage.scrollLeft = Math.max(0, (scaledWidth - stage.clientWidth) / 2);
@@ -970,6 +998,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     clearTimeout(handleWindowResize.timer);
     handleWindowResize.timer = setTimeout(() => {
       fitWidth();
+      if (!elements.fullscreenPreviewModal.hidden) {
+        fitFullscreenPreview();
+      }
     }, 60);
   }
 
@@ -1004,10 +1035,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.statusText.textContent = text;
   }
 
-  function stepZoom(delta) {
-    const value = clamp(Number(elements.zoomRange.value) + delta, 5, 500);
-    elements.zoomRange.value = String(value);
-    applyZoom();
+  function stepZoom(delta, target = "main") {
+    const range = target === "fullscreen" ? elements.fullscreenZoomRange : elements.zoomRange;
+    const value = clamp(Number(range.value) + delta, 5, 500);
+    range.value = String(value);
+    applyZoom(target);
   }
 
   function openModal(kind) {
@@ -1017,10 +1049,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       kind === "export" ? elements.exportModal :
       kind === "help" ? elements.helpModal :
       kind === "downloads" ? elements.downloadsModal :
+      kind === "fullscreen-preview" ? elements.fullscreenPreviewModal :
       elements.aboutModal;
     modal.hidden = false;
     if (kind === "import") {
       elements.importYamlText.value = state.yamlText || serializeCurrentState();
+    } else if (kind === "fullscreen-preview") {
+      syncFullscreenPreview();
+      fitFullscreenPreview();
     }
   }
 
@@ -1035,6 +1071,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       kind === "export" ? elements.exportModal :
       kind === "help" ? elements.helpModal :
       kind === "downloads" ? elements.downloadsModal :
+      kind === "fullscreen-preview" ? elements.fullscreenPreviewModal :
       elements.aboutModal;
     modal.hidden = true;
   }
@@ -1071,6 +1108,17 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       window.localStorage.setItem("treegen-help-seen-v1", "1");
     } catch {}
     closeModal("help");
+  }
+
+  function syncFullscreenPreview(sourceSvg = null) {
+    if (!elements.fullscreenSvgWrapper) return;
+    const svg = sourceSvg || elements.svgWrapper.querySelector("svg");
+    if (!svg) {
+      elements.fullscreenSvgWrapper.replaceChildren();
+      return;
+    }
+    elements.fullscreenSvgWrapper.replaceChildren(svg.cloneNode(true));
+    applyZoom("fullscreen");
   }
 
   async function chooseImportFile() {

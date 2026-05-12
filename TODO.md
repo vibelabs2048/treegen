@@ -6,7 +6,7 @@
    Status: Done in v0.2.30
 
 2. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
-   Status: Open
+   Status: Done in v0.2.31
 
 3. Add undo and redo for editing actions.
    Status: Open
