@@ -5,6 +5,18 @@ contextBridge.exposeInMainWorld("treegenDesktop", {
   openYamlFile() {
     return ipcRenderer.invoke("treegen:open-yaml");
   },
+  openProjectFile() {
+    return ipcRenderer.invoke("treegen:open-project");
+  },
+  saveProjectFile(payload) {
+    return ipcRenderer.invoke("treegen:save-project", payload);
+  },
+  readAutosave() {
+    return ipcRenderer.invoke("treegen:read-autosave");
+  },
+  writeAutosave(payload) {
+    return ipcRenderer.invoke("treegen:write-autosave", payload);
+  },
   saveFile(payload) {
     return ipcRenderer.invoke("treegen:save-file", payload);
   },

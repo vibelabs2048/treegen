@@ -7,6 +7,19 @@ import { startServer } from "../server.js";
 let mainWindow = null;
 let localServer = null;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_EXTENSIONS = ["yaml", "yml"];
+
+function projectDirectory() {
+  return path.join(app.getPath("userData"), "projects");
+}
+
+function autosavePath() {
+  return path.join(projectDirectory(), "autosave.json");
+}
+
+async function ensureProjectDirectory() {
+  await fs.mkdir(projectDirectory(), { recursive: true });
+}
 
 ipcMain.handle("treegen:open-yaml", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
@@ -23,6 +36,83 @@ ipcMain.handle("treegen:open-yaml", async () => {
   const filePath = result.filePaths[0];
   const text = await fs.readFile(filePath, "utf8");
   return { canceled: false, path: filePath, text };
+});
+
+ipcMain.handle("treegen:open-project", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: "Open TreeGen Project",
+    properties: ["openFile"],
+    filters: [
+      { name: "TreeGen Project", extensions: PROJECT_EXTENSIONS },
+      { name: "All Files", extensions: ["*"] },
+    ],
+  });
+  if (result.canceled || !result.filePaths[0]) {
+    return { canceled: true };
+  }
+  const filePath = result.filePaths[0];
+  const text = await fs.readFile(filePath, "utf8");
+  return { canceled: false, path: filePath, text };
+});
+
+ipcMain.handle("treegen:save-project", async (_event, payload = {}) => {
+  const {
+    suggestedName = "family-tree.treegen.yaml",
+    currentPath = "",
+    text = "",
+  } = payload;
+  await ensureProjectDirectory();
+  let filePath = currentPath || "";
+  if (!filePath) {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: "Save TreeGen Project",
+      defaultPath: path.join(projectDirectory(), suggestedName),
+      filters: [
+        { name: "TreeGen Project", extensions: PROJECT_EXTENSIONS },
+        { name: "All Files", extensions: ["*"] },
+      ],
+    });
+    if (result.canceled || !result.filePath) {
+      return { canceled: true };
+    }
+    filePath = result.filePath;
+  }
+  await fs.writeFile(filePath, String(text), "utf8");
+  const stats = await fs.stat(filePath);
+  return {
+    canceled: false,
+    path: filePath,
+    updatedAt: stats.mtime.toISOString(),
+  };
+});
+
+ipcMain.handle("treegen:read-autosave", async () => {
+  try {
+    const filePath = autosavePath();
+    const raw = await fs.readFile(filePath, "utf8");
+    const data = JSON.parse(raw);
+    return {
+      exists: true,
+      path: filePath,
+      text: typeof data.text === "string" ? data.text : "",
+      projectPath: typeof data.projectPath === "string" ? data.projectPath : "",
+      updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : "",
+    };
+  } catch {
+    return { exists: false, text: "", projectPath: "", updatedAt: "" };
+  }
+});
+
+ipcMain.handle("treegen:write-autosave", async (_event, payload = {}) => {
+  const {
+    text = "",
+    projectPath = "",
+  } = payload;
+  await ensureProjectDirectory();
+  const updatedAt = new Date().toISOString();
+  const filePath = autosavePath();
+  await fs.writeFile(filePath, JSON.stringify({ text: String(text), projectPath: String(projectPath || ""), updatedAt }, null, 2), "utf8");
+  return { path: filePath, updatedAt };
 });
 
 ipcMain.handle("treegen:save-file", async (_event, payload = {}) => {

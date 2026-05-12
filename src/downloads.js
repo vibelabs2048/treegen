@@ -1,5 +1,5 @@
 const APP_META = {
-  version: "0.2.33",
+  version: "0.2.34",
   lastUpdated: "2026-05-12",
 };
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.34 - 2026-05-12
+
+- added desktop-only project open/save actions in the main menu
+- added desktop autosave into the TreeGen app-data project directory with startup recovery prompt
+- kept browser mode clean by leaving project-file and autosave behavior disabled outside the desktop app
+
 ## 0.2.33 - 2026-05-12
 
 - replaced the single display-name editor with separate first-name and last-name fields

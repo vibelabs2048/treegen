@@ -2,14 +2,14 @@
 
 ## Priority Order
 
-1. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
+1. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
    Status: Open
 
-2. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
+2. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
    Status: Open
 
-3. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
-   Status: Open
+3. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
+   Status: Done in v0.2.34
 
 4. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
    Status: Done in v0.2.30

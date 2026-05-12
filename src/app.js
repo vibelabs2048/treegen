@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.33",
+    version: "0.2.34",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -46,6 +46,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     people: buildDefaultPeople(),
     yamlText: "",
     fitReport: [],
+    project: {
+      path: "",
+      autosavePath: "",
+      autosaveUpdatedAt: "",
+    },
     history: {
       undoStack: [],
       redoStack: [],
@@ -118,6 +123,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     openHelp: document.getElementById("open-help"),
     openAbout: document.getElementById("open-about"),
     openDownloads: document.getElementById("open-downloads"),
+    openProject: document.getElementById("open-project"),
+    saveProject: document.getElementById("save-project"),
     undoAction: document.getElementById("undo-action"),
     redoAction: document.getElementById("redo-action"),
     menuToggle: document.getElementById("menu-toggle"),
@@ -164,15 +171,19 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
   const latestReleaseUrl = resolveLatestReleaseUrl();
+  let autosaveTimer = null;
 
-  function init() {
+  async function init() {
     configureRuntimeMode();
     populateGenerationStyleSelect();
     bindEvents();
     bindTabs();
     enableStageDragging(elements.previewStage, ".node-box");
     enableStageDragging(elements.fullscreenPreviewStage);
-    loadDemoData();
+    const restored = await maybeRestoreDesktopAutosave();
+    if (!restored) {
+      loadDemoData();
+    }
     maybeShowHelpModal();
     window.addEventListener("resize", handleWindowResize);
   }
@@ -184,6 +195,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     });
     elements.undoAction.addEventListener("click", undoChange);
     elements.redoAction.addEventListener("click", redoChange);
+    elements.openProject.addEventListener("click", openProjectFile);
+    elements.saveProject.addEventListener("click", saveProjectFile);
     document.getElementById("clear-tree").addEventListener("click", () => {
       closeTopbarMenu();
       clearTree();
@@ -443,6 +456,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     renderChart();
     refreshYamlEditor();
     updateHistoryControls();
+    scheduleDesktopAutosave();
     setStatus("Cleared tree");
   }
 
@@ -517,6 +531,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     renderChart();
     fitWidth();
     updateHistoryControls();
+    scheduleDesktopAutosave();
     setStatus("Loaded Italian family demo");
   }
 
@@ -594,6 +609,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     refreshYamlEditor();
     renderChart();
     updateHistoryControls();
+    scheduleDesktopAutosave();
   }
 
   function captureHistoryState() {
@@ -670,6 +686,106 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
   }
 
+  async function openProjectFile() {
+    closeTopbarMenu();
+    if (!desktopBridge) {
+      openModal("import");
+      return;
+    }
+    const result = await desktopBridge.openProjectFile();
+    if (!result || result.canceled) return;
+    try {
+      applyYamlFromEditor(result.text || "");
+      state.project.path = result.path || "";
+      await writeDesktopAutosave();
+      setStatus(`Opened project ${basename(result.path || "project")}`);
+    } catch {
+      // status already updated
+    }
+  }
+
+  async function saveProjectFile() {
+    closeTopbarMenu();
+    if (!desktopBridge) {
+      openModal("export");
+      return;
+    }
+    refreshYamlEditor();
+    try {
+      const result = await desktopBridge.saveProjectFile({
+        currentPath: state.project.path || "",
+        suggestedName: suggestProjectFileName(),
+        text: state.yamlText || serializeCurrentState(),
+      });
+      if (!result || result.canceled) return;
+      state.project.path = result.path || state.project.path;
+      await writeDesktopAutosave();
+      setStatus(`Saved project ${basename(result.path || "project")}`);
+    } catch (error) {
+      setStatus(`Project save error: ${error.message}`);
+    }
+  }
+
+  async function maybeRestoreDesktopAutosave() {
+    if (!desktopBridge) return false;
+    try {
+      const autosave = await desktopBridge.readAutosave();
+      if (!autosave || !autosave.exists || !autosave.text) {
+        return false;
+      }
+      const label = autosave.updatedAt ? ` from ${formatTimestamp(autosave.updatedAt)}` : "";
+      const restore = window.confirm(`Recover the last autosaved TreeGen project${label}?`);
+      if (!restore) {
+        return false;
+      }
+      applyYamlFromEditor(autosave.text);
+      state.project.path = autosave.projectPath || "";
+      state.project.autosavePath = autosave.path || "";
+      state.project.autosaveUpdatedAt = autosave.updatedAt || "";
+      setStatus(`Recovered autosave${label}`);
+      return true;
+    } catch (error) {
+      setStatus(`Autosave recovery error: ${error.message}`);
+      return false;
+    }
+  }
+
+  function scheduleDesktopAutosave() {
+    if (!desktopBridge) return;
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => {
+      void writeDesktopAutosave();
+    }, 700);
+  }
+
+  async function writeDesktopAutosave() {
+    if (!desktopBridge) return;
+    refreshYamlEditor();
+    try {
+      const result = await desktopBridge.writeAutosave({
+        projectPath: state.project.path || "",
+        text: state.yamlText || serializeCurrentState(),
+      });
+      state.project.autosavePath = result?.path || state.project.autosavePath;
+      state.project.autosaveUpdatedAt = result?.updatedAt || state.project.autosaveUpdatedAt;
+    } catch (error) {
+      setStatus(`Autosave error: ${error.message}`);
+    }
+  }
+
+  function suggestProjectFileName() {
+    const root = state.people.root || {};
+    const rootName = displayName(root, "root") || "family-tree";
+    const base = sanitizeText(rootName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "family-tree";
+    return `${base}.treegen.yaml`;
+  }
+
+  function formatTimestamp(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "an unknown time";
+    return date.toLocaleString();
+  }
+
   function refreshYamlEditor() {
     state.yamlText = serializeCurrentState();
     if (elements.importYamlText && !elements.importModal.hidden) {
@@ -695,6 +811,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       renderChart();
       refreshYamlEditor();
       updateHistoryControls();
+      scheduleDesktopAutosave();
       setStatus("Imported YAML");
     } catch (error) {
       setStatus("YAML error: " + error.message);
@@ -1509,6 +1626,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       } else {
         elements.aboutReleaseLinkWrap.hidden = true;
       }
+    }
+    if (elements.openProject) {
+      elements.openProject.disabled = !desktopBridge;
+      elements.openProject.title = desktopBridge
+        ? "Open a saved TreeGen project from disk."
+        : "Project files and autosave are available in the desktop app.";
+    }
+    if (elements.saveProject) {
+      elements.saveProject.disabled = !desktopBridge;
+      elements.saveProject.title = desktopBridge
+        ? "Save the current TreeGen project to disk."
+        : "Project files and autosave are available in the desktop app.";
     }
     renderDownloadOptions();
   }
