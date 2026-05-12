@@ -61,19 +61,16 @@ people:
     name: "Eleonora Mariacristina Bellandi-Castelluccio"
     birth: "18 aprile 1952"
     death: "7 gennaio 2021"
-    note: "Soggetto principale"
   father:
     name: "Edoardo Gianlorenzo Bellandi-Castelluccio"
     birth: "14 marzo 1924"
     death: "9 novembre 1991"
-    note: "Linea paterna"
   mother:
     name: "Maria Giuseppina Della Rovere-Malatesta"
     birth: "22 luglio 1926"
     death: "3 febbraio 1996"
     marriageDate: "3 giugno 1948"
-    note: "Linea materna"
-    childrenNote: "Eleonora Mariacristina Bellandi-Castelluccio (1952-2021)"
+    childrenNote: "Eleonora"
   father_father:
     name: "Giorgio Marcantonio Bellandi-Castelluccio"
     birth: "11 maggio 1896"
@@ -83,7 +80,7 @@ people:
     birth: "7 dicembre 1898"
     death: "12 aprile 1969"
     marriageDate: "18 settembre 1920"
-    childrenNote: "Edoardo Gianlorenzo Bellandi-Castelluccio (1924-1991)"
+    childrenNote: "Edoardo"
   mother_father:
     name: "Giuseppe Salvatore Della Rovere-Malatesta"
     birth: "2 gennaio 1900"
@@ -93,7 +90,7 @@ people:
     birth: "25 settembre 1902"
     death: "6 marzo 1975"
     marriageDate: "14 febbraio 1924"
-    childrenNote: "Maria Giuseppina Della Rovere-Malatesta (1926-1996)\nCarlotta Della Rovere-Malatesta (1925-1996)\nDaniele Della Rovere-Malatesta (1928-2000)"
+    childrenNote: "Maria Giuseppina\nCarlotta\nDaniele"
   father_father_father:
     name: "Walter Sebastiano Sannazzaro-Farnesini"
     birth: "9 giugno 1870"
@@ -103,7 +100,7 @@ people:
     birth: "13 ottobre 1870"
     death: "5 gennaio 1942"
     marriageDate: "1895"
-    childrenNote: "Giorgio Marcantonio Bellandi-Castelluccio (1896-1968)"
+    childrenNote: "Giorgio"
   father_mother_father:
     name: "Arturo Michelangelo Sannazzaro-Farnesini"
     birth: "4 aprile 1872"
@@ -113,7 +110,7 @@ people:
     birth: "27 novembre 1874"
     death: "2 febbraio 1948"
     marriageDate: "1897"
-    childrenNote: "Elena Francescamaria Bellandi-Castelluccio (1898-1969)\nDorotea Bellandi-Castelluccio (1897-1968)\nFedericantonio Bellandi-Castelluccio (1900-1972)"
+    childrenNote: "Elena\nDorotea\nFedericantonio"
   mother_father_father:
     name: "Davide Costantino Fioravanti-Bartolomei"
     birth: "16 febbraio 1876"
@@ -123,7 +120,7 @@ people:
     birth: "8 agosto 1878"
     death: "24 maggio 1954"
     marriageDate: "1899"
-    childrenNote: "Giuseppe Salvatore Della Rovere-Malatesta (1900-1972)\nElisabetta Della Rovere-Malatesta (1899-1970)\nIgnazio Della Rovere-Malatesta (1902-1974)\nElisabetta Della Rovere-Malatesta (1905-1978)\nIgnazio Della Rovere-Malatesta (1908-1982)"
+    childrenNote: "Giuseppe\nElisabetta\nIgnazio\nElisabetta\nIgnazio"
   mother_mother_father:
     name: "Michele Bartolomeo Fioravanti-Bartolomei"
     birth: "20 gennaio 1880"
@@ -133,7 +130,7 @@ people:
     birth: "5 giugno 1882"
     death: "30 aprile 1950"
     marriageDate: "1901"
-    childrenNote: "Luisa Caterinella Della Rovere-Malatesta (1902-1975)\nFrancesca Della Rovere-Malatesta (1901-1972)\nNicodemo Della Rovere-Malatesta (1904-1976)\nFrancesca Della Rovere-Malatesta (1907-1980)\nNicodemo Della Rovere-Malatesta (1910-1984)\nFrancesca Della Rovere-Malatesta (1913-1983)\nNicodemo Della Rovere-Malatesta (1916-1987)"
+    childrenNote: "Luisa\nFrancesca\nNicodemo\nFrancesca\nNicodemo\nFrancesca\nNicodemo"
   father_father_father_father:
     name: "Roberto Ferdinando Pietrantonio-Valentini"
     birthYear: "?"
@@ -142,7 +139,7 @@ people:
     name: "Alice Beatricella Pietrantonio-Valentini"
     birthYear: "1842"
     deathYear: "1915"
-    childrenNote: "Walter Sebastiano Sannazzaro-Farnesini (?-?)"
+    childrenNote: "Walter"
   father_father_mother_father:
     name: "Giovanni Ludovico Pietrantonio-Valentini"
     birthYear: "1844"
@@ -151,7 +148,7 @@ people:
     name: "Marta Domenica Pietrantonio-Valentini"
     birthYear: "1846"
     deathYear: "1921"
-    childrenNote: "Sara Annunziata Sannazzaro-Farnesini (1870-1942)\nElisabetta Sannazzaro-Farnesini (1869-1940)\nIgnazio Sannazzaro-Farnesini (1872-1944)"
+    childrenNote: "Sara\nElisabetta\nIgnazio"
   father_mother_father_father:
     name: "Tommaso Alessandro Pietrantonio-Valentini"
     birthYear: "1848"
@@ -160,7 +157,7 @@ people:
     name: "Margherita Antonietta Pietrantonio-Valentini"
     birthYear: "1850"
     deathYear: "1927"
-    childrenNote: "Arturo Michelangelo Sannazzaro-Farnesini (1872-1945)\nFrancesca Sannazzaro-Farnesini (1871-1942)\nNicodemo Sannazzaro-Farnesini (1874-1946)\nFrancesca Sannazzaro-Farnesini (1877-1950)\nNicodemo Sannazzaro-Farnesini (1880-1954)"
+    childrenNote: "Arturo\nFrancesca\nNicodemo\nFrancesca\nNicodemo"
   father_mother_mother_father:
     name: "Carlo Giandomenico Pietrantonio-Valentini"
     birthYear: "1852"
@@ -169,7 +166,7 @@ people:
     name: "Caterina Mariangela Pietrantonio-Valentini"
     birthYear: "1854"
     deathYear: "1923"
-    childrenNote: "Grazia Eleonorina Sannazzaro-Farnesini (1874-1948)\nGinevra Sannazzaro-Farnesini (1873-1944)\nOrazio Sannazzaro-Farnesini (1876-1948)\nGinevra Sannazzaro-Farnesini (1879-1952)\nOrazio Sannazzaro-Farnesini (1882-1956)\nGinevra Sannazzaro-Farnesini (1885-1955)\nOrazio Sannazzaro-Farnesini (1888-1959)"
+    childrenNote: "Grazia\nGinevra\nOrazio\nGinevra\nOrazio\nGinevra\nOrazio"
   mother_father_father_father:
     name: "Enrico Raffaele Brancaleoni-Sforzeschi"
     birthYear: "1856"
@@ -178,7 +175,7 @@ people:
     name: "Eleonora Serafina Brancaleoni-Sforzeschi"
     birthYear: "1858"
     deathYear: "1929"
-    childrenNote: "Davide Costantino Fioravanti-Bartolomei (1876-1951)\nLudovica Fioravanti-Bartolomei (1875-1946)\nPierluigi Fioravanti-Bartolomei (1878-1950)\nLudovica Fioravanti-Bartolomei (1881-1954)\nPierluigi Fioravanti-Bartolomei (1884-1958)\nLudovica Fioravanti-Bartolomei (1887-1957)\nPierluigi Fioravanti-Bartolomei (1890-1961)\nLudovica Fioravanti-Bartolomei (1893-1965)\nPierluigi Fioravanti-Bartolomei (1896-1969)"
+    childrenNote: "Davide\nLudovica\nPierluigi\nLudovica\nPierluigi\nLudovica\nPierluigi\nLudovica\nPierluigi"
   mother_father_mother_father:
     name: "Giorgio Domenicantonio Brancaleoni-Sforzeschi"
     birthYear: "1860"
@@ -187,7 +184,7 @@ people:
     name: "Elena Alessandrina Brancaleoni-Sforzeschi"
     birthYear: "?"
     deathYear: "?"
-    childrenNote: "Giulia Vittoriana Fioravanti-Bartolomei (1878-1954)"
+    childrenNote: "Giulia"
   mother_mother_father_father:
     name: "Giuseppe Pasqualino Brancaleoni-Sforzeschi"
     birthYear: "1864"
@@ -196,7 +193,7 @@ people:
     name: "Luisa Michelina Brancaleoni-Sforzeschi"
     birthYear: "1866"
     deathYear: "1941"
-    childrenNote: "Michele Bartolomeo Fioravanti-Bartolomei (1880-1957)\nBeatrice Fioravanti-Bartolomei (1879-1950)\nBeniamino Fioravanti-Bartolomei (1882-1954)"
+    childrenNote: "Michele\nBeatrice\nBeniamino"
   mother_mother_mother_father:
     name: "Giacomo Francesco Brancaleoni-Sforzeschi"
     birthYear: "1868"
@@ -205,7 +202,7 @@ people:
     name: "Emma Ludovica Brancaleoni-Sforzeschi"
     birthYear: "1870"
     deathYear: "1947"
-    childrenNote: "Elisabetta Rosalinda Fioravanti-Bartolomei (1882-1950)\nCarlotta Fioravanti-Bartolomei (1881-1952)\nDaniele Fioravanti-Bartolomei (1884-1956)\nCarlotta Fioravanti-Bartolomei (1887-1960)\nDaniele Fioravanti-Bartolomei (1890-1964)"
+    childrenNote: "Elisabetta\nCarlotta\nDaniele\nCarlotta\nDaniele"
   father_father_father_father_father:
     name: "Michele Alessandrino Montemurro-Casalvecchio"
     birthYear: "?"

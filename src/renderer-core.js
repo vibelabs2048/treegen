@@ -295,16 +295,17 @@ function drawNode(state, slot, node) {
       parts.push(text(0, startY + idx * layout.lineHeight, lineText, style.nameColor, layout.nameSize, true, "middle", state.settings));
     });
     parts.push(`</g>`);
-    dateLines.forEach((lineText, idx) => {
+    const externalDateLayout = getExternalDateLayout(node, style, slot, person);
+    externalDateLayout.lines.forEach((lineText, idx) => {
       parts.push(
         text(
-          node.centerX,
-          node.y + node.height + layout.dateSize + 4 + idx * (layout.dateSize * 0.92),
+          externalDateLayout.x,
+          externalDateLayout.y + idx * externalDateLayout.lineHeight,
           lineText,
           style.dateColor,
-          layout.dateSize,
+          externalDateLayout.fontSize,
           false,
-          "middle",
+          externalDateLayout.anchor,
           state.settings
         )
       );
@@ -732,11 +733,22 @@ function getExternalDateLayout(node, style, slot, person) {
       anchor: "middle",
     };
   }
+  if (slot.generation >= 5) {
+    const isMother = slot.path[slot.path.length - 1] === "mother";
+    return {
+      lines,
+      x: isMother ? node.x + node.width + 3 : node.x - 3,
+      y: node.y + node.height + fontSize + 2,
+      lineHeight,
+      fontSize,
+      anchor: isMother ? "start" : "end",
+    };
+  }
   const isMother = slot.path[slot.path.length - 1] === "mother";
   return {
     lines,
     x: isMother ? node.x + node.width + 2 : node.x - 2,
-    y: node.y + node.height + fontSize + 4,
+    y: node.y + node.height + (slot.generation <= 3 ? fontSize + 2 : fontSize + 4),
     lineHeight,
     fontSize,
     anchor: isMother ? "start" : "end",

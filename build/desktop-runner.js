@@ -26,14 +26,12 @@ if (mode === "dev") {
 }
 
 function run(bin, args) {
-  const spawnArgs = process.platform === "win32"
-    ? ["cmd.exe", ["/d", "/s", "/c", `"${bin}" ${args.map(quoteWindowsArg).join(" ")}`]]
-    : [bin, args];
-  const child = spawn(spawnArgs[0], spawnArgs[1], {
+  const useWindowsShell = process.platform === "win32";
+  const child = spawn(bin, args, {
     cwd: repoRoot,
     env,
     stdio: "inherit",
-    shell: false,
+    shell: useWindowsShell,
   });
   child.on("exit", (code, signal) => {
     if (signal) {
@@ -46,12 +44,6 @@ function run(bin, args) {
     console.error(error);
     process.exit(1);
   });
-}
-
-function quoteWindowsArg(value) {
-  const text = String(value);
-  if (!/[ \t"]/u.test(text)) return text;
-  return `"${text.replace(/"/g, '\\"')}"`;
 }
 
 function binName(name) {

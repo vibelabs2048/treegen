@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.6",
+    version: "0.2.7",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;
@@ -492,7 +492,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const yaml = serializeCurrentState();
     state.yamlText = yaml;
     try {
-      const svgText = applyPreviewMargin(renderYamlToSvg(yaml), 18);
+      const svgText = applyPreviewMargin(renderYamlToSvg(yaml), 28);
       const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
       const svg = doc.documentElement;
       bindRenderedSvg(svg);
@@ -877,7 +877,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
       const scaledWidth = (svgWidth * percentage) / 100;
       const scaledHeight = (svgHeight * percentage) / 100;
       stage.scrollLeft = Math.max(0, (scaledWidth - stage.clientWidth) / 2);
-      stage.scrollTop = Math.max(0, (scaledHeight - stage.clientHeight) / 2 - 34);
+      stage.scrollTop = Math.max(0, (scaledHeight - stage.clientHeight) / 2 - 44);
     });
   }
 
@@ -1381,21 +1381,18 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const children = [];
     for (let i = 0; i < count; i += 1) {
       if (i === 0) {
-        children.push(`${demoNameForSlot(childSlot)} ${formatDates(childYears.birthYear, childYears.deathYear)}`);
+        children.push(formatCompactChildName(demoNameForSlot(childSlot), formatDates(childYears.birthYear, childYears.deathYear), count, i));
       } else {
         const birth = childBirth == null ? "" : String(childBirth - 4 + i * 3);
         const death = birth ? String(Number(birth) + 70 + (i % 5)) : "";
         const siblingName = i % 2 === 0 ? siblingNameForSlot(childSlot, "older") : siblingNameForSlot(childSlot, "younger");
-        children.push(`${siblingName} ${formatDates(birth, death)}`);
+        children.push(formatCompactChildName(siblingName, formatDates(birth, death), count, i));
       }
     }
     return children.join("\n");
   }
 
   function sampleNoteForSlot(slot) {
-    if (slot.generation === 0) return "Soggetto principale";
-    if (slot.generation === 1) return slot.path[0] === "father" ? "Linea paterna" : "Linea materna";
-    if (slot.generation === 2 && slot.index % 2 === 0) return "Residenza incerta";
     return "";
   }
 
@@ -1567,6 +1564,15 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const day = ((seed * 7) % 27) + 1;
     const month = months[(seed * 5) % months.length];
     return `${day} ${month} ${year}`;
+  }
+
+  function formatCompactChildName(fullName, dateText, totalCount, index) {
+    const parts = sanitizeText(fullName).split(" ").filter(Boolean);
+    const firstName = parts[0] || "";
+    const fullLabel = dateText && totalCount <= 2 ? `${fullName} ${dateText}` : fullName;
+    if (totalCount <= 2) return fullLabel;
+    if (totalCount <= 4) return firstName;
+    return index === 0 && dateText ? `${firstName} ${dateText}` : firstName;
   }
 
   function wrapText(text, maxChars) {

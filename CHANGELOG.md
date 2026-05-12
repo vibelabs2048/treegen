@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.7 - 2026-05-11
+
+- simplified the public README and moved build/release details into `DEVELOPER.md`
+- shortened the shipped demo child annotations and removed demo box notes
+- nudged preview margin and demo fit behavior again to reduce top-edge clipping
+- kept the Windows desktop rebuild fix and updated the local release metadata
+
 ## 0.2.6 - 2026-05-11
 
 - fixed Windows desktop rebuild by running Electron build tooling through `cmd.exe` on Windows runners
