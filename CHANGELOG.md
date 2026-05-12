@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.19 - 2026-05-12
+
+- changed date prefixes from one global setting to per-generation settings in the browser model, YAML serializer, and shared renderer
+- kept backward compatibility with older YAML that only had one global `datePrefixes` block
+- wired the existing generation selector so the prefix inputs now edit the selected generation instead of one global value
+
 ## 0.2.18 - 2026-05-12
 
 - changed the default date prefixes to `N` for birth, `M` for marriage, and `S` for death

@@ -21,11 +21,7 @@ const DEFAULT_SETTINGS = {
     author: "Prepared with TreeGen",
     crestDataUrl: "",
   },
-  datePrefixes: {
-    birth: "N",
-    death: "S",
-    marriage: "M",
-  },
+  datePrefixes: buildDefaultDatePrefixes(),
   boxNumbering: {
     enabled: false,
     startAt: 0,
@@ -116,11 +112,7 @@ function normalizeState(data, overrides) {
     };
   }
   if (importedSettings.datePrefixes && typeof importedSettings.datePrefixes === "object") {
-    nextSettings.datePrefixes = {
-      birth: sanitizePrefix(importedSettings.datePrefixes.birth),
-      death: sanitizePrefix(importedSettings.datePrefixes.death),
-      marriage: sanitizePrefix(importedSettings.datePrefixes.marriage),
-    };
+    nextSettings.datePrefixes = normalizeDatePrefixes(importedSettings.datePrefixes);
   }
   if (importedSettings.boxNumbering && typeof importedSettings.boxNumbering === "object") {
     nextSettings.boxNumbering = {
@@ -593,6 +585,38 @@ function buildDefaultGenerationStyles() {
   }));
 }
 
+function buildDefaultDatePrefixes() {
+  return Array.from({ length: MAX_GENERATION + 1 }, (_, generation) => ({
+    birth: generation <= 3 ? "N" : "",
+    death: generation <= 3 ? "S" : "",
+    marriage: generation <= 3 ? "M" : "",
+  }));
+}
+
+function normalizeDatePrefixes(datePrefixes) {
+  const defaults = buildDefaultDatePrefixes();
+  const hasPerGenerationKeys = Array.from({ length: MAX_GENERATION + 1 }, (_, generation) => `generation${generation}`)
+    .some((key) => datePrefixes && typeof datePrefixes[key] === "object");
+  if (hasPerGenerationKeys) {
+    return defaults.map((fallback, generation) => {
+      const incoming = datePrefixes[`generation${generation}`] || {};
+      return {
+        birth: sanitizePrefix(incoming.birth ?? fallback.birth),
+        death: sanitizePrefix(incoming.death ?? fallback.death),
+        marriage: sanitizePrefix(incoming.marriage ?? fallback.marriage),
+      };
+    });
+  }
+  const legacyBirth = sanitizePrefix(datePrefixes?.birth);
+  const legacyDeath = sanitizePrefix(datePrefixes?.death);
+  const legacyMarriage = sanitizePrefix(datePrefixes?.marriage);
+  return defaults.map((fallback, generation) => ({
+    birth: generation <= 3 ? (legacyBirth || fallback.birth) : "",
+    death: generation <= 3 ? (legacyDeath || fallback.death) : "",
+    marriage: generation <= 3 ? (legacyMarriage || fallback.marriage) : "",
+  }));
+}
+
 function normalizeGenerationStyles(styles) {
   const defaults = buildDefaultGenerationStyles();
   return defaults.map((fallback, generation) => {
@@ -831,8 +855,7 @@ function formatMarriageForGeneration(marriageDate, generation, style, settings =
 }
 
 function getActiveDatePrefix(kind, generation, settings = DEFAULT_SETTINGS) {
-  if (generation >= 4) return "";
-  return sanitizePrefix(settings.datePrefixes?.[kind]);
+  return sanitizePrefix(settings.datePrefixes?.[generation]?.[kind]);
 }
 
 function formatPrefixedDate(prefix, value) {

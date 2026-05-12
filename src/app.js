@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.18",
+    version: "0.2.19",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -32,11 +32,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
       author: "Prepared with TreeGen",
       crestDataUrl: "",
     },
-    datePrefixes: {
-      birth: "N",
-      death: "S",
-      marriage: "M",
-    },
+    datePrefixes: buildDefaultDatePrefixes(),
     boxNumbering: {
       enabled: false,
       startAt: 0,
@@ -474,11 +470,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
       };
     }
     if (importedSettings.datePrefixes && typeof importedSettings.datePrefixes === "object") {
-      nextSettings.datePrefixes = {
-        birth: sanitizePrefix(importedSettings.datePrefixes.birth),
-        death: sanitizePrefix(importedSettings.datePrefixes.death),
-        marriage: sanitizePrefix(importedSettings.datePrefixes.marriage),
-      };
+      nextSettings.datePrefixes = normalizeDatePrefixes(importedSettings.datePrefixes);
     }
     if (importedSettings.boxNumbering && typeof importedSettings.boxNumbering === "object") {
       nextSettings.boxNumbering = {
@@ -1255,6 +1247,38 @@ import { renderYamlToSvg } from "./renderer-core.js";
     });
   }
 
+  function buildDefaultDatePrefixes() {
+    return Array.from({ length: MAX_GENERATION + 1 }, (_, generation) => ({
+      birth: generation <= 3 ? "N" : "",
+      death: generation <= 3 ? "S" : "",
+      marriage: generation <= 3 ? "M" : "",
+    }));
+  }
+
+  function normalizeDatePrefixes(datePrefixes) {
+    const defaults = buildDefaultDatePrefixes();
+    const hasPerGenerationKeys = Array.from({ length: MAX_GENERATION + 1 }, (_, generation) => `generation${generation}`)
+      .some((key) => datePrefixes && typeof datePrefixes[key] === "object");
+    if (hasPerGenerationKeys) {
+      return defaults.map((fallback, generation) => {
+        const incoming = datePrefixes[`generation${generation}`] || {};
+        return {
+          birth: sanitizePrefix(incoming.birth ?? fallback.birth),
+          death: sanitizePrefix(incoming.death ?? fallback.death),
+          marriage: sanitizePrefix(incoming.marriage ?? fallback.marriage),
+        };
+      });
+    }
+    const legacyBirth = sanitizePrefix(datePrefixes?.birth);
+    const legacyDeath = sanitizePrefix(datePrefixes?.death);
+    const legacyMarriage = sanitizePrefix(datePrefixes?.marriage);
+    return defaults.map((fallback, generation) => ({
+      birth: generation <= 3 ? (legacyBirth || fallback.birth) : "",
+      death: generation <= 3 ? (legacyDeath || fallback.death) : "",
+      marriage: generation <= 3 ? (legacyMarriage || fallback.marriage) : "",
+    }));
+  }
+
   function populateGenerationStyleSelect() {
     elements.generationStyleSelect.innerHTML = "";
     for (let generation = 0; generation <= MAX_GENERATION; generation += 1) {
@@ -1280,9 +1304,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
     elements.genSyncNameDate.checked = !!style.syncNameDate;
     elements.genChildrenSize.value = String(style.childrenSize);
     elements.genChildrenColor.value = normalizeColor(style.childrenColor);
-    elements.datePrefixBirth.value = state.settings.datePrefixes.birth || "";
-    elements.datePrefixDeath.value = state.settings.datePrefixes.death || "";
-    elements.datePrefixMarriage.value = state.settings.datePrefixes.marriage || "";
+    const prefixes = state.settings.datePrefixes[generation] || buildDefaultDatePrefixes()[generation];
+    elements.datePrefixBirth.value = prefixes.birth || "";
+    elements.datePrefixDeath.value = prefixes.death || "";
+    elements.datePrefixMarriage.value = prefixes.marriage || "";
   }
 
   function updateGenerationStyle(key, value) {
@@ -1295,7 +1320,8 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function updateDatePrefix(kind, value) {
-    state.settings.datePrefixes[kind] = sanitizePrefix(value);
+    const generation = Number(elements.generationStyleSelect.value || "0");
+    state.settings.datePrefixes[generation][kind] = sanitizePrefix(value);
     syncAfterChange();
   }
 
@@ -1726,9 +1752,12 @@ import { renderYamlToSvg } from "./renderer-core.js";
       lines.push(`    crestDataUrl: ${quoteYaml(data.settings.titleBox.crestDataUrl)}`);
     }
     lines.push("  datePrefixes:");
-    lines.push(`    birth: ${quoteYaml(data.settings.datePrefixes.birth || "")}`);
-    lines.push(`    death: ${quoteYaml(data.settings.datePrefixes.death || "")}`);
-    lines.push(`    marriage: ${quoteYaml(data.settings.datePrefixes.marriage || "")}`);
+    data.settings.datePrefixes.forEach((prefixes, generation) => {
+      lines.push(`    generation${generation}:`);
+      lines.push(`      birth: ${quoteYaml(prefixes.birth || "")}`);
+      lines.push(`      death: ${quoteYaml(prefixes.death || "")}`);
+      lines.push(`      marriage: ${quoteYaml(prefixes.marriage || "")}`);
+    });
     lines.push("rootPersonId: root");
     lines.push("people:");
     for (const slot of SLOT_DEFINITIONS) {
