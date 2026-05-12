@@ -67,7 +67,7 @@ Pre-publish validation in GitHub Actions:
 ## GitHub automation
 
 - pushes to `main` update the GitHub Pages demo
-- pushing a version tag like `v0.2.10` creates or updates a GitHub release
+- pushing a version tag like `v0.2.23` creates or updates a GitHub release
 - the release workflow builds desktop packages and uploads them as release assets
 
 ## Manual repo setup

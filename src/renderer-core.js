@@ -1016,7 +1016,10 @@ function fitWrappedLines(text, maxChars, maxLines) {
 }
 
 function wrapText(text, maxChars) {
-  const words = String(text || "").split(/\s+/).filter(Boolean);
+  const words = String(text || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .flatMap((word) => splitLongToken(word, maxChars));
   if (!words.length) return [""];
   const lines = [];
   let current = words[0];
@@ -1031,6 +1034,24 @@ function wrapText(text, maxChars) {
   }
   lines.push(current);
   return lines;
+}
+
+function splitLongToken(token, maxChars) {
+  const clean = String(token || "");
+  if (!clean || clean.length <= maxChars) return [clean];
+  if (!clean.includes("-")) return [clean];
+  const parts = clean.split(/(?<=-)/).filter(Boolean);
+  const chunks = [];
+  for (const part of parts) {
+    if (part.length <= maxChars) {
+      chunks.push(part);
+      continue;
+    }
+    for (let index = 0; index < part.length; index += maxChars) {
+      chunks.push(part.slice(index, index + maxChars));
+    }
+  }
+  return chunks;
 }
 
 function maxCharsForWidth(width, fontSize, emphasize) {

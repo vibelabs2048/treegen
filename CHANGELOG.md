@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.24 - 2026-05-12
+
+- fixed stale version/example strings in the About modal, developer notes, and release workflow input description
+- added new backlog items documenting the remaining size-control semantics issues surfaced by the QA fit report
+- tightened generation 4 name wrapping so long hyphenated surnames break at hyphen boundaries before they can overflow the box
+
 ## 0.2.23 - 2026-05-12
 
 - added a non-publishing `Preview Validation` GitHub Actions workflow for pull requests and manual runs

@@ -51,3 +51,12 @@
 
 15. Add a safer pre-publish release path for the demo and desktop artifacts. The goal is to validate a production-like Pages build and release package before publishing to official GitHub Pages and tagged releases.
     Status: Done in v0.2.23
+
+16. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
+    Status: Open
+
+17. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
+    Status: Open
+
+18. Generation 4 long hyphenated surnames can still overflow even after the three-line fitter runs. Break those names at hyphen boundaries before shrinking.
+    Status: Done in v0.2.24

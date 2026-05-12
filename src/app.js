@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.23",
+    version: "0.2.24",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -1731,7 +1731,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function wrapText(text, maxChars) {
-    const words = String(text || "").split(/\s+/).filter(Boolean);
+    const words = String(text || "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .flatMap((word) => splitLongToken(word, maxChars));
     if (!words.length) return [""];
     const lines = [];
     let current = words[0];
@@ -1746,6 +1749,24 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
     lines.push(current);
     return lines;
+  }
+
+  function splitLongToken(token, maxChars) {
+    const clean = String(token || "");
+    if (!clean || clean.length <= maxChars) return [clean];
+    if (!clean.includes("-")) return [clean];
+    const parts = clean.split(/(?<=-)/).filter(Boolean);
+    const chunks = [];
+    for (const part of parts) {
+      if (part.length <= maxChars) {
+        chunks.push(part);
+        continue;
+      }
+      for (let index = 0; index < part.length; index += maxChars) {
+        chunks.push(part.slice(index, index + maxChars));
+      }
+    }
+    return chunks;
   }
 
   function generationLabel(generation) {
