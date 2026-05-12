@@ -1,6 +1,6 @@
 {
   "name": "treegen",
-  "version": "0.2.29",
+  "version": "0.2.30",
   "description": "Local family tree editor and deterministic export tool.",
   "author": {
     "name": "TreeGen",

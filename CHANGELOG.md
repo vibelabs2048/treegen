@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.30 - 2026-05-12
+
+- fixed the Windows desktop editing loop so text inputs are no longer re-hydrated on every keystroke while the user is typing
+- kept live preview, YAML sync, and renderer updates active during direct edits without resetting the active field
+- marked the Windows Display Name editing backlog item done after aligning browser and desktop edit behavior
+
 ## 0.2.29 - 2026-05-12
 
 - refined the downloads page so operating system and architecture are explicit

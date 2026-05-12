@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.29",
+    version: "0.2.30",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -199,48 +199,48 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
     elements.personName.addEventListener("input", () => {
       state.people[state.selectedId].name = elements.personName.value;
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personBirth.addEventListener("input", () => {
       state.people[state.selectedId].birthYear = sanitizeDateValue(elements.personBirth.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personDeath.addEventListener("input", () => {
       state.people[state.selectedId].deathYear = sanitizeDateValue(elements.personDeath.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personMarriage.addEventListener("input", () => {
       state.people[state.selectedId].marriageDate = sanitizeDateValue(elements.personMarriage.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personChildren.addEventListener("input", () => {
       state.people[state.selectedId].childrenNote = elements.personChildren.value;
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personNote.addEventListener("input", () => {
       state.people[state.selectedId].note = elements.personNote.value;
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personNameSizeOverride.addEventListener("input", () => {
       state.people[state.selectedId].nameSizeOverride = sanitizeOptionalNumber(elements.personNameSizeOverride.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personNameColorOverride.addEventListener("input", () => {
       state.people[state.selectedId].nameColorOverride = sanitizeOptionalColor(elements.personNameColorOverride.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personDateSizeOverride.addEventListener("input", () => {
       state.people[state.selectedId].dateSizeOverride = sanitizeOptionalNumber(elements.personDateSizeOverride.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.personDateColorOverride.addEventListener("input", () => {
       state.people[state.selectedId].dateColorOverride = sanitizeOptionalColor(elements.personDateColorOverride.value);
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
 
     elements.fontFamily.addEventListener("input", () => {
       state.settings.fontFamily = elements.fontFamily.value.trim() || DEFAULT_SETTINGS.fontFamily;
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.fauxBold.addEventListener("change", () => {
       state.settings.fauxBold = elements.fauxBold.checked;
@@ -270,11 +270,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     });
     elements.titleMain.addEventListener("input", () => {
       state.settings.titleBox.title = elements.titleMain.value;
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.titleSub.addEventListener("input", () => {
       state.settings.titleBox.subtitle = elements.titleSub.value;
-      syncAfterChange();
+      syncAfterChange({ rehydrate: false });
     });
     elements.boxNumberingEnabled.addEventListener("change", () => {
       state.settings.boxNumbering.enabled = elements.boxNumberingEnabled.checked;
@@ -470,8 +470,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     renderChart();
   }
 
-  function syncAfterChange() {
-    hydrateControls();
+  function syncAfterChange(options = {}) {
+    const { rehydrate = true } = options;
+    if (rehydrate) {
+      hydrateControls();
+    }
     refreshYamlEditor();
     renderChart();
   }

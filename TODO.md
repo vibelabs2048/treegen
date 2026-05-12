@@ -2,44 +2,41 @@
 
 ## Priority Order
 
-1. Refine the downloads page so OS and architecture are explicit. Show a selector for concrete targets such as Windows x64, macOS arm64, and Linux x64/AppImage (or whatever the actual release artifacts support), default it from the current device, and show only the links for the selected target.
-   Status: Done in v0.2.29
+1. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
+   Status: Done in v0.2.30
 
 2. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
    Status: Open
 
-3. Add a real downloads page to the hosted web version. It should be directly navigable, show Windows/macOS/Linux options with platform symbols, display the release version being downloaded, provide a clear way back to the editor/home screen, auto-detect the user's operating system, allow manual platform selection, and expose the GitHub-provided SHA-256 digest on demand.
+3. Add undo and redo for editing actions.
+   Status: Open
+
+4. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
+   Status: Open
+
+5. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
+   Status: Open
+
+6. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
+   Status: Open
+
+7. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
+   Status: Open
+
+8. Refine the downloads page so OS and architecture are explicit. Show a selector for concrete targets such as Windows x64, macOS arm64, and Linux x64/AppImage (or whatever the actual release artifacts support), default it from the current device, and show only the links for the selected target.
+   Status: Done in v0.2.29
+
+9. Add a real downloads page to the hosted web version. It should be directly navigable, show Windows/macOS/Linux options with platform symbols, display the release version being downloaded, provide a clear way back to the editor/home screen, auto-detect the user's operating system, allow manual platform selection, and expose the GitHub-provided SHA-256 digest on demand.
    Status: Done in v0.2.28
 
-4. Raise the preview zoom ceiling from 300 percent to 500 percent across the slider, numeric input, and zoom controls.
+10. Raise the preview zoom ceiling from 300 percent to 500 percent across the slider, numeric input, and zoom controls.
    Status: Done in v0.2.28
 
-4. Fix the release pipeline failure in the publish step.
+11. Fix the release pipeline failure in the publish step.
    Error:
    `Run gh release upload "$TAG" release-assets/* --clobber`
    `failed to run git: fatal: not a git repository (or any of the parent directories): .git`
    Status: Done and verified in GitHub Actions
-
-3. Generation 1, 2, and 3 child annotations should show full child name and full date.
-   Status: Done in v0.2.12
-
-4. Generation 1, 2, and 3 should use all three lines in the box for names with a larger default font.
-   Status: Done in v0.2.13
-
-5. Generation 4 should use all three lines in the box before overflowing. Ensure wrapping works correctly.
-   Status: Done in v0.2.14
-
-6. Generation 5 and 6 maternal-side birth/death dates should move to the left side of their tree line to avoid overlap.
-   Status: Done in v0.2.15
-
-7. Generation 5 and 6 should wrap to two lines instead of one to avoid overflow.
-   Status: Done in v0.2.16
-
-8. The SVG preview is still vulnerable to top-edge clipping. Add a general fit/margin solution so the full SVG is always shown.
-   Status: Done in v0.2.17
-
-9. Remove the line in the title box.
-   Status: Done in v0.2.9
 
 10. Refresh the shipped demo title-box subtitle so it no longer says "placeholder crest".
    Status: Done in v0.2.17
@@ -86,7 +83,7 @@
     Status: First pass done in v0.2.26
 
 24. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
-    Status: Open
+    Status: Done in v0.2.30
 
 25. Increase preview zoom controls to at least 300 percent everywhere, including the slider ceiling.
     Status: Done in v0.2.26
