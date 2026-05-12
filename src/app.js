@@ -96,6 +96,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
     importYamlFile: document.getElementById("import-yaml-file"),
+    importYamlChoose: document.getElementById("import-yaml-choose"),
     importYamlText: document.getElementById("import-yaml-text"),
     applyImport: document.getElementById("apply-import"),
     downloadExport: document.getElementById("download-export"),
@@ -104,6 +105,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     zoomIn: document.getElementById("zoom-in"),
     zoomPercent: document.getElementById("zoom-percent"),
   };
+  const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
 
   function init() {
     populateGenerationStyleSelect();
@@ -133,6 +135,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
       node.addEventListener("click", () => closeModal(node.getAttribute("data-close-modal")));
     });
     elements.importYamlFile.addEventListener("change", handleImportFile);
+    elements.importYamlChoose.addEventListener("click", chooseImportFile);
     elements.applyImport.addEventListener("click", applyImportModal);
     elements.downloadExport.addEventListener("click", handleExportAction);
 
@@ -860,8 +863,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
 
   async function downloadSvgFile() {
     const text = await requestRenderedArtifact("svg", buildRenderPayload("svg"), "text");
-    downloadBlob(new Blob([text], { type: "image/svg+xml;charset=utf-8" }), "family-tree-chart.svg");
-    setStatus("Downloaded SVG");
+    await saveOrDownload(new Blob([text], { type: "image/svg+xml;charset=utf-8" }), "family-tree-chart.svg", [
+      { name: "SVG", extensions: ["svg"] },
+    ]);
+    setStatus(desktopBridge ? "Saved SVG" : "Downloaded SVG");
   }
 
   async function downloadRasterFile() {
@@ -869,14 +874,18 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const extension = format === "jpeg" ? "jpg" : "png";
     const blob = await requestRenderedArtifact(format, buildRenderPayload(format), "blob");
     const { pixelWidth, pixelHeight } = getExportPixels();
-    downloadBlob(blob, `family-tree-chart-${pixelWidth}x${pixelHeight}.${extension}`);
-    setStatus(`Downloaded ${format.toUpperCase()} at ${pixelWidth}x${pixelHeight}`);
+    await saveOrDownload(blob, `family-tree-chart-${pixelWidth}x${pixelHeight}.${extension}`, [
+      { name: extension === "jpg" ? "JPG" : "PNG", extensions: [extension] },
+    ]);
+    setStatus(`${desktopBridge ? "Saved" : "Downloaded"} ${format.toUpperCase()} at ${pixelWidth}x${pixelHeight}`);
   }
 
   async function printPdf() {
     const blob = await requestRenderedArtifact("pdf", buildRenderPayload("pdf"), "blob");
-    downloadBlob(blob, "family-tree-chart.pdf");
-    setStatus("Downloaded PDF");
+    await saveOrDownload(blob, "family-tree-chart.pdf", [
+      { name: "PDF", extensions: ["pdf"] },
+    ]);
+    setStatus(desktopBridge ? "Saved PDF" : "Downloaded PDF");
   }
 
   function setStatus(text) {
@@ -902,6 +911,17 @@ import { renderYamlToSvg } from "./renderer-core.js";
     modal.hidden = true;
   }
 
+  async function chooseImportFile() {
+    if (desktopBridge) {
+      const result = await desktopBridge.openYamlFile();
+      if (!result || result.canceled) return;
+      elements.importYamlText.value = result.text || "";
+      setStatus(`Loaded YAML from ${basename(result.path || "selected file")}`);
+      return;
+    }
+    elements.importYamlFile.click();
+  }
+
   async function handleImportFile() {
     const [file] = elements.importYamlFile.files || [];
     if (!file) return;
@@ -920,22 +940,32 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   async function handleExportAction() {
-    const format = state.export.format;
-    if (format === "yaml") {
-      refreshYamlEditor();
-      downloadBlob(new Blob([state.yamlText], { type: "text/yaml;charset=utf-8" }), "family-tree.yaml");
-      setStatus("Downloaded YAML");
+    try {
+      const format = state.export.format;
+      if (format === "yaml") {
+        refreshYamlEditor();
+        await saveOrDownload(new Blob([state.yamlText], { type: "text/yaml;charset=utf-8" }), "family-tree.yaml", [
+          { name: "YAML", extensions: ["yaml", "yml"] },
+        ]);
+        setStatus(desktopBridge ? "Saved YAML" : "Downloaded YAML");
+        closeModal("export");
+        return;
+      }
+      if (format === "svg") {
+        await downloadSvgFile();
+      } else if (format === "pdf") {
+        await printPdf();
+      } else {
+        await downloadRasterFile();
+      }
       closeModal("export");
-      return;
+    } catch (error) {
+      if (error && error.message === "Save cancelled") {
+        setStatus("Save cancelled");
+        return;
+      }
+      setStatus(`Export error: ${error.message}`);
     }
-    if (format === "svg") {
-      await downloadSvgFile();
-    } else if (format === "pdf") {
-      await printPdf();
-    } else {
-      await downloadRasterFile();
-    }
-    closeModal("export");
   }
 
   async function handleCrestUpload(event) {
@@ -1021,6 +1051,22 @@ import { renderYamlToSvg } from "./renderer-core.js";
     return responseType === "blob" ? response.blob() : response.text();
   }
 
+  async function saveOrDownload(blob, filename, filters) {
+    if (!desktopBridge) {
+      downloadBlob(blob, filename);
+      return;
+    }
+    const bytes = Array.from(new Uint8Array(await blob.arrayBuffer()));
+    const result = await desktopBridge.saveFile({
+      suggestedName: filename,
+      filters,
+      bytes,
+    });
+    if (!result || result.canceled) {
+      throw new Error("Save cancelled");
+    }
+  }
+
   function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -1030,6 +1076,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
     anchor.click();
     anchor.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function basename(value) {
+    return String(value || "").split(/[\\/]/).pop() || "";
   }
 
   function loadImage(url) {
