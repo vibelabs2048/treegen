@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.5",
+    version: "0.2.6",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;
@@ -86,7 +86,6 @@ import { renderYamlToSvg } from "./renderer-core.js";
     titleEnabled: document.getElementById("title-enabled"),
     titleMain: document.getElementById("title-main"),
     titleSub: document.getElementById("title-sub"),
-    titleAuthor: document.getElementById("title-author"),
     boxNumberingEnabled: document.getElementById("box-numbering-enabled"),
     boxNumberingStart: document.getElementById("box-numbering-start"),
     titleCrest: document.getElementById("title-crest"),
@@ -218,10 +217,6 @@ import { renderYamlToSvg } from "./renderer-core.js";
     });
     elements.titleSub.addEventListener("input", () => {
       state.settings.titleBox.subtitle = elements.titleSub.value;
-      syncAfterChange();
-    });
-    elements.titleAuthor.addEventListener("input", () => {
-      state.settings.titleBox.author = elements.titleAuthor.value;
       syncAfterChange();
     });
     elements.boxNumberingEnabled.addEventListener("change", () => {
@@ -382,7 +377,6 @@ import { renderYamlToSvg } from "./renderer-core.js";
     elements.titleEnabled.checked = !!state.settings.titleBox.enabled;
     elements.titleMain.value = state.settings.titleBox.title || "";
     elements.titleSub.value = state.settings.titleBox.subtitle || "";
-    elements.titleAuthor.value = state.settings.titleBox.author || "";
     elements.boxNumberingEnabled.checked = !!state.settings.boxNumbering.enabled;
     elements.boxNumberingStart.value = String(state.settings.boxNumbering.startAt || 0);
     elements.crestStatus.textContent = state.settings.titleBox.crestDataUrl ? "Custom crest image loaded." : "Default crest from root surname.";

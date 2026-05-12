@@ -372,6 +372,34 @@ function drawNode(state, slot, node) {
 function fitHorizontalNodeText(node, style, name, noteLines) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
+  const baseNameChars = maxCharsForWidth(availableWidth, style.nameSize, true);
+  const baseNameLines = fitWrappedLines(name, baseNameChars, 3);
+  const baseNameLineHeight = Math.max(style.nameSize * 0.97, style.nameSize + 0.08);
+  const baseNoteSize = Math.max(3.5, style.dateSize * 0.82);
+  const baseNoteChars = maxCharsForWidth(availableWidth, baseNoteSize, false);
+  const baseWrappedNotes = noteLines.flatMap((line) => fitWrappedLines(line, baseNoteChars, 1)).slice(0, 2);
+  const baseNoteLineHeight = Math.max(baseNoteSize * 0.9, baseNoteSize + 0.04);
+  const baseNameNoteGap = baseNameLines.length && baseWrappedNotes.length ? 0.55 : 0;
+  const baseHeight =
+    baseNameLines.length * baseNameLineHeight +
+    baseWrappedNotes.length * baseNoteLineHeight +
+    baseNameNoteGap;
+  const baseWidest = Math.max(
+    ...baseNameLines.map((line) => estimateLineWidth(line, style.nameSize, true)),
+    ...(baseWrappedNotes.length ? baseWrappedNotes.map((line) => estimateLineWidth(line, baseNoteSize, false)) : [0])
+  );
+  if (baseHeight <= availableHeight && baseWidest <= availableWidth) {
+    return {
+      nameSize: style.nameSize,
+      noteSize: round2(baseNoteSize),
+      nameLines: baseNameLines,
+      noteLines: baseWrappedNotes,
+      nameLineHeight: baseNameLineHeight,
+      noteLineHeight: baseNoteLineHeight,
+      nameNoteGap: baseNameNoteGap,
+      height: baseHeight,
+    };
+  }
   for (let scale = 1; scale >= 0.38; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);
     const noteSize = round2(Math.max(3.5, style.dateSize * Math.min(scale, 0.82)));
@@ -418,34 +446,20 @@ function fitHorizontalNodeText(node, style, name, noteLines) {
 function fitBoxNameOnly(node, style, name, generation) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
-  if (generation === 4) {
-    for (let scale = 1; scale >= 0.34; scale -= 0.025) {
-      const nameSize = round2(style.nameSize * scale);
-      const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
-      const nameLines = fitWrappedLines(name, nameChars, 3);
-      const lineHeight = Math.max(nameSize * 0.96, nameSize + 0.06);
-      const height = nameLines.length * lineHeight;
-      const widest = Math.max(...nameLines.map((line) => estimateLineWidth(line, nameSize, true)));
-      if (height <= availableHeight && widest <= availableWidth) {
-        return { nameSize, nameLines, lineHeight, height };
-      }
-    }
+  const baseChars = maxCharsForWidth(availableWidth, style.nameSize, true);
+  const baseLines = fitWrappedLines(name, baseChars, 3);
+  const baseLineHeight = Math.max(style.nameSize * 0.96, style.nameSize + 0.06);
+  const baseHeight = baseLines.length * baseLineHeight;
+  const baseWidest = Math.max(...baseLines.map((line) => estimateLineWidth(line, style.nameSize, true)));
+  if (baseHeight <= availableHeight && baseWidest <= availableWidth) {
+    return { nameSize: style.nameSize, nameLines: baseLines, lineHeight: baseLineHeight, height: baseHeight };
   }
-  const maxWrapLines = generation === 4 ? 3 : 2;
-  const minSingleScale = generation === 4 ? 0.38 : 0.28;
-  for (let scale = 1; scale >= minSingleScale; scale -= 0.025) {
-    const nameSize = round2(style.nameSize * scale);
-    const lineHeight = Math.max(nameSize * 0.92, nameSize - 0.08);
-    const widest = estimateLineWidth(name, nameSize, true);
-    if (lineHeight <= availableHeight && widest <= availableWidth) {
-      return { nameSize, nameLines: [name], lineHeight, height: lineHeight };
-    }
-  }
+  const maxWrapLines = 3;
   for (let scale = 1; scale >= 0.38; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
     const nameLines = fitWrappedLines(name, nameChars, maxWrapLines);
-    const lineHeight = Math.max(nameSize * 0.92, nameSize - 0.08);
+    const lineHeight = Math.max(nameSize * 0.96, nameSize + 0.06);
     const height = nameLines.length * lineHeight;
     const widest = Math.max(...nameLines.map((line) => estimateLineWidth(line, nameSize, true)));
     if (height <= availableHeight && widest <= availableWidth) {
@@ -578,9 +592,9 @@ function relationLabel(path) {
 
 function drawTitleBox(state) {
   const x = 6;
-  const y = PAGE_HEIGHT_PT - 78;
+  const y = PAGE_HEIGHT_PT - 72;
   const width = 176;
-  const height = 60;
+  const height = 54;
   const notes = compactLines(state.settings.titleBox.subtitle || "");
   const parts = [];
   parts.push(`<g>`);
@@ -591,17 +605,36 @@ function drawTitleBox(state) {
   } else {
     parts.push(drawDefaultCrest(x + 6, y + 6, 28, state.people.root?.name));
   }
-  parts.push(text(x + 42, y + 16, state.settings.titleBox.title || "Family Tree", "#314A9C", 7.5, true, "start", state.settings));
-  parts.push(`<line x1="${x + 42}" y1="${y + 20}" x2="${x + width - 6}" y2="${y + 20}" stroke="#303030" stroke-width="1.15"/>`);
-  notes.forEach((lineText, index) => {
-    parts.push(text(x + 42, y + 32 + index * 8, lineText, "#000000", 4.6, false, "start", state.settings));
+  const titleLayout = fitTitleText(state.settings.titleBox.title || "Family Tree", width - 48, 7.5, 3);
+  titleLayout.lines.forEach((lineText, index) => {
+    parts.push(text(x + 42, y + 14 + index * titleLayout.lineHeight, lineText, "#314A9C", titleLayout.fontSize, true, "start", state.settings));
   });
-  const author = state.settings.titleBox.author || "";
-  if (author) {
-    parts.push(text(x + 42, y + height - 6, author, "#5f5649", 4.2, false, "start", state.settings));
-  }
+  parts.push(`<line x1="${x + 42}" y1="${y + 20}" x2="${x + width - 6}" y2="${y + 20}" stroke="#303030" stroke-width="1.15"/>`);
+  const subtitleLayout = fitTitleText(notes.join(" "), width - 48, 4.6, 3);
+  subtitleLayout.lines.forEach((lineText, index) => {
+    parts.push(text(x + 42, y + 29 + index * subtitleLayout.lineHeight, lineText, "#000000", subtitleLayout.fontSize, false, "start", state.settings));
+  });
   parts.push(`</g>`);
   return parts.join("");
+}
+
+function fitTitleText(textValue, width, preferredSize, maxLines) {
+  const clean = sanitizeText(textValue);
+  if (!clean) return { lines: [], fontSize: preferredSize, lineHeight: preferredSize + 0.6 };
+  for (let fontSize = preferredSize; fontSize >= 3.8; fontSize -= 0.3) {
+    const chars = maxCharsForWidth(width, fontSize, true);
+    const lines = fitWrappedLines(clean, chars, maxLines);
+    const lineHeight = Math.max(fontSize * 0.95, fontSize + 0.2);
+    const widest = Math.max(...lines.map((line) => estimateLineWidth(line, fontSize, true)));
+    if (widest <= width) {
+      return { lines, fontSize: round2(fontSize), lineHeight };
+    }
+  }
+  return {
+    lines: fitWrappedLines(clean, maxCharsForWidth(width, 3.8, true), maxLines),
+    fontSize: 3.8,
+    lineHeight: 4.1,
+  };
 }
 
 function line(x1, y1, x2, y2) {

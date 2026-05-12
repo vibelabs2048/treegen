@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.6 - 2026-05-11
+
+- fixed Windows desktop rebuild by running Electron build tooling through `cmd.exe` on Windows runners
+- changed box fitting to prefer wrapping names to up to three lines before shrinking the font
+- simplified the rendered title box to title, subtitle, and optional crest
+- added browser editing for marriage dates and kept deterministic export checks for the updated layout
+
 ## 0.2.5 - 2026-05-11
 
 - moved generation 0-3 dates outside the boxes with smaller external labels
