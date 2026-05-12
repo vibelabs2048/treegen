@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.5 - 2026-05-11
+
+- moved generation 0-3 dates outside the boxes with smaller external labels
+- added marriage dates above spouse connector lines with generation-aware formatting
+- switched blank/default people from `?` markers to empty values
+- added marriage-date editing in the browser UI and YAML support for `birth`, `death`, and `marriageDate`
+
 ## 0.2.4 - 2026-05-11
 
 - changed the demo family to use longer Italian-style names and surnames

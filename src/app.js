@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.4",
+    version: "0.2.5",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;
@@ -60,6 +60,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     personName: document.getElementById("person-name"),
     personBirth: document.getElementById("person-birth"),
     personDeath: document.getElementById("person-death"),
+    personMarriage: document.getElementById("person-marriage"),
     personChildren: document.getElementById("person-children"),
     personNote: document.getElementById("person-note"),
     fontFamily: document.getElementById("font-family"),
@@ -164,11 +165,15 @@ import { renderYamlToSvg } from "./renderer-core.js";
       syncAfterChange();
     });
     elements.personBirth.addEventListener("input", () => {
-      state.people[state.selectedId].birthYear = sanitizeYear(elements.personBirth.value);
+      state.people[state.selectedId].birthYear = sanitizeDateValue(elements.personBirth.value);
       syncAfterChange();
     });
     elements.personDeath.addEventListener("input", () => {
-      state.people[state.selectedId].deathYear = sanitizeYear(elements.personDeath.value);
+      state.people[state.selectedId].deathYear = sanitizeDateValue(elements.personDeath.value);
+      syncAfterChange();
+    });
+    elements.personMarriage.addEventListener("input", () => {
+      state.people[state.selectedId].marriageDate = sanitizeDateValue(elements.personMarriage.value);
       syncAfterChange();
     });
     elements.personChildren.addEventListener("input", () => {
@@ -293,7 +298,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function clearTree() {
-    if (!window.confirm("Clear the whole tree and replace all values with blanks and ? markers?")) return;
+    if (!window.confirm("Clear the whole tree and replace all values with blanks?")) return;
     state.people = buildBlankPeople();
     state.selectedId = "root";
     hydrateControls();
@@ -310,6 +315,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
         name: demoNameForSlot(slot),
         birthYear: years.birthYear,
         deathYear: years.deathYear,
+        marriageDate: sampleMarriageDate(slot),
         childrenNote: sampleChildrenNote(slot),
         note: sampleNoteForSlot(slot),
       };
@@ -321,9 +327,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const people = {};
     for (const slot of SLOT_DEFINITIONS) {
       people[slot.id] = {
-        name: "?",
-        birthYear: "?",
-        deathYear: "?",
+        name: "",
+        birthYear: "",
+        deathYear: "",
+        marriageDate: "",
         childrenNote: "",
         note: "",
       };
@@ -357,6 +364,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     elements.personName.value = person.name;
     elements.personBirth.value = person.birthYear;
     elements.personDeath.value = person.deathYear;
+    elements.personMarriage.value = person.marriageDate || "";
     elements.personChildren.value = person.childrenNote;
     elements.personNote.value = person.note || "";
     elements.personChildren.disabled = slot.generation >= 5;
@@ -364,6 +372,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
       elements.personChildren.value = "";
     }
     elements.personNote.disabled = slot.generation >= 3;
+    elements.personMarriage.disabled = !(slot.generation > 0 && slot.generation < 5 && slot.path[slot.path.length - 1] === "mother");
+    if (elements.personMarriage.disabled) {
+      elements.personMarriage.value = "";
+    }
     elements.fontFamily.value = state.settings.fontFamily;
     elements.fauxBold.checked = !!state.settings.fauxBold;
     hydrateGenerationStyleControls();
@@ -463,14 +475,15 @@ import { renderYamlToSvg } from "./renderer-core.js";
       };
     }
 
-    const nextPeople = buildDefaultPeople();
+    const nextPeople = buildBlankPeople();
     const importedPeople = data.people || {};
     for (const slot of SLOT_DEFINITIONS) {
       const incoming = importedPeople[slot.id] || {};
       nextPeople[slot.id] = {
-        name: typeof incoming.name === "string" && incoming.name.trim() ? incoming.name.trim() : nextPeople[slot.id].name,
-        birthYear: sanitizeYear(incoming.birthYear ?? "?"),
-        deathYear: sanitizeYear(incoming.deathYear ?? "?"),
+        name: sanitizeText(incoming.name ?? nextPeople[slot.id].name),
+        birthYear: sanitizeDateValue(incoming.birth ?? incoming.birthYear ?? nextPeople[slot.id].birthYear),
+        deathYear: sanitizeDateValue(incoming.death ?? incoming.deathYear ?? nextPeople[slot.id].deathYear),
+        marriageDate: sanitizeDateValue(incoming.marriageDate ?? nextPeople[slot.id].marriageDate),
         childrenNote: typeof incoming.childrenNote === "string" ? incoming.childrenNote : nextPeople[slot.id].childrenNote,
         note: typeof incoming.note === "string" ? incoming.note : nextPeople[slot.id].note,
       };
@@ -1266,8 +1279,12 @@ import { renderYamlToSvg } from "./renderer-core.js";
     syncAfterChange();
   }
 
-  function sanitizeYear(value) {
-    return String(value ?? "").replace(/[^0-9?]/g, "").slice(0, 8);
+  function sanitizeText(value) {
+    return String(value ?? "").replace(/\s+/g, " ").trim();
+  }
+
+  function sanitizeDateValue(value) {
+    return sanitizeText(value);
   }
 
   function normalizeColor(value) {
@@ -1332,9 +1349,28 @@ import { renderYamlToSvg } from "./renderer-core.js";
 
   function sampleYears(slot) {
     const baseBirth = 1952 - slot.generation * 28;
-    const birthYear = slot.index % 11 === 0 ? "?" : String(baseBirth + slot.index * 2);
-    const deathYear = birthYear === "?" ? "?" : String(Number(birthYear) + 68 + ((slot.index + slot.generation) % 10));
-    return { birthYear, deathYear };
+    const birthYearNumber = baseBirth + slot.index * 2;
+    const deathYearNumber = birthYearNumber + 68 + ((slot.index + slot.generation) % 10);
+    if (slot.generation <= 2) {
+      return {
+        birthYear: formatItalianFullDate(birthYearNumber, slot.index + slot.generation + 2),
+        deathYear: formatItalianFullDate(deathYearNumber, slot.index + slot.generation + 9),
+      };
+    }
+    return { birthYear: String(birthYearNumber), deathYear: String(deathYearNumber) };
+  }
+
+  function sampleMarriageDate(slot) {
+    if (!(slot.generation > 0 && slot.generation < 5 && slot.path[slot.path.length - 1] === "mother")) return "";
+    const childPath = slot.path.slice(0, -1);
+    const childSlot = getSlot(childPath.length ? childPath.join("_") : "root");
+    const childBirth = sampleYears(childSlot).birthYear;
+    if (slot.generation <= 2) {
+      const year = extractYear(childBirth) || String(1935 - slot.generation * 18 + slot.index);
+      return formatItalianFullDate(Number(year) - 2, slot.index + slot.generation + 5);
+    }
+    const year = extractYear(childBirth) || String(1880 + slot.index * 2 + slot.generation);
+    return year ? String(Number(year) - 2) : "";
   }
 
   function sampleChildrenNote(slot) {
@@ -1346,14 +1382,15 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const childYears = sampleYears(childSlot);
     const count = slot.index % 10;
     if (count === 0) return "";
-    const childBirth = childYears.birthYear === "?" ? "?" : Number(childYears.birthYear);
+    const childBirthYear = extractYear(childYears.birthYear);
+    const childBirth = childBirthYear ? Number(childBirthYear) : null;
     const children = [];
     for (let i = 0; i < count; i += 1) {
       if (i === 0) {
         children.push(`${demoNameForSlot(childSlot)} ${formatDates(childYears.birthYear, childYears.deathYear)}`);
       } else {
-        const birth = childBirth === "?" ? "?" : String(childBirth - 4 + i * 3);
-        const death = birth === "?" ? "?" : String(Number(birth) + 70 + (i % 5));
+        const birth = childBirth == null ? "" : String(childBirth - 4 + i * 3);
+        const death = birth ? String(Number(birth) + 70 + (i % 5)) : "";
         const siblingName = i % 2 === 0 ? siblingNameForSlot(childSlot, "older") : siblingNameForSlot(childSlot, "younger");
         children.push(`${siblingName} ${formatDates(birth, death)}`);
       }
@@ -1362,9 +1399,9 @@ import { renderYamlToSvg } from "./renderer-core.js";
   }
 
   function sampleNoteForSlot(slot) {
-    if (slot.generation === 0) return "Primary subject";
-    if (slot.generation === 1) return slot.path[0] === "father" ? "Paternal line" : "Maternal line";
-    if (slot.generation === 2 && slot.index % 2 === 0) return "Residence uncertain";
+    if (slot.generation === 0) return "Soggetto principale";
+    if (slot.generation === 1) return slot.path[0] === "father" ? "Linea paterna" : "Linea materna";
+    if (slot.generation === 2 && slot.index % 2 === 0) return "Residenza incerta";
     return "";
   }
 
@@ -1514,16 +1551,28 @@ import { renderYamlToSvg } from "./renderer-core.js";
     imageNode.setAttribute("preserveAspectRatio", "xMidYMid meet");
   }
 
+  function extractYear(value) {
+    const matches = sanitizeDateValue(value).match(/\b(?:1[5-9]\d{2}|20\d{2}|21\d{2})\b/g);
+    return matches && matches.length ? matches[matches.length - 1] : "";
+  }
+
   function formatDates(birthYear, deathYear) {
-    const birth = sanitizeYear(birthYear);
-    const death = sanitizeYear(deathYear);
-    if (!birth && !death) return "?";
-    return `(${birth || "?"}-${death || "?"})`;
+    const birth = extractYear(birthYear) || sanitizeDateValue(birthYear);
+    const death = extractYear(deathYear) || sanitizeDateValue(deathYear);
+    if (!birth && !death) return "";
+    if (birth && death) return `(${birth}-${death})`;
+    return `(${birth || death})`;
   }
 
   function displayName(name) {
-    const text = String(name || "").trim();
-    return text || "?";
+    return sanitizeText(name);
+  }
+
+  function formatItalianFullDate(year, seed) {
+    const months = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+    const day = ((seed * 7) % 27) + 1;
+    const month = months[(seed * 5) % months.length];
+    return `${day} ${month} ${year}`;
   }
 
   function wrapText(text, maxChars) {
@@ -1631,11 +1680,17 @@ import { renderYamlToSvg } from "./renderer-core.js";
     for (const slot of SLOT_DEFINITIONS) {
       const person = data.people[slot.id] || {};
       lines.push(`  ${slot.id}:`);
-      lines.push(`    name: ${quoteYaml(person.name || "?")}`);
-      lines.push(`    birthYear: ${quoteYaml(person.birthYear || "?")}`);
-      lines.push(`    deathYear: ${quoteYaml(person.deathYear || "?")}`);
+      lines.push(`    name: ${quoteYaml(person.name || "")}`);
+      lines.push(`    birth: ${quoteYaml(person.birthYear || "")}`);
+      lines.push(`    death: ${quoteYaml(person.deathYear || "")}`);
+      if (person.marriageDate) {
+        lines.push(`    marriageDate: ${quoteYaml(person.marriageDate)}`);
+      }
       if (person.childrenNote) {
         lines.push(`    childrenNote: ${quoteYaml(person.childrenNote)}`);
+      }
+      if (person.note) {
+        lines.push(`    note: ${quoteYaml(person.note)}`);
       }
     }
     return lines.join("\n");

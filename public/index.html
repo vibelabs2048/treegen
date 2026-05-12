@@ -17,7 +17,7 @@
           <div>
             <div class="brand-title-row">
               <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.4</span>
+              <span id="app-version-badge" class="version-badge">v0.2.5</span>
             </div>
             <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
           </div>
@@ -164,14 +164,18 @@
             </label>
             <div class="field-row">
               <label>
-                Birth Year
-                <input id="person-birth" type="text" inputmode="numeric" autocomplete="off">
+                Birth
+                <input id="person-birth" type="text" autocomplete="off" placeholder="14 marzo 1926">
               </label>
               <label>
-                Death Year
-                <input id="person-death" type="text" inputmode="numeric" autocomplete="off">
+                Death
+                <input id="person-death" type="text" autocomplete="off" placeholder="9 novembre 1996">
               </label>
             </div>
+            <label>
+              Marriage
+              <input id="person-marriage" type="text" autocomplete="off" placeholder="3 giugno 1948">
+            </label>
             <label>
               Child Annotation
               <textarea id="person-children" rows="4"></textarea>
@@ -180,7 +184,7 @@
               Note
               <textarea id="person-note" rows="3"></textarea>
             </label>
-            <p class="help-text">Use one child per line. This appears as a floating list beside the mother's box. Box notes are stored in YAML as `note:` and currently render inside the box for generations 0-2.</p>
+            <p class="help-text">Use one child per line. Marriage is stored in YAML as `marriageDate:` on the mother-side record for that couple. Box notes are stored in YAML as `note:` and render inside the box for generations 0-2.</p>
           </section>
 
         </aside>
@@ -280,7 +284,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.4</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.5</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-11</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p id="about-release-link-wrap"><strong>Latest release:</strong> <a id="about-release-link" href="#" target="_blank" rel="noopener noreferrer">Open releases page</a></p>

@@ -69,8 +69,10 @@ export function renderStateToSvg(state) {
           fatherNode,
           motherNode,
           noteText,
+          state.people[fatherSlot.id],
+          state.people[motherSlot.id],
           getGenerationStyle(state, motherSlot.generation),
-          layout.rowSteps[motherSlot.generation]
+          state.settings
         )
       );
     }
@@ -124,9 +126,10 @@ function normalizeState(data, overrides) {
   for (const slot of slotDefinitions) {
     const incoming = importedPeople[slot.id] || {};
     people[slot.id] = {
-      name: typeof incoming.name === "string" && incoming.name.trim() ? incoming.name.trim() : slot.label,
-      birthYear: sanitizeYear(incoming.birthYear ?? "?"),
-      deathYear: sanitizeYear(incoming.deathYear ?? "?"),
+      name: sanitizeText(incoming.name),
+      birthYear: sanitizeDateValue(incoming.birth ?? incoming.birthYear),
+      deathYear: sanitizeDateValue(incoming.death ?? incoming.deathYear),
+      marriageDate: sanitizeDateValue(incoming.marriageDate),
       childrenNote: typeof incoming.childrenNote === "string" ? incoming.childrenNote : "",
       note: typeof incoming.note === "string" ? incoming.note : "",
     };
@@ -140,11 +143,21 @@ function buildLayout(slotDefinitions, state) {
     const childGeneration = generation - 1;
     const pairCount = 2 ** childGeneration;
     const pairWidth = CHART_WIDTH / pairCount;
-      const noteWidth = generation === 4 ? Math.max(36, pairWidth * 0.42) : Math.max(26, pairWidth / 2 - 8);
+    const noteWidth = generation === 4 ? Math.max(36, pairWidth * 0.42) : Math.max(26, pairWidth / 2 - 8);
     let maxHeight = 0;
+    let maxReserve = 0;
     for (let index = 0; index < pairCount; index += 1) {
+      const fatherSlot = getSlotByGenerationIndex(slotDefinitions, generation, index * 2);
       const motherSlot = getSlotByGenerationIndex(slotDefinitions, generation, index * 2 + 1);
+      const fatherPerson = state.people[fatherSlot.id];
+      const motherPerson = state.people[motherSlot.id];
       const childLines = compactLines(state.people[motherSlot.id]?.childrenNote || "").slice(0, 9);
+      const familyReserve = Math.max(
+        getExternalDateReserve(fatherPerson, generation, getGenerationStyle(state, generation)),
+        getExternalDateReserve(motherPerson, generation, getGenerationStyle(state, generation)),
+        getMarriageReserve(motherPerson?.marriageDate, generation, getGenerationStyle(state, generation))
+      );
+      maxReserve = Math.max(maxReserve, familyReserve);
       if (!childLines.length) continue;
       const titleText = `${childLines.length} ${childLines.length === 1 ? "Child" : "Children"}`;
       const preferredChildSize = generation === 4
@@ -153,10 +166,10 @@ function buildLayout(slotDefinitions, state) {
       const noteLayout = layoutAnnotationText(childLines, noteWidth, preferredChildSize, titleText, 1000);
       maxHeight = Math.max(maxHeight, noteLayout.height);
     }
-    if (maxHeight > 0) {
-      const dateReserve = generation >= 4 ? 12 : 0;
-      rowSteps[generation] = Math.max(rowSteps[generation], Math.ceil(maxHeight + 10 + dateReserve));
-    }
+    rowSteps[generation] = Math.max(
+      rowSteps[generation],
+      Math.ceil(maxReserve + (maxHeight > 0 ? maxHeight + 10 : 8))
+    );
   }
 
   const rowTops = {};
@@ -196,18 +209,42 @@ function buildLayout(slotDefinitions, state) {
   return { nodes: positions, rowSteps };
 }
 
-function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, generationStyle, rowStep) {
+function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, fatherPerson, motherPerson, generationStyle, settings) {
   const parts = [];
-  const joinY = Math.max(fatherNode.y + fatherNode.height, motherNode.y + motherNode.height) + 4;
-  const midX = (fatherNode.centerX + motherNode.centerX) / 2;
+  const fatherAnchorX = getConnectorAnchorX(fatherNode, "father");
+  const motherAnchorX = getConnectorAnchorX(motherNode, "mother");
+  const parentBottom = Math.max(fatherNode.y + fatherNode.height, motherNode.y + motherNode.height);
+  const parentGeneration = motherNode.generation;
+  const marriageReserve = getMarriageReserve(motherPerson?.marriageDate, parentGeneration, generationStyle);
+  const fatherDateReserve = getExternalDateReserve(fatherPerson, parentGeneration, generationStyle);
+  const motherDateReserve = getExternalDateReserve(motherPerson, parentGeneration, generationStyle);
+  const pairReserve = Math.max(fatherDateReserve, motherDateReserve, marriageReserve);
+  const joinY = parentBottom + pairReserve + 4;
+  const midX = (fatherAnchorX + motherAnchorX) / 2;
   const childJoinY = childNode.y - 4;
 
-  parts.push(line(fatherNode.centerX, fatherNode.y + fatherNode.height, fatherNode.centerX, joinY));
-  parts.push(line(motherNode.centerX, motherNode.y + motherNode.height, motherNode.centerX, joinY));
-  parts.push(line(fatherNode.centerX, joinY, motherNode.centerX, joinY));
+  parts.push(line(fatherAnchorX, fatherNode.y + fatherNode.height, fatherAnchorX, joinY));
+  parts.push(line(motherAnchorX, motherNode.y + motherNode.height, motherAnchorX, joinY));
+  parts.push(line(fatherAnchorX, joinY, motherAnchorX, joinY));
   parts.push(line(midX, joinY, midX, childJoinY));
   parts.push(line(midX, childJoinY, childNode.centerX, childJoinY));
   parts.push(line(childNode.centerX, childJoinY, childNode.centerX, childNode.y));
+
+  const marriageLabel = formatMarriageForGeneration(motherPerson?.marriageDate, parentGeneration, generationStyle);
+  if (marriageLabel.text) {
+    parts.push(
+      text(
+        midX,
+        joinY - 1.8,
+        marriageLabel.text,
+        generationStyle.dateColor,
+        marriageLabel.fontSize,
+        false,
+        "middle",
+        settings || DEFAULT_SETTINGS
+      )
+    );
+  }
 
   const childLines = compactLines(noteText).slice(0, 9);
   if (!childLines.length) {
@@ -222,19 +259,18 @@ function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, g
   const laneLeft = useFullPairWidth ? midX + 8 : midX + 4;
   const laneRight = useFullPairWidth ? pairRight - 4 : pairRight - 2;
   const noteWidth = Math.max(24, useFullPairWidth ? Math.min(pairWidth * 0.39, laneRight - laneLeft) : Math.min(92, laneRight - laneLeft));
-  const dateReserve = motherNode.generation >= 4 ? 12 : 0;
-  const availableHeight = Math.max(10, childNode.y - (motherNode.y + motherNode.height + dateReserve + 6));
+  const availableHeight = Math.max(10, childNode.y - (motherNode.y + motherNode.height + pairReserve + 6));
   const preferredChildSize = motherNode.generation === 4
     ? Math.max(2.6, generationStyle.childrenSize - 2.8)
     : generationStyle.childrenSize;
   const noteLayout = layoutAnnotationText(childLines, noteWidth, preferredChildSize, titleText, availableHeight);
   const noteX = clamp(motherNode.x + 2, laneLeft, Math.max(laneLeft, laneRight - noteLayout.width));
-  const noteY = motherNode.y + motherNode.height + 4.2 + dateReserve;
+  const noteY = motherNode.y + motherNode.height + 4.2 + pairReserve;
   const titleY = noteY + noteLayout.fontSize;
   parts.push(text(noteX, titleY, titleText, generationStyle.childrenColor, noteLayout.fontSize, true, "start"));
   parts.push(`<line x1="${noteX}" y1="${round2(titleY + 2)}" x2="${round2(noteX + noteLayout.width)}" y2="${round2(titleY + 2)}" stroke="#303030" stroke-width="1.05"/>`);
   noteLayout.lines.forEach((lineText, idx) => {
-    const y = titleY + 2.7 + (idx + 1) * noteLayout.lineHeight;
+    const y = titleY + 1.8 + (idx + 1) * noteLayout.lineHeight;
     parts.push(text(noteX + 1, y, lineText, generationStyle.childrenColor, noteLayout.fontSize, false, "start"));
   });
   return `<g>${parts.join("")}</g>`;
@@ -250,7 +286,7 @@ function drawNode(state, slot, node) {
   );
 
   const name = displayName(person.name);
-  const dates = formatDates(person.birthYear, person.deathYear);
+  const dateLines = getExternalDateLines(person, slot.generation);
   if (node.verticalText) {
     const layout = fitVerticalNodeText(node, style, name);
     parts.push(`<g transform="translate(${round2(node.centerX)}, ${round2(node.centerY)}) rotate(-90)">`);
@@ -259,8 +295,7 @@ function drawNode(state, slot, node) {
       parts.push(text(0, startY + idx * layout.lineHeight, lineText, style.nameColor, layout.nameSize, true, "middle", state.settings));
     });
     parts.push(`</g>`);
-    const verticalDateLines = splitDateLines(person.birthYear, person.deathYear);
-    verticalDateLines.forEach((lineText, idx) => {
+    dateLines.forEach((lineText, idx) => {
       parts.push(
         text(
           node.centerX,
@@ -280,9 +315,8 @@ function drawNode(state, slot, node) {
     layout.nameLines.forEach((lineText, idx) => {
       parts.push(text(node.centerX, startY + idx * layout.lineHeight, lineText, style.nameColor, layout.nameSize, true, "middle", state.settings));
     });
-    const lateDateLines = splitDateLines(person.birthYear, person.deathYear);
     const lateDateSize = slot.generation >= 5 ? Math.max(3.1, style.dateSize - 1.6) : Math.max(3.7, style.dateSize - 1.4);
-    lateDateLines.forEach((lineText, idx) => {
+    dateLines.forEach((lineText, idx) => {
       parts.push(
         text(
           node.centerX,
@@ -298,25 +332,31 @@ function drawNode(state, slot, node) {
     });
   } else {
     const noteLines = slot.generation <= 2 ? compactLines(person.note || "").slice(0, 2) : [];
-    const layout = fitHorizontalNodeText(node, style, name, dates, noteLines);
+    const layout = fitHorizontalNodeText(node, style, name, noteLines);
     let y = node.centerY - layout.height / 2 + layout.nameSize * 0.76;
     layout.nameLines.forEach((lineText) => {
       parts.push(text(node.centerX, y, lineText, style.nameColor, layout.nameSize, true, "middle", state.settings));
       y += layout.nameLineHeight;
     });
-    if (layout.nameLines.length && layout.dateLines.length) {
-      y += layout.nameDateGap || 0;
-    }
-    layout.dateLines.forEach((lineText) => {
-      parts.push(text(node.centerX, y, lineText, style.dateColor, layout.dateSize, false, "middle", state.settings));
-      y += layout.dateLineHeight;
-    });
-    if (layout.dateLines.length && layout.noteLines.length) {
-      y += layout.dateNoteGap || 0;
-    }
+    if (layout.nameLines.length && layout.noteLines.length) y += layout.nameNoteGap || 0;
     layout.noteLines.forEach((lineText) => {
       parts.push(text(node.centerX, y, lineText, "#000000", layout.noteSize, false, "middle", state.settings));
       y += layout.noteLineHeight;
+    });
+    const externalDateLayout = getExternalDateLayout(node, style, slot, person);
+    externalDateLayout.lines.forEach((lineText, idx) => {
+      parts.push(
+        text(
+          externalDateLayout.x,
+          externalDateLayout.y + idx * externalDateLayout.lineHeight,
+          lineText,
+          style.dateColor,
+          externalDateLayout.fontSize,
+          false,
+          externalDateLayout.anchor,
+          state.settings
+        )
+      );
     });
   }
 
@@ -329,64 +369,48 @@ function drawNode(state, slot, node) {
   return parts.join("");
 }
 
-function fitHorizontalNodeText(node, style, name, dates, noteLines) {
+function fitHorizontalNodeText(node, style, name, noteLines) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
   for (let scale = 1; scale >= 0.38; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);
-    const dateSize = round2((style.syncNameDate ? style.nameSize : style.dateSize) * Math.min(scale, 0.92));
-    const noteSize = round2(Math.max(3.5, dateSize - 0.8));
+    const noteSize = round2(Math.max(3.5, style.dateSize * Math.min(scale, 0.82)));
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
-    const dateChars = maxCharsForWidth(availableWidth, dateSize, false);
     const noteChars = maxCharsForWidth(availableWidth, noteSize, false);
     const nameLines = fitWrappedLines(name, nameChars, 3);
-    const dateLines = fitWrappedLines(dates, dateChars, 1);
     const wrappedNotes = noteLines.flatMap((line) => fitWrappedLines(line, noteChars, 1)).slice(0, 2);
     const nameLineHeight = Math.max(nameSize * 0.97, nameSize + 0.08);
-    const dateLineHeight = Math.max(dateSize * 0.95, dateSize + 0.06);
     const noteLineHeight = Math.max(noteSize * 0.9, noteSize + 0.04);
-    const nameDateGap = nameLines.length && dateLines.length ? 0.7 : 0;
-    const dateNoteGap = dateLines.length && wrappedNotes.length ? 0.55 : 0;
+    const nameNoteGap = nameLines.length && wrappedNotes.length ? 0.55 : 0;
     const height =
       nameLines.length * nameLineHeight +
-      dateLines.length * dateLineHeight +
       wrappedNotes.length * noteLineHeight +
-      nameDateGap +
-      dateNoteGap;
+      nameNoteGap;
     const widest = Math.max(
       ...nameLines.map((line) => estimateLineWidth(line, nameSize, true)),
-      ...dateLines.map((line) => estimateLineWidth(line, dateSize, false)),
       ...(wrappedNotes.length ? wrappedNotes.map((line) => estimateLineWidth(line, noteSize, false)) : [0])
     );
     if (height <= availableHeight && widest <= availableWidth) {
       return {
         nameSize,
-        dateSize,
         noteSize,
         nameLines,
-        dateLines,
         noteLines: wrappedNotes,
         nameLineHeight,
-        dateLineHeight,
         noteLineHeight,
-        nameDateGap,
-        dateNoteGap,
+        nameNoteGap,
         height,
       };
     }
   }
   return {
     nameSize: 4.2,
-    dateSize: 3.8,
     noteSize: 3.3,
     nameLines: fitWrappedLines(name, maxCharsForWidth(availableWidth, 4.2, true), 3),
-    dateLines: [ellipsize(dates, maxCharsForWidth(availableWidth, 3.8, false))],
     noteLines: noteLines.slice(0, 1).map((line) => ellipsize(line, maxCharsForWidth(availableWidth, 3.3, false))),
     nameLineHeight: 4.0,
-    dateLineHeight: 3.7,
     noteLineHeight: 3.2,
-    nameDateGap: 0.7,
-    dateNoteGap: noteLines.length ? 0.55 : 0,
+    nameNoteGap: noteLines.length ? 0.55 : 0,
     height: availableHeight,
   };
 }
@@ -609,15 +633,7 @@ function slotCornerRadius(slot) {
 }
 
 function displayName(name) {
-  const text = String(name || "").trim();
-  return text || "?";
-}
-
-function formatDates(birthYear, deathYear) {
-  const birth = sanitizeYear(birthYear);
-  const death = sanitizeYear(deathYear);
-  if (!birth && !death) return "?";
-  return `(${birth || "?"}-${death || "?"})`;
+  return sanitizeText(name);
 }
 
 function compactLines(text) {
@@ -627,9 +643,12 @@ function compactLines(text) {
     .filter(Boolean);
 }
 
-function sanitizeYear(value) {
-  const text = String(value ?? "").replace(/[^0-9?]/g, "").slice(0, 8);
-  return text || "?";
+function sanitizeText(value) {
+  return String(value ?? "").replace(/\s+/g, " ").trim();
+}
+
+function sanitizeDateValue(value) {
+  return sanitizeText(value);
 }
 
 function normalizeColor(value) {
@@ -638,10 +657,78 @@ function normalizeColor(value) {
   return text.startsWith("#") ? text.toUpperCase() : `#${text.toUpperCase()}`;
 }
 
-function splitDateLines(birthYear, deathYear) {
-  const birth = sanitizeYear(birthYear) || "?";
-  const death = sanitizeYear(deathYear) || "?";
-  return [birth, death];
+function extractYear(value) {
+  const text = sanitizeDateValue(value);
+  const matches = text.match(/\b(?:1[5-9]\d{2}|20\d{2}|21\d{2})\b/g);
+  return matches && matches.length ? matches[matches.length - 1] : "";
+}
+
+function getExternalDateLines(person, generation) {
+  const birth = sanitizeDateValue(person?.birthYear);
+  const death = sanitizeDateValue(person?.deathYear);
+  if (generation <= 2) {
+    return [birth, death].filter(Boolean);
+  }
+  const birthYear = extractYear(birth);
+  const deathYear = extractYear(death);
+  return [birthYear, deathYear].filter(Boolean);
+}
+
+function getExternalDateReserve(person, generation, style) {
+  const lines = getExternalDateLines(person, generation);
+  if (!lines.length) return 0;
+  const fontSize = generation >= 5 ? Math.max(3.1, style.dateSize - 1.6) : generation >= 3 ? Math.max(3.8, Math.min(4.4, style.dateSize - 0.8)) : 4.6;
+  const lineHeight = generation <= 2 ? Math.max(fontSize + 1, fontSize * 1.08) : Math.max(fontSize * 0.92, fontSize + 0.1);
+  return round2(fontSize + 4 + (lines.length - 1) * lineHeight + 2);
+}
+
+function getExternalDateLayout(node, style, slot, person) {
+  const lines = getExternalDateLines(person, slot.generation);
+  if (!lines.length) {
+    return { lines: [], x: node.centerX, y: node.y + node.height + 5, lineHeight: 0, fontSize: 0, anchor: "middle" };
+  }
+  const fontSize = slot.generation >= 3 ? Math.max(3.8, Math.min(4.4, style.dateSize - 0.8)) : 4.6;
+  const lineHeight = slot.generation <= 2 ? Math.max(fontSize + 1, fontSize * 1.08) : Math.max(fontSize * 0.92, fontSize + 0.1);
+  if (slot.generation === 0) {
+    return {
+      lines,
+      x: node.centerX,
+      y: node.y + node.height + fontSize + 5,
+      lineHeight,
+      fontSize,
+      anchor: "middle",
+    };
+  }
+  const isMother = slot.path[slot.path.length - 1] === "mother";
+  return {
+    lines,
+    x: isMother ? node.x + node.width + 2 : node.x - 2,
+    y: node.y + node.height + fontSize + 4,
+    lineHeight,
+    fontSize,
+    anchor: isMother ? "start" : "end",
+  };
+}
+
+function getMarriageReserve(marriageDate, generation, style) {
+  const label = formatMarriageForGeneration(marriageDate, generation, style);
+  if (!label.text) return 0;
+  return round2(label.fontSize + 3);
+}
+
+function formatMarriageForGeneration(marriageDate, generation, style) {
+  const full = sanitizeDateValue(marriageDate);
+  if (!full || generation >= 5) return { text: "", fontSize: 0 };
+  if (generation <= 2) {
+    return { text: full, fontSize: 4.6 };
+  }
+  return { text: extractYear(full), fontSize: generation === 4 ? 3.2 : 3.8 };
+}
+
+function getConnectorAnchorX(node, side) {
+  if (node.generation >= 5) return node.centerX;
+  if (side === "father") return round2(node.x + node.width * 0.72);
+  return round2(node.x + node.width * 0.28);
 }
 
 function drawDefaultCrest(x, y, size, rootName) {

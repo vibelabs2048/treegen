@@ -115,7 +115,7 @@ npm run desktop:dist:linux
 This repo is set up so that:
 
 - pushes to `main` update the GitHub Pages demo
-- pushing a version tag like `v0.2.4` creates or updates a GitHub release
+- pushing a version tag like `v0.2.5` creates or updates a GitHub release
 - the release workflow builds desktop packages and uploads them as release assets
 
 ## What still needs to be set manually
@@ -131,4 +131,4 @@ These parts live outside the repo itself:
 
 ## Current version
 
-`0.2.4`
+`0.2.5`
