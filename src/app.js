@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.8",
+    version: "0.2.9",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;
@@ -1545,15 +1545,6 @@ import { renderYamlToSvg } from "./renderer-core.js";
     title.setAttribute("y", String(y + 16));
     applyTextStyle(title, getGenerationStyle(0).nameColor, 7.5, true);
     group.appendChild(title);
-
-    const underline = document.createElementNS(SVG_NS, "line");
-    underline.setAttribute("x1", String(x + 42));
-    underline.setAttribute("y1", String(y + 20));
-    underline.setAttribute("x2", String(x + width - 6));
-    underline.setAttribute("y2", String(y + 20));
-    underline.setAttribute("stroke", "#303030");
-    underline.setAttribute("stroke-width", "1.15");
-    group.appendChild(underline);
 
     const notes = compactLines(state.settings.titleBox.subtitle || "");
     notes.forEach((lineText, index) => {

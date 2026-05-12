@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.9 - 2026-05-11
+
+- added `TODO.md` with the current renderer and preview backlog
+- removed the title-box divider line
+
 ## 0.2.8 - 2026-05-11
 
 - aligned parent date labels to the connector anchor under each box

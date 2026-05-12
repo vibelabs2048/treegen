@@ -622,7 +622,6 @@ function drawTitleBox(state) {
   titleLayout.lines.forEach((lineText, index) => {
     parts.push(text(x + 42, y + 14 + index * titleLayout.lineHeight, lineText, "#314A9C", titleLayout.fontSize, true, "start", state.settings));
   });
-  parts.push(`<line x1="${x + 42}" y1="${y + 20}" x2="${x + width - 6}" y2="${y + 20}" stroke="#303030" stroke-width="1.15"/>`);
   const subtitleLayout = fitTitleText(notes.join(" "), width - 48, 4.6, 3);
   subtitleLayout.lines.forEach((lineText, index) => {
     parts.push(text(x + 42, y + 29 + index * subtitleLayout.lineHeight, lineText, "#000000", subtitleLayout.fontSize, false, "start", state.settings));
