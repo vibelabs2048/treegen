@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.8 - 2026-05-11
+
+- aligned parent date labels to the connector anchor under each box
+- added optional single-character prefixes for birth, death, and marriage dates
+- shortened the shipped demo child annotations and kept demo box notes empty
+- simplified the public README to a single demo link and a single desktop download link
+
 ## 0.2.7 - 2026-05-11
 
 - simplified the public README and moved build/release details into `DEVELOPER.md`

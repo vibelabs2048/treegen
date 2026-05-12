@@ -17,7 +17,7 @@
           <div>
             <div class="brand-title-row">
               <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.7</span>
+              <span id="app-version-badge" class="version-badge">v0.2.8</span>
             </div>
             <p>Ancestor chart editor with live preview, YAML import/export, and print-quality output.</p>
           </div>
@@ -115,6 +115,20 @@
                 <input id="gen-children-color" type="color">
               </label>
             </div>
+            <div class="field-row export-grid">
+              <label>
+                Birth Prefix
+                <input id="date-prefix-birth" type="text" maxlength="1" autocomplete="off" placeholder="N">
+              </label>
+              <label>
+                Death Prefix
+                <input id="date-prefix-death" type="text" maxlength="1" autocomplete="off" placeholder="M">
+              </label>
+            </div>
+            <label>
+              Marriage Prefix
+              <input id="date-prefix-marriage" type="text" maxlength="1" autocomplete="off" placeholder="S">
+            </label>
             <p class="help-text">Styles apply to the selected generation only.</p>
           </section>
 
@@ -280,7 +294,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.7</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.8</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-11</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p id="about-release-link-wrap"><strong>Latest release:</strong> <a id="about-release-link" href="#" target="_blank" rel="noopener noreferrer">Open releases page</a></p>

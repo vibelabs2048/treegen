@@ -21,6 +21,11 @@ const DEFAULT_SETTINGS = {
     author: "Prepared with TreeGen",
     crestDataUrl: "",
   },
+  datePrefixes: {
+    birth: "",
+    death: "",
+    marriage: "",
+  },
   boxNumbering: {
     enabled: false,
     startAt: 0,
@@ -110,6 +115,13 @@ function normalizeState(data, overrides) {
       ...importedSettings.titleBox,
     };
   }
+  if (importedSettings.datePrefixes && typeof importedSettings.datePrefixes === "object") {
+    nextSettings.datePrefixes = {
+      birth: sanitizePrefix(importedSettings.datePrefixes.birth),
+      death: sanitizePrefix(importedSettings.datePrefixes.death),
+      marriage: sanitizePrefix(importedSettings.datePrefixes.marriage),
+    };
+  }
   if (importedSettings.boxNumbering && typeof importedSettings.boxNumbering === "object") {
     nextSettings.boxNumbering = {
       enabled: typeof importedSettings.boxNumbering.enabled === "boolean" ? importedSettings.boxNumbering.enabled : nextSettings.boxNumbering.enabled,
@@ -153,9 +165,9 @@ function buildLayout(slotDefinitions, state) {
       const motherPerson = state.people[motherSlot.id];
       const childLines = compactLines(state.people[motherSlot.id]?.childrenNote || "").slice(0, 9);
       const familyReserve = Math.max(
-        getExternalDateReserve(fatherPerson, generation, getGenerationStyle(state, generation)),
-        getExternalDateReserve(motherPerson, generation, getGenerationStyle(state, generation)),
-        getMarriageReserve(motherPerson?.marriageDate, generation, getGenerationStyle(state, generation))
+        getExternalDateReserve(fatherPerson, generation, getGenerationStyle(state, generation), state.settings),
+        getExternalDateReserve(motherPerson, generation, getGenerationStyle(state, generation), state.settings),
+        getMarriageReserve(motherPerson?.marriageDate, generation, getGenerationStyle(state, generation), state.settings)
       );
       maxReserve = Math.max(maxReserve, familyReserve);
       if (!childLines.length) continue;
@@ -215,9 +227,9 @@ function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, f
   const motherAnchorX = getConnectorAnchorX(motherNode, "mother");
   const parentBottom = Math.max(fatherNode.y + fatherNode.height, motherNode.y + motherNode.height);
   const parentGeneration = motherNode.generation;
-  const marriageReserve = getMarriageReserve(motherPerson?.marriageDate, parentGeneration, generationStyle);
-  const fatherDateReserve = getExternalDateReserve(fatherPerson, parentGeneration, generationStyle);
-  const motherDateReserve = getExternalDateReserve(motherPerson, parentGeneration, generationStyle);
+  const marriageReserve = getMarriageReserve(motherPerson?.marriageDate, parentGeneration, generationStyle, settings);
+  const fatherDateReserve = getExternalDateReserve(fatherPerson, parentGeneration, generationStyle, settings);
+  const motherDateReserve = getExternalDateReserve(motherPerson, parentGeneration, generationStyle, settings);
   const pairReserve = Math.max(fatherDateReserve, motherDateReserve, marriageReserve);
   const joinY = parentBottom + pairReserve + 4;
   const midX = (fatherAnchorX + motherAnchorX) / 2;
@@ -230,7 +242,7 @@ function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, f
   parts.push(line(midX, childJoinY, childNode.centerX, childJoinY));
   parts.push(line(childNode.centerX, childJoinY, childNode.centerX, childNode.y));
 
-  const marriageLabel = formatMarriageForGeneration(motherPerson?.marriageDate, parentGeneration, generationStyle);
+  const marriageLabel = formatMarriageForGeneration(motherPerson?.marriageDate, parentGeneration, generationStyle, settings);
   if (marriageLabel.text) {
     parts.push(
       text(
@@ -286,7 +298,7 @@ function drawNode(state, slot, node) {
   );
 
   const name = displayName(person.name);
-  const dateLines = getExternalDateLines(person, slot.generation);
+  const dateLines = getExternalDateLines(person, slot.generation, state.settings);
   if (node.verticalText) {
     const layout = fitVerticalNodeText(node, style, name);
     parts.push(`<g transform="translate(${round2(node.centerX)}, ${round2(node.centerY)}) rotate(-90)">`);
@@ -295,7 +307,7 @@ function drawNode(state, slot, node) {
       parts.push(text(0, startY + idx * layout.lineHeight, lineText, style.nameColor, layout.nameSize, true, "middle", state.settings));
     });
     parts.push(`</g>`);
-    const externalDateLayout = getExternalDateLayout(node, style, slot, person);
+    const externalDateLayout = getExternalDateLayout(node, style, slot, person, state.settings);
     externalDateLayout.lines.forEach((lineText, idx) => {
       parts.push(
         text(
@@ -344,7 +356,7 @@ function drawNode(state, slot, node) {
       parts.push(text(node.centerX, y, lineText, "#000000", layout.noteSize, false, "middle", state.settings));
       y += layout.noteLineHeight;
     });
-    const externalDateLayout = getExternalDateLayout(node, style, slot, person);
+    const externalDateLayout = getExternalDateLayout(node, style, slot, person, state.settings);
     externalDateLayout.lines.forEach((lineText, idx) => {
       parts.push(
         text(
@@ -697,27 +709,33 @@ function extractYear(value) {
   return matches && matches.length ? matches[matches.length - 1] : "";
 }
 
-function getExternalDateLines(person, generation) {
+function getExternalDateLines(person, generation, settings = DEFAULT_SETTINGS) {
   const birth = sanitizeDateValue(person?.birthYear);
   const death = sanitizeDateValue(person?.deathYear);
   if (generation <= 2) {
-    return [birth, death].filter(Boolean);
+    return [
+      formatPrefixedDate(settings.datePrefixes?.birth, birth),
+      formatPrefixedDate(settings.datePrefixes?.death, death),
+    ].filter(Boolean);
   }
   const birthYear = extractYear(birth);
   const deathYear = extractYear(death);
-  return [birthYear, deathYear].filter(Boolean);
+  return [
+    formatPrefixedDate(settings.datePrefixes?.birth, birthYear),
+    formatPrefixedDate(settings.datePrefixes?.death, deathYear),
+  ].filter(Boolean);
 }
 
-function getExternalDateReserve(person, generation, style) {
-  const lines = getExternalDateLines(person, generation);
+function getExternalDateReserve(person, generation, style, settings = DEFAULT_SETTINGS) {
+  const lines = getExternalDateLines(person, generation, settings);
   if (!lines.length) return 0;
   const fontSize = generation >= 5 ? Math.max(3.1, style.dateSize - 1.6) : generation >= 3 ? Math.max(3.8, Math.min(4.4, style.dateSize - 0.8)) : 4.6;
   const lineHeight = generation <= 2 ? Math.max(fontSize + 1, fontSize * 1.08) : Math.max(fontSize * 0.92, fontSize + 0.1);
   return round2(fontSize + 4 + (lines.length - 1) * lineHeight + 2);
 }
 
-function getExternalDateLayout(node, style, slot, person) {
-  const lines = getExternalDateLines(person, slot.generation);
+function getExternalDateLayout(node, style, slot, person, settings = DEFAULT_SETTINGS) {
+  const lines = getExternalDateLines(person, slot.generation, settings);
   if (!lines.length) {
     return { lines: [], x: node.centerX, y: node.y + node.height + 5, lineHeight: 0, fontSize: 0, anchor: "middle" };
   }
@@ -737,8 +755,8 @@ function getExternalDateLayout(node, style, slot, person) {
     const isMother = slot.path[slot.path.length - 1] === "mother";
     return {
       lines,
-      x: isMother ? node.x + node.width + 3 : node.x - 3,
-      y: node.y + node.height + fontSize + 2,
+      x: getConnectorAnchorX(node, isMother ? "mother" : "father") + (isMother ? 1.5 : -1.5),
+      y: node.y + node.height + fontSize + 2.6,
       lineHeight,
       fontSize,
       anchor: isMother ? "start" : "end",
@@ -747,27 +765,39 @@ function getExternalDateLayout(node, style, slot, person) {
   const isMother = slot.path[slot.path.length - 1] === "mother";
   return {
     lines,
-    x: isMother ? node.x + node.width + 2 : node.x - 2,
-    y: node.y + node.height + (slot.generation <= 3 ? fontSize + 2 : fontSize + 4),
+    x: getConnectorAnchorX(node, isMother ? "mother" : "father") + (isMother ? 1 : -1),
+    y: node.y + node.height + (slot.generation <= 3 ? fontSize + 1.2 : fontSize + 4),
     lineHeight,
     fontSize,
     anchor: isMother ? "start" : "end",
   };
 }
 
-function getMarriageReserve(marriageDate, generation, style) {
-  const label = formatMarriageForGeneration(marriageDate, generation, style);
+function getMarriageReserve(marriageDate, generation, style, settings = DEFAULT_SETTINGS) {
+  const label = formatMarriageForGeneration(marriageDate, generation, style, settings);
   if (!label.text) return 0;
   return round2(label.fontSize + 3);
 }
 
-function formatMarriageForGeneration(marriageDate, generation, style) {
+function formatMarriageForGeneration(marriageDate, generation, style, settings = DEFAULT_SETTINGS) {
   const full = sanitizeDateValue(marriageDate);
   if (!full || generation >= 5) return { text: "", fontSize: 0 };
+  const formattedFull = formatPrefixedDate(settings.datePrefixes?.marriage, full);
   if (generation <= 2) {
-    return { text: full, fontSize: 4.6 };
+    return { text: formattedFull, fontSize: 4.6 };
   }
-  return { text: extractYear(full), fontSize: generation === 4 ? 3.2 : 3.8 };
+  return { text: formatPrefixedDate(settings.datePrefixes?.marriage, extractYear(full)), fontSize: generation === 4 ? 3.2 : 3.8 };
+}
+
+function formatPrefixedDate(prefix, value) {
+  const text = sanitizeDateValue(value);
+  if (!text) return "";
+  const cleanPrefix = sanitizePrefix(prefix);
+  return cleanPrefix ? `${cleanPrefix}: ${text}` : text;
+}
+
+function sanitizePrefix(value) {
+  return String(value ?? "").trim().slice(0, 1);
 }
 
 function getConnectorAnchorX(node, side) {
