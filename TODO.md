@@ -24,10 +24,10 @@
    Status: Done in v0.2.16
 
 7. The SVG preview is still vulnerable to top-edge clipping. Add a general fit/margin solution so the full SVG is always shown.
-   Status: Open
+   Status: Done in v0.2.17
 
 8. Remove the line in the title box.
    Status: Done in v0.2.9
 
 9. Refresh the shipped demo title-box subtitle so it no longer says "placeholder crest".
-   Status: Open
+   Status: Done in v0.2.17

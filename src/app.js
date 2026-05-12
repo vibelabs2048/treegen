@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.16",
+    version: "0.2.17",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;
@@ -28,7 +28,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     titleBox: {
       enabled: true,
       title: "Famiglia Bellandi-Castelluccio",
-      subtitle: "Demo export layout\nDraft lineage with placeholder crest",
+      subtitle: "Demo export layout\nExample lineage with surname crest",
       author: "Prepared with TreeGen",
       crestDataUrl: "",
     },
@@ -510,7 +510,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const yaml = serializeCurrentState();
     state.yamlText = yaml;
     try {
-      const svgText = applyPreviewMargin(renderYamlToSvg(yaml), 28);
+      const svgText = applyPreviewMargin(renderYamlToSvg(yaml), 36);
       const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
       const svg = doc.documentElement;
       bindRenderedSvg(svg);
@@ -882,9 +882,10 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const stage = elements.previewStage;
     const svg = elements.svgWrapper.querySelector("svg");
     if (!svg) return;
-    const fitMargin = 56;
-    const width = Math.max(1, stage.clientWidth - fitMargin);
-    const height = Math.max(1, stage.clientHeight - fitMargin);
+    const fitMarginX = 56;
+    const fitMarginY = 72;
+    const width = Math.max(1, stage.clientWidth - fitMarginX);
+    const height = Math.max(1, stage.clientHeight - fitMarginY);
     const svgWidth = svg.viewBox.baseVal.width || PAGE_WIDTH_PT;
     const svgHeight = svg.viewBox.baseVal.height || PAGE_HEIGHT_PT;
     const percentage = Math.max(5, Math.min(150, Math.floor(Math.min(width / svgWidth, height / svgHeight) * 100)));
@@ -893,9 +894,8 @@ import { renderYamlToSvg } from "./renderer-core.js";
     applyZoom();
     requestAnimationFrame(() => {
       const scaledWidth = (svgWidth * percentage) / 100;
-      const scaledHeight = (svgHeight * percentage) / 100;
       stage.scrollLeft = Math.max(0, (scaledWidth - stage.clientWidth) / 2);
-      stage.scrollTop = Math.max(0, (scaledHeight - stage.clientHeight) / 2 - 44);
+      stage.scrollTop = 0;
     });
   }
 

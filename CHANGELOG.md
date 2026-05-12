@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.17 - 2026-05-11
+
+- changed preview fitting to use a larger preview-only margin and a top-aligned fit scroll so the full SVG is shown more reliably
+- increased the preview-only padded viewBox margin used by the browser preview
+- refreshed the shipped demo subtitle text so it no longer refers to a placeholder crest
+
 ## 0.2.16 - 2026-05-11
 
 - changed the late-generation vertical name fitter to prefer two wrapped lines before falling back to a single truncated line

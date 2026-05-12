@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS = {
   titleBox: {
     enabled: true,
     title: "Famiglia Bellandi-Castelluccio",
-    subtitle: "Demo export layout\nDraft lineage with placeholder crest",
+    subtitle: "Demo export layout\nExample lineage with surname crest",
     author: "Prepared with TreeGen",
     crestDataUrl: "",
   },
