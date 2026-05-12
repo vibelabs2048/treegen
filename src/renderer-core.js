@@ -86,11 +86,11 @@ export function renderStateToSvg(state) {
   }
 
   for (const slot of slotDefinitions) {
-    parts.push(drawNode(state, slot, layout.nodes[slot.id]));
+    parts.push(drawNode(state, slotDefinitions, slot, layout.nodes[slot.id]));
   }
 
   if (state.settings.titleBox.enabled) {
-    parts.push(drawTitleBox(state));
+    parts.push(drawTitleBox(state, slotDefinitions));
   }
 
   parts.push(`</svg>`);
@@ -127,7 +127,7 @@ function analyzeStateLayout(state) {
     const node = layout.nodes[slot.id];
     const person = state.people[slot.id];
     const style = getResolvedNodeStyle(state, slot.generation, person);
-    const name = displayName(person.name);
+    const name = resolvePersonDisplayName(state.people, slotDefinitions, slot.id);
     const dateLines = getExternalDateLines(person, slot.generation, state.settings);
     let actualNameSize = style.nameSize;
     let actualDateSize = 0;
@@ -211,8 +211,17 @@ function normalizeState(data, overrides) {
   const importedPeople = data.people || {};
   for (const slot of slotDefinitions) {
     const incoming = importedPeople[slot.id] || {};
+    const legacyName = sanitizeText(incoming.name);
+    const splitName = splitDisplayName(legacyName);
     people[slot.id] = {
-      name: sanitizeText(incoming.name),
+      firstName: sanitizeText(incoming.firstName ?? splitName.firstName),
+      lastName: sanitizeText(incoming.lastName ?? splitName.lastName),
+      inheritSurname: sanitizeOptionalBoolean(incoming.inheritSurname, false),
+      displayNameOverrideEnabled: sanitizeOptionalBoolean(
+        incoming.displayNameOverrideEnabled,
+        incoming.displayNameOverride ? true : false
+      ),
+      displayNameOverride: sanitizeText(incoming.displayNameOverride),
       birthYear: sanitizeDateValue(incoming.birth ?? incoming.birthYear),
       deathYear: sanitizeDateValue(incoming.death ?? incoming.deathYear),
       marriageDate: sanitizeDateValue(incoming.marriageDate),
@@ -366,7 +375,7 @@ function drawConnector(childSlot, childNode, fatherNode, motherNode, noteText, f
   return `<g>${parts.join("")}</g>`;
 }
 
-function drawNode(state, slot, node) {
+function drawNode(state, slotDefinitions, slot, node) {
   const person = state.people[slot.id];
   const style = getResolvedNodeStyle(state, slot.generation, person);
   const parts = [];
@@ -375,7 +384,7 @@ function drawNode(state, slot, node) {
     `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${slotCornerRadius(slot)}" fill="#fffdfa" stroke="#303030" stroke-width="1.25"/>`
   );
 
-  const name = displayName(person.name);
+  const name = resolvePersonDisplayName(state.people, slotDefinitions, slot.id);
   const dateLines = getExternalDateLines(person, slot.generation, state.settings);
   if (node.verticalText) {
     const layout = fitVerticalNodeText(node, style, name);
@@ -767,7 +776,7 @@ function relationLabel(path) {
   return `${side} ${multiplier}x ${gender}-${pairIndex}`;
 }
 
-function drawTitleBox(state) {
+function drawTitleBox(state, slotDefinitions) {
   const x = 6;
   const y = PAGE_HEIGHT_PT - 72;
   const width = 176;
@@ -780,7 +789,7 @@ function drawTitleBox(state) {
   if (crestDataUrl) {
     parts.push(`<image href="${escapeAttribute(crestDataUrl)}" x="${x + 6}" y="${y + 6}" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>`);
   } else {
-    parts.push(drawDefaultCrest(x + 6, y + 6, 28, state.people.root?.name));
+    parts.push(drawDefaultCrest(x + 6, y + 6, 28, resolvePersonDisplayName(state.people, slotDefinitions, "root")));
   }
   const titleLayout = fitTitleText(state.settings.titleBox.title || "Family Tree", width - 48, 7.5, 3);
   titleLayout.lines.forEach((lineText, index) => {
@@ -841,8 +850,47 @@ function slotCornerRadius(slot) {
   return last === "mother" ? 2.5 : 0;
 }
 
-function displayName(name) {
-  return sanitizeText(name);
+function splitDisplayName(name) {
+  const text = sanitizeText(name);
+  if (!text) return { firstName: "", lastName: "" };
+  const parts = text.split(" ").filter(Boolean);
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" };
+  }
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts.slice(-1).join(" "),
+  };
+}
+
+function resolvePersonDisplayName(people, slotDefinitions, slotId, visited = new Set()) {
+  const person = people[slotId] || {};
+  if (person.displayNameOverrideEnabled && sanitizeText(person.displayNameOverride)) {
+    return sanitizeText(person.displayNameOverride);
+  }
+  const firstName = sanitizeText(person.firstName);
+  const surname = resolvePersonSurname(people, slotDefinitions, slotId, visited);
+  return sanitizeText([firstName, surname].filter(Boolean).join(" "));
+}
+
+function resolvePersonSurname(people, slotDefinitions, slotId, visited = new Set()) {
+  const person = people[slotId] || {};
+  if (!person.inheritSurname) {
+    return sanitizeText(person.lastName);
+  }
+  if (visited.has(slotId)) {
+    return sanitizeText(person.lastName);
+  }
+  const slot = slotDefinitions.find((entry) => entry.id === slotId);
+  if (!slot || slot.path.length === 0) {
+    return sanitizeText(person.lastName);
+  }
+  const childPath = slot.path.slice(0, -1);
+  const childId = childPath.length ? childPath.join("_") : "root";
+  const nextVisited = new Set(visited);
+  nextVisited.add(slotId);
+  const inherited = resolvePersonSurname(people, slotDefinitions, childId, nextVisited);
+  return sanitizeText(inherited || person.lastName);
 }
 
 function compactLines(text) {
@@ -864,6 +912,10 @@ function sanitizeOptionalNumber(value) {
   if (value == null || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function sanitizeOptionalBoolean(value, fallback = false) {
+  return typeof value === "boolean" ? value : fallback;
 }
 
 function sanitizeOptionalColor(value) {

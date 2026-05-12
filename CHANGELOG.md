@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.33 - 2026-05-12
+
+- replaced the single display-name editor with separate first-name and last-name fields
+- added per-box surname inheritance and explicit custom display-text override controls
+- kept YAML backward-compatible with older `name:` input while exporting the new structured name fields
+
 ## 0.2.32 - 2026-05-12
 
 - added first-pass undo and redo controls in the main menu

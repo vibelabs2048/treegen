@@ -2,26 +2,26 @@
 
 ## Priority Order
 
-1. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
+1. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
+   Status: Open
+
+2. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
+   Status: Open
+
+3. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
+   Status: Open
+
+4. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
    Status: Done in v0.2.30
 
-2. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
+5. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
    Status: Done in v0.2.31
 
-3. Add undo and redo for editing actions.
+6. Add undo and redo for editing actions.
    Status: Done in v0.2.32
 
-4. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
-   Status: Open
-
-5. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
-   Status: Open
-
-6. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
-   Status: Open
-
-7. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
-   Status: Open
+7. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
+   Status: Done in v0.2.33
 
 8. Refine the downloads page so OS and architecture are explicit. Show a selector for concrete targets such as Windows x64, macOS arm64, and Linux x64/AppImage (or whatever the actual release artifacts support), default it from the current device, and show only the links for the selected target.
    Status: Done in v0.2.29

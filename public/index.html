@@ -15,7 +15,7 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-              <span id="app-version-badge" class="version-badge">v0.2.32</span>
+              <span id="app-version-badge" class="version-badge">v0.2.33</span>
           </div>
         </div>
         <div class="menu-shell">
@@ -175,9 +175,27 @@
           <section class="tab-panel active" data-panel="person">
             <h2>Selected Person</h2>
             <p id="selected-slot-label" class="slot-title"></p>
+            <div class="field-row">
+              <label>
+                First Name
+                <input id="person-first-name" type="text" autocomplete="off" title="Given name or names for this person.">
+              </label>
+              <label>
+                Last Name
+                <input id="person-last-name" type="text" autocomplete="off" title="Family name used when surname inheritance is turned off for this box.">
+              </label>
+            </div>
+            <label class="checkbox-row" title="When enabled, this box inherits its surname from the linked descendant branch instead of using its local last-name field. This is useful for the paternal surname chain.">
+              <input id="person-inherit-surname" type="checkbox">
+              <span>Inherit Linked Surname</span>
+            </label>
+            <label class="checkbox-row" title="When enabled, the chart uses the custom display text below instead of combining first and last name fields.">
+              <input id="person-display-override-enabled" type="checkbox">
+              <span>Use Custom Display Text</span>
+            </label>
             <label>
-              Display Name
-              <input id="person-name" type="text" autocomplete="off" title="Direct full text rendered for this box. This will later be split into first and last name controls.">
+              Custom Display Text
+              <input id="person-name" type="text" autocomplete="off" title="Direct full text rendered for this box when the custom display override is enabled.">
             </label>
             <div class="field-row">
               <label>
@@ -222,6 +240,7 @@
               </label>
             </div>
             <p class="help-text">Use one child per line. Marriage is stored in YAML as `marriageDate:` on the mother-side record for that couple. Box notes are stored in YAML as `note:` and render inside the box for generations 0-2.</p>
+            <p class="help-text">If custom display text is off, TreeGen renders the combined first and last name automatically. Inherited surname uses the linked descendant branch so the paternal surname chain can stay consistent without repeating the same last name in every box.</p>
             <p class="help-text">Leave local override fields blank to inherit the selected generation settings.</p>
           </section>
 
@@ -322,7 +341,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.32</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.33</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>

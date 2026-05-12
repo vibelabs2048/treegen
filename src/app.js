@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.32",
+    version: "0.2.33",
     lastUpdated: "2026-05-12",
   };
   const MAX_GENERATION = 6;
@@ -64,6 +64,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     svgWrapper: document.getElementById("svg-wrapper"),
     statusText: document.getElementById("status-text"),
     selectedSlotLabel: document.getElementById("selected-slot-label"),
+    personFirstName: document.getElementById("person-first-name"),
+    personLastName: document.getElementById("person-last-name"),
+    personInheritSurname: document.getElementById("person-inherit-surname"),
+    personDisplayOverrideEnabled: document.getElementById("person-display-override-enabled"),
     personName: document.getElementById("person-name"),
     personBirth: document.getElementById("person-birth"),
     personDeath: document.getElementById("person-death"),
@@ -225,9 +229,38 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.applyImport.addEventListener("click", applyImportModal);
     elements.downloadExport.addEventListener("click", handleExportAction);
 
+    elements.personFirstName.addEventListener("input", () => {
+      commitStateChange(() => {
+        const person = state.people[state.selectedId];
+        const slot = getSlot(state.selectedId);
+        person.firstName = sanitizeText(elements.personFirstName.value);
+        if (slot && slot.generation > 0 && person.firstName && !person.lastName && !person.displayNameOverrideEnabled) {
+          person.inheritSurname = true;
+        }
+      }, { rehydrate: false });
+    });
+    elements.personLastName.addEventListener("input", () => {
+      commitStateChange(() => {
+        state.people[state.selectedId].lastName = sanitizeText(elements.personLastName.value);
+      }, { rehydrate: false });
+    });
+    elements.personInheritSurname.addEventListener("change", () => {
+      commitStateChange(() => {
+        state.people[state.selectedId].inheritSurname = elements.personInheritSurname.checked;
+      });
+    });
+    elements.personDisplayOverrideEnabled.addEventListener("change", () => {
+      commitStateChange(() => {
+        const person = state.people[state.selectedId];
+        person.displayNameOverrideEnabled = elements.personDisplayOverrideEnabled.checked;
+        if (!person.displayNameOverrideEnabled) {
+          person.displayNameOverride = "";
+        }
+      });
+    });
     elements.personName.addEventListener("input", () => {
       commitStateChange(() => {
-        state.people[state.selectedId].name = elements.personName.value;
+        state.people[state.selectedId].displayNameOverride = elements.personName.value;
       }, { rehydrate: false });
     });
     elements.personBirth.addEventListener("input", () => {
@@ -417,8 +450,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const people = {};
     for (const slot of SLOT_DEFINITIONS) {
       const years = sampleYears(slot);
+      const nameParts = splitDisplayName(demoNameForSlot(slot));
       people[slot.id] = {
-        name: demoNameForSlot(slot),
+        firstName: nameParts.firstName,
+        lastName: nameParts.lastName,
+        inheritSurname: slot.id === "root" ? false : false,
+        displayNameOverrideEnabled: false,
+        displayNameOverride: "",
         birthYear: years.birthYear,
         deathYear: years.deathYear,
         marriageDate: sampleMarriageDate(slot),
@@ -437,7 +475,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const people = {};
     for (const slot of SLOT_DEFINITIONS) {
       people[slot.id] = {
-        name: "",
+        firstName: "",
+        lastName: "",
+        inheritSurname: false,
+        displayNameOverrideEnabled: false,
+        displayNameOverride: "",
         birthYear: "",
         deathYear: "",
         marriageDate: "",
@@ -482,7 +524,23 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const person = state.people[state.selectedId];
     const slot = getSlot(state.selectedId);
     elements.selectedSlotLabel.textContent = slot.label;
-    elements.personName.value = person.name;
+    elements.personFirstName.value = person.firstName || "";
+    elements.personLastName.value = person.lastName || "";
+    elements.personInheritSurname.checked = !!person.inheritSurname;
+    elements.personInheritSurname.disabled = slot.generation === 0;
+    elements.personInheritSurname.title = slot.generation === 0
+      ? "The original person is the root of the surname chain, so surname inheritance does not apply here."
+      : "When enabled, this box inherits its surname from the linked descendant branch instead of using its local last-name field.";
+    elements.personDisplayOverrideEnabled.checked = !!person.displayNameOverrideEnabled;
+    elements.personName.value = person.displayNameOverride || "";
+    elements.personLastName.disabled = !!person.inheritSurname;
+    elements.personLastName.title = person.inheritSurname
+      ? "This box is currently inheriting its surname from the linked descendant branch. Turn off surname inheritance to edit the local last name."
+      : "Family name used when surname inheritance is off for this box.";
+    elements.personName.disabled = !person.displayNameOverrideEnabled;
+    elements.personName.title = person.displayNameOverrideEnabled
+      ? "Direct full text rendered for this box because custom display text is enabled."
+      : "Turn on custom display text to override the combined first and last name for this box.";
     elements.personBirth.value = person.birthYear;
     elements.personDeath.value = person.deathYear;
     elements.personMarriage.value = person.marriageDate || "";
@@ -688,8 +746,17 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const importedPeople = data.people || {};
     for (const slot of SLOT_DEFINITIONS) {
       const incoming = importedPeople[slot.id] || {};
+      const legacyName = sanitizeText(incoming.name ?? "");
+      const splitName = splitDisplayName(legacyName);
       nextPeople[slot.id] = {
-        name: sanitizeText(incoming.name ?? nextPeople[slot.id].name),
+        firstName: sanitizeText(incoming.firstName ?? splitName.firstName ?? nextPeople[slot.id].firstName),
+        lastName: sanitizeText(incoming.lastName ?? splitName.lastName ?? nextPeople[slot.id].lastName),
+        inheritSurname: sanitizeOptionalBoolean(incoming.inheritSurname, nextPeople[slot.id].inheritSurname),
+        displayNameOverrideEnabled: sanitizeOptionalBoolean(
+          incoming.displayNameOverrideEnabled,
+          incoming.displayNameOverride ? true : nextPeople[slot.id].displayNameOverrideEnabled
+        ),
+        displayNameOverride: sanitizeText(incoming.displayNameOverride ?? nextPeople[slot.id].displayNameOverride),
         birthYear: sanitizeDateValue(incoming.birth ?? incoming.birthYear ?? nextPeople[slot.id].birthYear),
         deathYear: sanitizeDateValue(incoming.death ?? incoming.deathYear ?? nextPeople[slot.id].deathYear),
         marriageDate: sanitizeDateValue(incoming.marriageDate ?? nextPeople[slot.id].marriageDate),
@@ -868,7 +935,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     group.appendChild(rect);
 
     const textGroup = document.createElementNS(SVG_NS, "g");
-    const name = displayName(person.name);
+    const name = displayName(person, slot.id);
     const dates = formatDates(person.birthYear, person.deathYear);
     if (node.verticalText) {
       const verticalLayout = fitVerticalNodeText(node, generationStyle, name, dates);
@@ -1444,10 +1511,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
     }
     renderDownloadOptions();
-    if (elements.personName) {
-      elements.personName.disabled = false;
-      elements.personName.title = "Direct full text rendered for this box. This field should be editable in both the browser and the desktop app.";
-    }
   }
 
   function renderDownloadOptions() {
@@ -1737,6 +1800,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     return Number.isFinite(number) && number > 0 ? number : null;
   }
 
+  function sanitizeOptionalBoolean(value, fallback = false) {
+    return typeof value === "boolean" ? value : fallback;
+  }
+
   function sanitizeOptionalColor(value) {
     const text = String(value ?? "").trim();
     return text ? normalizeColor(text) : "";
@@ -1746,6 +1813,19 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const text = String(value || "").trim();
     if (!text) return "#000000";
     return text.startsWith("#") ? text.toUpperCase() : `#${text.toUpperCase()}`;
+  }
+
+  function splitDisplayName(name) {
+    const text = sanitizeText(name);
+    if (!text) return { firstName: "", lastName: "" };
+    const parts = text.split(" ").filter(Boolean);
+    if (parts.length === 1) {
+      return { firstName: parts[0], lastName: "" };
+    }
+    return {
+      firstName: parts.slice(0, -1).join(" "),
+      lastName: parts.slice(-1).join(" "),
+    };
   }
 
   function sanitizePrefix(value) {
@@ -2031,8 +2111,36 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     return `(${birth || death})`;
   }
 
-  function displayName(name) {
-    return sanitizeText(name);
+  function displayName(personOrName, slotId = state.selectedId, visited = new Set()) {
+    if (typeof personOrName === "string") {
+      return sanitizeText(personOrName);
+    }
+    const person = personOrName || state.people[slotId] || {};
+    if (person.displayNameOverrideEnabled && sanitizeText(person.displayNameOverride)) {
+      return sanitizeText(person.displayNameOverride);
+    }
+    const firstName = sanitizeText(person.firstName);
+    const surname = resolvePersonSurname(slotId, visited);
+    return sanitizeText([firstName, surname].filter(Boolean).join(" "));
+  }
+
+  function resolvePersonSurname(slotId, visited = new Set()) {
+    const person = state.people[slotId] || {};
+    if (!person.inheritSurname) {
+      return sanitizeText(person.lastName);
+    }
+    if (visited.has(slotId)) {
+      return sanitizeText(person.lastName);
+    }
+    const slot = getSlot(slotId);
+    if (!slot || slot.path.length === 0) {
+      return sanitizeText(person.lastName);
+    }
+    const childPath = slot.path.slice(0, -1);
+    const childId = childPath.length ? childPath.join("_") : "root";
+    const nextVisited = new Set(visited);
+    nextVisited.add(slotId);
+    return sanitizeText(resolvePersonSurname(childId, nextVisited) || person.lastName);
   }
 
   function formatItalianFullDate(year, seed) {
@@ -2193,7 +2301,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     for (const slot of SLOT_DEFINITIONS) {
       const person = data.people[slot.id] || {};
       lines.push(`  ${slot.id}:`);
-      lines.push(`    name: ${quoteYaml(person.name || "")}`);
+      lines.push(`    firstName: ${quoteYaml(person.firstName || "")}`);
+      lines.push(`    lastName: ${quoteYaml(person.lastName || "")}`);
+      lines.push(`    inheritSurname: ${person.inheritSurname ? "true" : "false"}`);
+      lines.push(`    displayNameOverrideEnabled: ${person.displayNameOverrideEnabled ? "true" : "false"}`);
+      if (person.displayNameOverride) {
+        lines.push(`    displayNameOverride: ${quoteYaml(person.displayNameOverride)}`);
+      }
       lines.push(`    birth: ${quoteYaml(person.birthYear || "")}`);
       lines.push(`    death: ${quoteYaml(person.deathYear || "")}`);
       if (person.marriageDate) {
