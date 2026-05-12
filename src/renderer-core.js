@@ -479,19 +479,25 @@ function fitWrappedLinesPreferred(text, maxChars, maxLines, preferredLines) {
 function fitBoxNameOnly(node, style, name, generation) {
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2);
-  const baseChars = maxCharsForWidth(availableWidth, style.nameSize, true);
-  const baseLines = fitWrappedLines(name, baseChars, 3);
-  const baseLineHeight = Math.max(style.nameSize * 0.96, style.nameSize + 0.06);
+  const preferThreeNameLines = generation === 4;
+  const preferredBaseNameSize = round2(style.nameSize * (preferThreeNameLines ? 1.12 : 1));
+  const baseChars = maxCharsForWidth(availableWidth, preferredBaseNameSize, true);
+  const baseLines = preferThreeNameLines
+    ? fitWrappedLinesPreferred(name, baseChars, 3, 3)
+    : fitWrappedLines(name, baseChars, 3);
+  const baseLineHeight = Math.max(preferredBaseNameSize * 0.96, preferredBaseNameSize + 0.06);
   const baseHeight = baseLines.length * baseLineHeight;
-  const baseWidest = Math.max(...baseLines.map((line) => estimateLineWidth(line, style.nameSize, true)));
+  const baseWidest = Math.max(...baseLines.map((line) => estimateLineWidth(line, preferredBaseNameSize, true)));
   if (baseHeight <= availableHeight && baseWidest <= availableWidth) {
-    return { nameSize: style.nameSize, nameLines: baseLines, lineHeight: baseLineHeight, height: baseHeight };
+    return { nameSize: preferredBaseNameSize, nameLines: baseLines, lineHeight: baseLineHeight, height: baseHeight };
   }
   const maxWrapLines = 3;
-  for (let scale = 1; scale >= 0.38; scale -= 0.025) {
+  for (let scale = (preferThreeNameLines ? 1.12 : 1); scale >= 0.38; scale -= 0.025) {
     const nameSize = round2(style.nameSize * scale);
     const nameChars = maxCharsForWidth(availableWidth, nameSize, true);
-    const nameLines = fitWrappedLines(name, nameChars, maxWrapLines);
+    const nameLines = preferThreeNameLines
+      ? fitWrappedLinesPreferred(name, nameChars, maxWrapLines, 3)
+      : fitWrappedLines(name, nameChars, maxWrapLines);
     const lineHeight = Math.max(nameSize * 0.96, nameSize + 0.06);
     const height = nameLines.length * lineHeight;
     const widest = Math.max(...nameLines.map((line) => estimateLineWidth(line, nameSize, true)));

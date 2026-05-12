@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.14 - 2026-05-11
+
+- changed the generation 4 name fitter to prefer three wrapped lines before shrinking
+- increased the effective starting size for generation 4 box names so those boxes use more of their height
+- kept the fit constrained to the box width and height while preserving the denser generation 4 layout
+
 ## 0.2.13 - 2026-05-11
 
 - changed the horizontal name fitter so generations 1-3 prefer three wrapped name lines before shrinking

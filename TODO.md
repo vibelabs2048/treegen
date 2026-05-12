@@ -15,7 +15,7 @@
    Status: Done in v0.2.13
 
 4. Generation 4 should use all three lines in the box before overflowing. Ensure wrapping works correctly.
-   Status: Open
+   Status: Done in v0.2.14
 
 5. Generation 5 and 6 maternal-side birth/death dates should move to the left side of their tree line to avoid overlap.
    Status: Open
