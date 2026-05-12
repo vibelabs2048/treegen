@@ -9,7 +9,7 @@
    Status: Done and verified in GitHub Actions
 
 2. Generation 1, 2, and 3 child annotations should show full child name and full date.
-   Status: Open
+   Status: Done in v0.2.12
 
 3. Generation 1, 2, and 3 should use all three lines in the box for names with a larger default font.
    Status: Open

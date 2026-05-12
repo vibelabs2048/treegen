@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.12 - 2026-05-11
+
+- updated the built-in demo so generation 1-3 child annotations show full names and full dates
+- reduced early-generation demo child counts so the full child labels remain readable
+- updated the shipped placeholder YAML to match the fuller early-generation child labels
+
 ## 0.2.11 - 2026-05-11
 
 - added stable GitHub Release asset aliases so the latest release has exact per-OS download URLs

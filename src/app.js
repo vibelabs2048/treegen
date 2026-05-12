@@ -3,7 +3,7 @@ import { renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.11",
+    version: "0.2.12",
     lastUpdated: "2026-05-11",
   };
   const MAX_GENERATION = 6;
@@ -1404,22 +1404,42 @@ import { renderYamlToSvg } from "./renderer-core.js";
     const childPath = slot.path.slice(0, -1);
     const childSlot = getSlot(childPath.length ? childPath.join("_") : "root");
     const childYears = sampleYears(childSlot);
-    const count = slot.index % 10;
+    const count = demoChildCountForSlot(slot);
     if (count === 0) return "";
     const childBirthYear = extractYear(childYears.birthYear);
     const childBirth = childBirthYear ? Number(childBirthYear) : null;
     const children = [];
     for (let i = 0; i < count; i += 1) {
       if (i === 0) {
-        children.push(formatCompactChildName(demoNameForSlot(childSlot), formatDates(childYears.birthYear, childYears.deathYear), count, i));
+        children.push(
+          slot.generation <= 3
+            ? formatFullChildEntry(demoNameForSlot(childSlot), childYears.birthYear, childYears.deathYear)
+            : formatCompactChildName(demoNameForSlot(childSlot), formatDates(childYears.birthYear, childYears.deathYear), count, i)
+        );
       } else {
-        const birth = childBirth == null ? "" : String(childBirth - 4 + i * 3);
-        const death = birth ? String(Number(birth) + 70 + (i % 5)) : "";
+        const birthYear = childBirth == null ? null : childBirth - 4 + i * 3;
+        const deathYear = birthYear == null ? null : birthYear + 70 + (i % 5);
+        const birth = birthYear == null ? "" : (slot.generation <= 3 ? formatItalianFullDate(birthYear, slot.index + slot.generation + 20 + i * 2) : String(birthYear));
+        const death = deathYear == null ? "" : (slot.generation <= 3 ? formatItalianFullDate(deathYear, slot.index + slot.generation + 35 + i * 2) : String(deathYear));
         const siblingName = i % 2 === 0 ? siblingNameForSlot(childSlot, "older") : siblingNameForSlot(childSlot, "younger");
-        children.push(formatCompactChildName(siblingName, formatDates(birth, death), count, i));
+        children.push(
+          slot.generation <= 3
+            ? formatFullChildEntry(siblingName, birth, death)
+            : formatCompactChildName(siblingName, formatDates(birth, death), count, i)
+        );
       }
     }
     return children.join("\n");
+  }
+
+  function demoChildCountForSlot(slot) {
+    if (slot.generation === 1) return 1;
+    if (slot.generation === 2) return slot.index === 3 ? 2 : 1;
+    if (slot.generation === 3) {
+      const counts = [1, 2, 2, 2];
+      return counts[Math.floor(slot.index / 2)] || 1;
+    }
+    return slot.index % 10;
   }
 
   function sampleNoteForSlot(slot) {
@@ -1594,6 +1614,15 @@ import { renderYamlToSvg } from "./renderer-core.js";
     if (totalCount <= 2) return fullLabel;
     if (totalCount <= 4) return firstName;
     return index === 0 && dateText ? `${firstName} ${dateText}` : firstName;
+  }
+
+  function formatFullChildEntry(fullName, birthText, deathText) {
+    const name = sanitizeText(fullName);
+    const birth = sanitizeDateValue(birthText);
+    const death = sanitizeDateValue(deathText);
+    if (birth && death) return `${name} (${birth} - ${death})`;
+    if (birth || death) return `${name} (${birth || death})`;
+    return name;
   }
 
   function wrapText(text, maxChars) {

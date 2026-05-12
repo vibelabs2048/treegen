@@ -70,7 +70,7 @@ people:
     birth: "22 luglio 1926"
     death: "3 febbraio 1996"
     marriageDate: "3 giugno 1948"
-    childrenNote: "Eleonora"
+    childrenNote: "Eleonora Mariacristina Bellandi-Castelluccio (18 aprile 1952 - 7 gennaio 2021)"
   father_father:
     name: "Giorgio Marcantonio Bellandi-Castelluccio"
     birth: "11 maggio 1896"
@@ -80,7 +80,7 @@ people:
     birth: "7 dicembre 1898"
     death: "12 aprile 1969"
     marriageDate: "18 settembre 1920"
-    childrenNote: "Edoardo"
+    childrenNote: "Edoardo Gianlorenzo Bellandi-Castelluccio (14 marzo 1924 - 9 novembre 1991)"
   mother_father:
     name: "Giuseppe Salvatore Della Rovere-Malatesta"
     birth: "2 gennaio 1900"
@@ -90,7 +90,7 @@ people:
     birth: "25 settembre 1902"
     death: "6 marzo 1975"
     marriageDate: "14 febbraio 1924"
-    childrenNote: "Maria Giuseppina\nCarlotta\nDaniele"
+    childrenNote: "Maria Giuseppina Della Rovere-Malatesta (22 luglio 1926 - 3 febbraio 1996)\nCarlotta Della Rovere-Malatesta (8 novembre 1929 - 14 agosto 2002)"
   father_father_father:
     name: "Walter Sebastiano Sannazzaro-Farnesini"
     birth: "9 giugno 1870"
@@ -100,7 +100,7 @@ people:
     birth: "13 ottobre 1870"
     death: "5 gennaio 1942"
     marriageDate: "1895"
-    childrenNote: "Giorgio"
+    childrenNote: "Giorgio Marcantonio Bellandi-Castelluccio (11 maggio 1896 - 28 ottobre 1968)"
   father_mother_father:
     name: "Arturo Michelangelo Sannazzaro-Farnesini"
     birth: "4 aprile 1872"
@@ -110,7 +110,7 @@ people:
     birth: "27 novembre 1874"
     death: "2 febbraio 1948"
     marriageDate: "1897"
-    childrenNote: "Elena\nDorotea\nFedericantonio"
+    childrenNote: "Elena Francescamaria Bellandi-Castelluccio (7 dicembre 1898 - 12 aprile 1969)\nDorotea Bellandi-Castelluccio (4 aprile 1901 - 22 giugno 1972)"
   mother_father_father:
     name: "Davide Costantino Fioravanti-Bartolomei"
     birth: "16 febbraio 1876"
@@ -120,7 +120,7 @@ people:
     birth: "8 agosto 1878"
     death: "24 maggio 1954"
     marriageDate: "1899"
-    childrenNote: "Giuseppe\nElisabetta\nIgnazio\nElisabetta\nIgnazio"
+    childrenNote: "Giuseppe Salvatore Della Rovere-Malatesta (2 gennaio 1900 - 16 agosto 1972)\nElisabetta Della Rovere-Malatesta (17 settembre 1903 - 12 maggio 1979)"
   mother_mother_father:
     name: "Michele Bartolomeo Fioravanti-Bartolomei"
     birth: "20 gennaio 1880"
@@ -130,7 +130,7 @@ people:
     birth: "5 giugno 1882"
     death: "30 aprile 1950"
     marriageDate: "1901"
-    childrenNote: "Luisa\nFrancesca\nNicodemo\nFrancesca\nNicodemo\nFrancesca\nNicodemo"
+    childrenNote: "Luisa Caterinella Della Rovere-Malatesta (25 settembre 1902 - 6 marzo 1975)\nFrancesca Della Rovere-Malatesta (12 febbraio 1905 - 28 ottobre 1981)"
   father_father_father_father:
     name: "Roberto Ferdinando Pietrantonio-Valentini"
     birthYear: "?"
