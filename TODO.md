@@ -53,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.58` Relieved the mid-tree demo pressure by widening generations 3 and 4, using a bit more page width, shortening the shipped demo surnames in those generations, and tightening the QA warning threshold so generation 3 no longer warns on trivial reductions.
 - `v0.2.57` Added a checked-in browser preview baseline with toleranced scenario metrics and a refresh command so preview-shell drift is checked against stored accepted behavior.
 - `v0.2.56` Added a little more vertical spacing between the two external date lines in generation 4 so those labels no longer read as crowded.
 - `v0.2.55` Strengthened the browser QA gate so it now checks preview geometry across multiple scenarios, including hidden-editor, compact viewport, and fullscreen preview states.

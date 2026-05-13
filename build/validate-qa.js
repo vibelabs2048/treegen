@@ -119,8 +119,13 @@ function checkFitReport(report) {
     if (generation.actual?.dateMax > generation.requested?.dateSize + 0.01) {
       errors.push(`Generation ${generation.generation} exceeded its configured date-size ceiling.`);
     }
-    if (generation.limited?.nameCount >= generation.boxCount && generation.generation <= 4) {
-      warnings.push(`Generation ${generation.generation} had every box name reduced to fit.`);
+    const fullGenerationLimited = generation.limited?.nameCount >= generation.boxCount;
+    const nameReduction = generation.requested?.nameSize - generation.actual?.nameMin;
+    if (fullGenerationLimited && generation.generation === 3 && nameReduction > 0.6) {
+      warnings.push(`Generation ${generation.generation} had every box name reduced meaningfully to fit.`);
+    }
+    if (fullGenerationLimited && generation.generation === 4 && nameReduction > 1.2) {
+      warnings.push(`Generation ${generation.generation} had every box name reduced meaningfully to fit.`);
     }
   }
 }

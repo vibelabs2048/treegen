@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.58 - 2026-05-12
+
+- widened generations 3 and 4 slightly and used a bit more of the available page width to relieve mid-tree name pressure
+- shortened the shipped demo surnames for generations 3 and 4 so the example data is still Italian but no longer artificially stress-tests those generations as hard
+- refined the QA warning threshold so generation 3 only warns on meaningful full-generation reductions, while generation 4 remains the real pressure signal
+
 ## 0.2.57 - 2026-05-12
 
 - added a checked-in browser preview baseline with toleranced scenario metrics so the preview shell is now compared against stored expected behavior, not only raw minimum thresholds
