@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.56 - 2026-05-12
+
+- added a small extra vertical gap between the two external date lines in generation 4 so the birth and death labels read as separate lines more clearly
+
 ## 0.2.55 - 2026-05-12
 
 - strengthened the browser QA gate from a single preview snapshot into multi-scenario checks that cover normal preview, editor-hidden preview, compact viewport preview, and fullscreen preview

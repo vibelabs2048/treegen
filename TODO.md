@@ -53,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.56` Added a little more vertical spacing between the two external date lines in generation 4 so those labels no longer read as crowded.
 - `v0.2.55` Strengthened the browser QA gate so it now checks preview geometry across multiple scenarios, including hidden-editor, compact viewport, and fullscreen preview states.
 - `v0.2.54` Replaced the brittle disclosure-based menu interactions with an explicit top-menu controller, prevented overlapping open panels, and extended browser QA to assert real menu behavior.
 - `v0.2.53` Fixed the horizontal menu bar interaction model by switching it to native disclosure behavior so the menu buttons actually open and close their panels reliably.

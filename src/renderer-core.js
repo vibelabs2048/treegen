@@ -1045,6 +1045,9 @@ function getExternalDateAvailableWidth(node, slot, anchorX, anchor) {
 }
 
 function getExternalDateLineHeight(fontSize, generation) {
+  if (generation === 4) {
+    return Math.max(fontSize * 1.02, fontSize + 0.45);
+  }
   return generation <= 2
     ? Math.max(fontSize + 1, fontSize * 1.08)
     : Math.max(fontSize * 0.92, fontSize + 0.1);
