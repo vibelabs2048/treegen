@@ -175,32 +175,43 @@ label > textarea {
 }
 
 .menu-shell {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.menu-bar {
   position: relative;
 }
 
-.menu-toggle {
-  min-width: 2.5rem;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.7rem;
-  font-weight: 700;
+.menu-group {
+  position: relative;
 }
 
-.topbar-menu {
+.menu-button {
+  min-height: 2.2rem;
+  padding: 0.42rem 0.72rem;
+  font-weight: 600;
+}
+
+.menu-panel {
   position: absolute;
   top: calc(100% + 0.35rem);
   right: 0;
   z-index: 25;
   display: grid;
   gap: 0.55rem;
-  min-width: 15rem;
-  padding: 0.45rem;
+  min-width: 16rem;
+  max-width: min(26rem, calc(100vw - 2rem));
+  padding: 0.55rem;
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   background: var(--button-bg);
   box-shadow: 0 16px 32px var(--shadow-soft);
 }
 
-.topbar-menu button {
+.menu-panel button {
   text-align: left;
   width: 100%;
 }
@@ -248,18 +259,6 @@ label > textarea {
   letter-spacing: 0.04em;
 }
 
-.advanced-menu {
-  display: grid;
-  gap: 0.35rem;
-  margin: -0.1rem 0 0.15rem;
-  padding: 0.35rem 0 0 0.65rem;
-  border-left: 2px solid var(--panel-border);
-}
-
-.advanced-menu[hidden] {
-  display: none;
-}
-
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 282px;
@@ -302,7 +301,15 @@ label > textarea {
   display: block;
 }
 
-.topbar-menu[hidden] {
+.menu-panel[hidden] {
+  display: none;
+}
+
+.workspace.editor-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace.editor-hidden .sidebar {
   display: none;
 }
 

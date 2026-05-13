@@ -15,44 +15,70 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.51</span>
+            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.52</span>
           </div>
           <div class="project-status-row">
             <span id="project-status-label" class="project-status-label" title="Current project or session label">Local session</span>
             <span id="project-status-detail" class="project-status-detail" title="Current save or cache destination and timing">Not saved to your device yet</span>
           </div>
         </div>
-        <div class="menu-shell">
-          <button id="menu-toggle" type="button" class="menu-toggle" title="Open the main menu" aria-expanded="false" aria-controls="topbar-menu">☰</button>
-          <div id="topbar-menu" class="topbar-menu" hidden>
-            <section class="menu-section menu-project-summary" aria-label="Current project summary">
-              <p class="menu-section-title">Current Project</p>
-              <p id="menu-project-name" class="menu-project-name">Local session</p>
-              <p id="menu-project-state" class="menu-project-state">Not saved to your device yet</p>
-            </section>
-            <section class="menu-section" aria-label="Project actions">
-              <p class="menu-section-title">Project</p>
-              <button id="open-recent-projects" type="button" title="Open the project manager for current and recent TreeGen projects">Projects</button>
-              <button id="undo-action" type="button" title="Undo the last tree change">Undo</button>
-              <button id="redo-action" type="button" title="Redo the last undone tree change">Redo</button>
-              <button id="open-export" type="button" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
-              <button id="toggle-advanced" type="button" title="Show advanced YAML import tools" aria-expanded="false" aria-controls="advanced-menu">Advanced</button>
-              <div id="advanced-menu" class="advanced-menu" hidden>
-                <button id="open-import" type="button" title="Import a YAML family tree from a file or pasted text">Import YAML</button>
-              </div>
-            </section>
-            <section class="menu-section" aria-label="Display and downloads">
-              <p class="menu-section-title">Display</p>
-              <button id="toggle-theme" type="button" title="Switch between light and dark mode">Use Dark Mode</button>
-              <button id="open-downloads" type="button" title="Open direct desktop downloads for Windows, macOS, and Linux">Downloads</button>
-            </section>
-            <section class="menu-section" aria-label="Help and information">
-              <p class="menu-section-title">Help</p>
-              <button id="open-help" type="button" title="Open a quick guide to editing and exporting family trees">How To</button>
-              <button id="open-about" type="button" title="View version and release information">About</button>
-            </section>
+        <nav class="menu-shell menu-bar" aria-label="Main menu">
+          <div class="menu-group">
+            <button id="projects-menu-button" type="button" class="menu-button" data-menu-target="projects-menu" aria-expanded="false">Projects</button>
+            <div id="projects-menu" class="menu-panel" hidden>
+              <section class="menu-section menu-project-summary" aria-label="Current project summary">
+                <p class="menu-section-title">Current Project</p>
+                <p id="menu-project-name" class="menu-project-name">Local session</p>
+                <p id="menu-project-state" class="menu-project-state">Not saved to your device yet</p>
+              </section>
+              <section class="menu-section" aria-label="Project actions">
+                <button id="open-recent-projects" type="button" title="Open the project manager for current and recent TreeGen projects">Project Manager</button>
+                <button id="project-menu-new" type="button" title="Start a blank TreeGen project">New Project</button>
+                <button id="project-menu-open" type="button" title="Open a saved TreeGen project">Open Project</button>
+                <button id="project-menu-save" type="button" title="Save the current TreeGen project">Save</button>
+                <button id="project-menu-save-as" type="button" title="Save the current TreeGen project to a new file">Save As</button>
+                <button id="project-menu-autosave" type="button" title="Turn automatic background saving on or off">Autosave: On</button>
+                <button id="project-menu-load-demo" type="button" title="Load the example family tree into the editor">Load Demo</button>
+                <button id="project-menu-clear" type="button" title="Clear every person and reset the current tree">Clear Tree</button>
+              </section>
+            </div>
           </div>
-        </div>
+          <div class="menu-group">
+            <button id="export-menu-button" type="button" class="menu-button" data-menu-target="export-menu" aria-expanded="false">Export</button>
+            <div id="export-menu" class="menu-panel" hidden>
+              <section class="menu-section" aria-label="Export actions">
+                <button id="open-export" type="button" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export Tree</button>
+                <button id="open-downloads" type="button" title="Open direct desktop downloads for Windows, macOS, and Linux">Downloads</button>
+              </section>
+            </div>
+          </div>
+          <div class="menu-group">
+            <button id="view-menu-button" type="button" class="menu-button" data-menu-target="view-menu" aria-expanded="false">View</button>
+            <div id="view-menu" class="menu-panel" hidden>
+              <section class="menu-section" aria-label="View actions">
+                <button id="toggle-sidebar" type="button" title="Hide or show the side editing panel">Hide Editor</button>
+                <button id="toggle-theme" type="button" title="Switch between light and dark mode">Use Dark Mode</button>
+              </section>
+            </div>
+          </div>
+          <div class="menu-group">
+            <button id="help-menu-button" type="button" class="menu-button" data-menu-target="help-menu" aria-expanded="false">Help</button>
+            <div id="help-menu" class="menu-panel" hidden>
+              <section class="menu-section" aria-label="Help and information">
+                <button id="open-help" type="button" title="Open a quick guide to editing and exporting family trees">How To</button>
+                <button id="open-about" type="button" title="View version and release information">About</button>
+              </section>
+            </div>
+          </div>
+          <div class="menu-group">
+            <button id="advanced-menu-button" type="button" class="menu-button" data-menu-target="advanced-menu" aria-expanded="false">Advanced</button>
+            <div id="advanced-menu" class="menu-panel" hidden>
+              <section class="menu-section" aria-label="Advanced actions">
+                <button id="open-import" type="button" title="Import a YAML family tree from a file or pasted text">Import YAML</button>
+              </section>
+            </div>
+          </div>
+        </nav>
       </header>
 
       <main class="workspace">
@@ -363,7 +389,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.51</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.52</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>

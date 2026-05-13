@@ -3,11 +3,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.51",
+    version: "0.2.52",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
   const THEME_STORAGE_KEY = "treegen-theme-v1";
+  const SIDEBAR_STORAGE_KEY = "treegen-sidebar-visible-v1";
   const BROWSER_DRAFT_STORAGE_KEY = `treegen-browser-draft-v${PROJECT_SCHEMA_VERSION}`;
   const AUTOSAVE_STORAGE_KEY = "treegen-autosave-enabled-v1";
   const BROWSER_RECENT_PROJECTS_KEY = `treegen-browser-projects-v${PROJECT_SCHEMA_VERSION}`;
@@ -131,22 +132,26 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     sidebarTabs: Array.from(document.querySelectorAll(".sidebar-tab")),
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
-    toggleAdvanced: document.getElementById("toggle-advanced"),
+    menuButtons: Array.from(document.querySelectorAll(".menu-button")),
+    menuPanels: Array.from(document.querySelectorAll(".menu-panel")),
     advancedMenu: document.getElementById("advanced-menu"),
     openExport: document.getElementById("open-export"),
     openHelp: document.getElementById("open-help"),
     openAbout: document.getElementById("open-about"),
     openDownloads: document.getElementById("open-downloads"),
-    openProject: document.getElementById("open-project"),
     openRecentProjects: document.getElementById("open-recent-projects"),
-    newProject: document.getElementById("new-project"),
-    saveProject: document.getElementById("save-project"),
-    saveProjectAs: document.getElementById("save-project-as"),
-    toggleAutosave: document.getElementById("toggle-autosave"),
+    projectMenuNew: document.getElementById("project-menu-new"),
+    projectMenuOpen: document.getElementById("project-menu-open"),
+    projectMenuSave: document.getElementById("project-menu-save"),
+    projectMenuSaveAs: document.getElementById("project-menu-save-as"),
+    projectMenuAutosave: document.getElementById("project-menu-autosave"),
+    projectMenuLoadDemo: document.getElementById("project-menu-load-demo"),
+    projectMenuClear: document.getElementById("project-menu-clear"),
+    toggleSidebar: document.getElementById("toggle-sidebar"),
+    workspace: document.querySelector(".workspace"),
+    sidebar: document.querySelector(".sidebar"),
     undoAction: document.getElementById("undo-action"),
     redoAction: document.getElementById("redo-action"),
-    menuToggle: document.getElementById("menu-toggle"),
-    topbarMenu: document.getElementById("topbar-menu"),
     importModal: document.getElementById("import-modal"),
     exportModal: document.getElementById("export-modal"),
     aboutModal: document.getElementById("about-modal"),
@@ -208,10 +213,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   let autosaveTimer = null;
   let browserDraftTimer = null;
   let browserFileIntent = "import";
+  let openMenuId = "";
 
   async function init() {
     applyStoredTheme();
     applyStoredAutosavePreference();
+    applyStoredSidebarPreference();
     configureRuntimeMode();
     populateGenerationStyleSelect();
     bindEvents();
@@ -228,9 +235,41 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function bindEvents() {
+    elements.menuButtons.forEach((button) => {
+      button.addEventListener("click", toggleMenuPanel);
+    });
     elements.undoAction.addEventListener("click", undoChange);
     elements.redoAction.addEventListener("click", redoChange);
     elements.openRecentProjects.addEventListener("click", openRecentProjectsModal);
+    elements.projectMenuNew.addEventListener("click", () => {
+      closeTopbarMenu();
+      newProject();
+    });
+    elements.projectMenuOpen.addEventListener("click", async () => {
+      closeTopbarMenu();
+      await openProjectFile();
+    });
+    elements.projectMenuSave.addEventListener("click", async () => {
+      closeTopbarMenu();
+      await saveProjectFile();
+    });
+    elements.projectMenuSaveAs.addEventListener("click", async () => {
+      closeTopbarMenu();
+      await saveProjectFileAs();
+    });
+    elements.projectMenuAutosave.addEventListener("click", () => {
+      toggleAutosavePreference();
+      renderProjectManagerCurrent();
+    });
+    elements.projectMenuLoadDemo.addEventListener("click", () => {
+      closeTopbarMenu();
+      loadDemoData(true);
+    });
+    elements.projectMenuClear.addEventListener("click", () => {
+      closeTopbarMenu();
+      clearTree();
+    });
+    elements.toggleSidebar.addEventListener("click", toggleSidebarVisibility);
     elements.projectManagerNew.addEventListener("click", () => {
       closeModal("recent-projects");
       newProject();
@@ -260,8 +299,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       clearTree();
     });
     elements.toggleTheme.addEventListener("click", toggleThemeMode);
-    elements.toggleAdvanced.addEventListener("click", toggleAdvancedMenu);
-    elements.menuToggle.addEventListener("click", toggleTopbarMenu);
     elements.zoomOut.addEventListener("click", () => stepZoom(-5));
     elements.zoomIn.addEventListener("click", () => stepZoom(5));
     elements.zoomPercent.addEventListener("input", () => {
@@ -531,13 +568,22 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     setTheme(current === "dark" ? "light" : "dark");
   }
 
-  function toggleAdvancedMenu(event) {
-    if (event) {
-      event.stopPropagation();
+  function toggleMenuPanel(event) {
+    const button = event.currentTarget;
+    const targetId = button.dataset.menuTarget || "";
+    if (!targetId) return;
+    event.stopPropagation();
+    if (openMenuId === targetId) {
+      closeTopbarMenu();
+      return;
     }
-    const nextHidden = !elements.advancedMenu.hidden;
-    elements.advancedMenu.hidden = nextHidden;
-    elements.toggleAdvanced.setAttribute("aria-expanded", String(!nextHidden));
+    openMenuId = targetId;
+    elements.menuPanels.forEach((panel) => {
+      panel.hidden = panel.id !== targetId;
+    });
+    elements.menuButtons.forEach((menuButton) => {
+      menuButton.setAttribute("aria-expanded", String(menuButton === button));
+    });
   }
 
   function setActivePanel(target) {
@@ -1317,6 +1363,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         ? "Turn desktop autosave on or off for the current project."
         : "Turn browser local draft caching on or off for the current project.";
     }
+    if (elements.projectMenuAutosave) {
+      elements.projectMenuAutosave.textContent = state.project.autosaveEnabled ? "Autosave: On" : "Autosave: Off";
+      elements.projectMenuAutosave.title = desktopBridge
+        ? "Turn desktop autosave on or off for the current project."
+        : "Turn browser local draft caching on or off for the current project.";
+    }
   }
 
   function joinStatusParts(parts) {
@@ -1557,6 +1609,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       const svg = doc.documentElement;
       bindRenderedSvg(svg);
       elements.svgWrapper.replaceChildren(svg);
+      normalizePreviewSvgBounds(svg);
       syncFullscreenPreview(svg);
       applyZoom();
       updateGenerationFitReport();
@@ -1576,6 +1629,23 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         selectSlot(slotId);
       });
     });
+  }
+
+  function normalizePreviewSvgBounds(svg) {
+    try {
+      const bbox = svg.getBBox();
+      const base = svg.viewBox.baseVal;
+      if (![bbox.x, bbox.y, bbox.width, bbox.height, base.x, base.y, base.width, base.height].every(Number.isFinite)) {
+        return;
+      }
+      const minX = Math.min(base.x, bbox.x - PREVIEW_SVG_MARGIN_PT);
+      const minY = Math.min(base.y, bbox.y - PREVIEW_SVG_MARGIN_PT);
+      const maxX = Math.max(base.x + base.width, bbox.x + bbox.width + PREVIEW_SVG_MARGIN_PT);
+      const maxY = Math.max(base.y + base.height, bbox.y + bbox.height + PREVIEW_SVG_MARGIN_PT);
+      svg.setAttribute("viewBox", `${round2(minX)} ${round2(minY)} ${round2(maxX - minX)} ${round2(maxY - minY)}`);
+    } catch {
+      // Browser preview correction is best-effort only.
+    }
   }
 
   function buildLayout() {
@@ -2037,27 +2107,50 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     modal.hidden = true;
   }
 
-  function toggleTopbarMenu(event) {
-    event.stopPropagation();
-    const nextHidden = !elements.topbarMenu.hidden;
-    elements.topbarMenu.hidden = nextHidden;
-    elements.menuToggle.setAttribute("aria-expanded", String(!nextHidden));
-  }
-
   function closeTopbarMenu() {
-    elements.topbarMenu.hidden = true;
-    elements.menuToggle.setAttribute("aria-expanded", "false");
-    if (elements.advancedMenu && !elements.advancedMenu.hidden) {
-      elements.advancedMenu.hidden = true;
-      elements.toggleAdvanced.setAttribute("aria-expanded", "false");
-    }
+    openMenuId = "";
+    elements.menuPanels.forEach((panel) => {
+      panel.hidden = true;
+    });
+    elements.menuButtons.forEach((button) => {
+      button.setAttribute("aria-expanded", "false");
+    });
   }
 
   function handleDocumentMenuClick(event) {
-    if (elements.topbarMenu.hidden) return;
-    if (event.target === elements.menuToggle || elements.menuToggle.contains(event.target)) return;
-    if (elements.topbarMenu.contains(event.target)) return;
+    if (!openMenuId) return;
+    if (event.target.closest(".menu-shell")) return;
     closeTopbarMenu();
+  }
+
+  function applyStoredSidebarPreference() {
+    try {
+      const stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      setSidebarVisibility(stored !== "false", false);
+    } catch {
+      setSidebarVisibility(true, false);
+    }
+  }
+
+  function setSidebarVisibility(visible, persist = true) {
+    if (!elements.workspace || !elements.sidebar || !elements.toggleSidebar) return;
+    elements.workspace.classList.toggle("editor-hidden", !visible);
+    elements.toggleSidebar.textContent = visible ? "Hide Editor" : "Show Editor";
+    elements.toggleSidebar.title = visible
+      ? "Hide the side editing panel to maximize tree viewing space."
+      : "Show the side editing panel again.";
+    if (persist) {
+      try {
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, visible ? "true" : "false");
+      } catch {}
+    }
+  }
+
+  function toggleSidebarVisibility() {
+    const visible = !elements.workspace.classList.contains("editor-hidden");
+    setSidebarVisibility(!visible);
+    closeTopbarMenu();
+    handleWindowResize();
   }
 
   function maybeShowHelpModal() {

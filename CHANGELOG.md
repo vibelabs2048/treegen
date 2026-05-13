@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.52 - 2026-05-12
+
+- replaced the scrolling hamburger with a horizontal menu bar and submenu panels so the main shell no longer depends on a long vertical menu
+- added a `Hide Editor` / `Show Editor` control under `View` so the tree can take the full width when you do not need the side inspector
+- switched preview clipping protection to measured preview-bound normalization and kept explicit preview-shell QA checks in place
+
 ## 0.2.51 - 2026-05-12
 
 - shortened the hamburger menu by moving more document-level actions into the dedicated `Projects` surface so the top menu no longer needs to carry the full project workflow
