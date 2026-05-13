@@ -247,6 +247,17 @@ ipcMain.handle("treegen:remove-recent-project", async (_event, payload = {}) => 
   return { removed: true };
 });
 
+ipcMain.handle("treegen:delete-recent-project", async (_event, payload = {}) => {
+  const filePath = String(payload.path || "").trim();
+  if (!filePath) {
+    return { deleted: false };
+  }
+  await fs.unlink(filePath);
+  const entries = (await readRecentProjects()).filter((entry) => entry && entry.path !== filePath);
+  await writeRecentProjects(entries);
+  return { deleted: true, path: filePath };
+});
+
 async function createWindow() {
   if (!localServer) {
     localServer = await startServer({ port: 0 });

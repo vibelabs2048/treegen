@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.48 - 2026-05-12
+
+- split desktop recent-project removal into `Remove from Recent` and `Delete from Disk` so destructive file deletion is no longer mixed with simple list cleanup
+- added a stronger confirmation for deleting a project file from disk and kept the current tree open as an unsaved session if its backing file is deleted
+- updated the visible help copy and README so the difference between list removal and file deletion is explicit
+
 ## 0.2.47 - 2026-05-12
 
 - added a machine-checked QA validation step that inspects the generated SVG, output artifact sizes, and fit-report invariants instead of relying only on human review

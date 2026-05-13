@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.47",
+    version: "0.2.48",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -1107,7 +1107,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
           <div class="recent-project-actions">
             <button type="button" data-open-desktop-recent-project="${escapeHtml(entry.path || "")}">Open</button>
             <button type="button" data-rename-desktop-recent-project="${escapeHtml(entry.path || "")}">Rename</button>
-            <button type="button" data-delete-desktop-recent-project="${escapeHtml(entry.path || "")}">Remove</button>
+            <button type="button" data-remove-desktop-recent-project="${escapeHtml(entry.path || "")}">Remove from Recent</button>
+            <button type="button" data-delete-desktop-project-file="${escapeHtml(entry.path || "")}">Delete from Disk</button>
           </div>
         </article>
       `).join("");
@@ -1117,8 +1118,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       elements.recentProjectsList.querySelectorAll("[data-rename-desktop-recent-project]").forEach((button) => {
         button.addEventListener("click", () => renameRecentDesktopProject(button.getAttribute("data-rename-desktop-recent-project") || ""));
       });
-      elements.recentProjectsList.querySelectorAll("[data-delete-desktop-recent-project]").forEach((button) => {
-        button.addEventListener("click", () => deleteRecentDesktopProject(button.getAttribute("data-delete-desktop-recent-project") || ""));
+      elements.recentProjectsList.querySelectorAll("[data-remove-desktop-recent-project]").forEach((button) => {
+        button.addEventListener("click", () => removeRecentDesktopProject(button.getAttribute("data-remove-desktop-recent-project") || ""));
+      });
+      elements.recentProjectsList.querySelectorAll("[data-delete-desktop-project-file]").forEach((button) => {
+        button.addEventListener("click", () => deleteRecentDesktopProjectFile(button.getAttribute("data-delete-desktop-project-file") || ""));
       });
     } catch (error) {
       elements.recentProjectsList.innerHTML = `<p class="help-text">Recent desktop projects could not be loaded: ${escapeHtml(error.message || "unknown error")}.</p>`;
@@ -1193,12 +1197,36 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
   }
 
-  async function deleteRecentDesktopProject(filePath) {
+  async function removeRecentDesktopProject(filePath) {
     if (!desktopBridge || !filePath) return;
     try {
       await desktopBridge.removeRecentProject({ path: filePath });
       await renderDesktopRecentProjectsModal();
-      setStatus("Removed recent desktop project");
+      setStatus("Removed desktop project from the recent list");
+    } catch (error) {
+      setStatus(`Recent project error: ${error.message}`);
+    }
+  }
+
+  async function deleteRecentDesktopProjectFile(filePath) {
+    if (!desktopBridge || !filePath) return;
+    const projectName = basename(filePath);
+    const confirmed = window.confirm(
+      `Delete ${projectName} from disk?\n\nThis permanently removes the file from your filesystem. Use Remove from Recent if you only want to hide it from this list.`
+    );
+    if (!confirmed) return;
+    try {
+      const result = await desktopBridge.deleteRecentProject({ path: filePath });
+      if (!result || !result.deleted) return;
+      if (state.project.path === filePath) {
+        state.project.path = "";
+        state.project.lastSavedAt = "";
+        state.project.dirty = true;
+        await writeDesktopAutosave();
+        updateProjectStatusIndicator();
+      }
+      await renderDesktopRecentProjectsModal();
+      setStatus(`Deleted ${projectName} from disk. The current tree remains open but is now unsaved.`);
     } catch (error) {
       setStatus(`Recent project error: ${error.message}`);
     }

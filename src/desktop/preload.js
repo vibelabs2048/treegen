@@ -26,6 +26,9 @@ contextBridge.exposeInMainWorld("treegenDesktop", {
   removeRecentProject(payload) {
     return ipcRenderer.invoke("treegen:remove-recent-project", payload);
   },
+  deleteRecentProject(payload) {
+    return ipcRenderer.invoke("treegen:delete-recent-project", payload);
+  },
   readAutosave() {
     return ipcRenderer.invoke("treegen:read-autosave");
   },

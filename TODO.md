@@ -2,19 +2,13 @@
 
 ## Priority Work
 
-1. Add both desktop recent-project removal modes.
-   Scope:
-   - keep `Remove from recent` lightweight and clearly non-destructive
-   - add `Delete from disk` with a stronger warning/confirmation path
-   Status: Open
-
-2. Tighten project-state language around save destination instead of generic dirty markers.
+1. Tighten project-state language around save destination instead of generic dirty markers.
    Scope:
    - emphasize last saved time/date and destination like disk or local cache
    - keep unsaved-state signals explicit but secondary
    Status: Open
 
-3. Build a fuller project manager later.
+2. Build a fuller project manager later.
    Scope:
    - browser and desktop now both support open/remove/rename in `Recent Projects`
    - there is still no dedicated project-manager surface for browsing and organizing saved work at larger scale
@@ -59,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.48` Split desktop recent-project removal into a lightweight `Remove from Recent` action and a destructive `Delete from Disk` action with stronger confirmation, while keeping the current tree open but unsaved if its backing file is deleted.
 - `v0.2.47` Added hard QA validation for SVG sanity, artifact sizes, and fit-report invariants so CI can reject obviously broken preview/export output before release.
 - `v0.2.46` Brought desktop recent-project management closer to browser mode by allowing rename directly from `Recent Projects`, and updated the visible help text to match.
 - `v0.2.45` Added the first browser-side named-project step by making `Save As` assign browser project names and allowing rename directly from `Recent Projects`.
