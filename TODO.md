@@ -1,113 +1,57 @@
 # TreeGen Backlog
 
-## Priority Order
+## Current Priorities
 
-1. When surname inheritance is enabled, the inherited surname is not shown in the last-name editor field. Show the inherited surname in the editor in a disabled/read-only state so it is obvious why the field cannot be edited.
-   Status: Done in v0.2.35
+1. Continue UI polish around the editor shell.
+   Scope:
+   - keep the hamburger menu compact and coherent
+   - keep the inspector tab model clear and avoid duplicate section naming
+   - continue tightening tooltip coverage where behavior is subtle
+   Status: Open
 
-2. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
-   Status: Done in v0.2.36
+2. Decide whether browser mode should gain named local projects instead of one rolling draft.
+   Scope:
+   - current browser mode now supports one cached draft and recovery
+   - next step would be multiple browser-side drafts/projects if needed
+   Status: Open
 
-3. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
-   Status: Done in v0.2.35
+3. Decide whether desktop project state needs stronger visible affordances.
+   Scope:
+   - recent files
+   - dirty badges in more places
+   - clearer saved/autosaved distinction
+   Status: Open
 
-3. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
-   Status: Done in v0.2.34
+## Active Behavior Notes
 
-4. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
-   Status: Done in v0.2.30
+- Undo/redo works in both the browser and the desktop app because it lives in shared `src/app.js`.
+- Desktop project save/open/autosave/recovery exists now.
+- Browser mode now has automatic local draft caching and recovery.
+- Saved YAML now includes explicit `meta.appVersion`, `meta.schemaVersion`, and `meta.exportedAt`.
 
-5. Replace the current Fit button with a fullscreen-preview control. Use a fullscreen-style icon, open a modal focused on the SVG preview, keep only zoom controls in that view, maximize the preview area, and add a tooltip.
-   Status: Done in v0.2.31
+## Recently Completed
 
-6. Add undo and redo for editing actions.
-   Status: Done in v0.2.32
+- `v0.2.37` TreeGen became more project-focused in both browser and desktop mode: browser draft recovery was added, light/dark theme selection now persists, fullscreen control uses a real icon, project state is visible in the header, raw YAML import moved under Advanced, and the inspector now behaves more like a tabbed editor.
+- `v0.2.36` Name size controls now behave as a real ceiling; auto-fit can only hold or reduce the requested size.
+- `v0.2.35` Date size controls now use the requested size as the target, and inherited surnames remain visible in the disabled surname field.
+- `v0.2.34` Desktop project open/save, autosave, and recovery were added.
+- `v0.2.33` First/last name editing, surname inheritance, and explicit display-name override were added.
+- `v0.2.32` Undo and redo were added.
+- `v0.2.31` Fullscreen preview replaced the old Fit button.
+- `v0.2.30` Windows desktop text editing was stabilized.
 
-7. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
-   Status: Done in v0.2.33
+## Historical Milestones
 
-8. Refine the downloads page so OS and architecture are explicit. Show a selector for concrete targets such as Windows x64, macOS arm64, and Linux x64/AppImage (or whatever the actual release artifacts support), default it from the current device, and show only the links for the selected target.
-   Status: Done in v0.2.29
-
-9. Add a real downloads page to the hosted web version. It should be directly navigable, show Windows/macOS/Linux options with platform symbols, display the release version being downloaded, provide a clear way back to the editor/home screen, auto-detect the user's operating system, allow manual platform selection, and expose the GitHub-provided SHA-256 digest on demand.
-   Status: Done in v0.2.28
-
-10. Raise the preview zoom ceiling from 300 percent to 500 percent across the slider, numeric input, and zoom controls.
-   Status: Done in v0.2.28
-
-11. Fix the release pipeline failure in the publish step.
-   Error:
-   `Run gh release upload "$TAG" release-assets/* --clobber`
-   `failed to run git: fatal: not a git repository (or any of the parent directories): .git`
-   Status: Done and verified in GitHub Actions
-
-10. Refresh the shipped demo title-box subtitle so it no longer says "placeholder crest".
-   Status: Done in v0.2.17
-
-11. Make date prefixes generation-aware by default:
-    use `N` for birth, `M` for marriage, and `S` for death on generations 0-3 only,
-    and suppress those prefixes on generations 4-6 by default.
-    Status: Done in v0.2.18
-
-12. Prefix editing is still global. Adding or removing `N`, `M`, and `S` should work per generation in the UI, YAML model, and renderer.
-    Status: Done in v0.2.19
-
-13. Font-size controls need clearer limit feedback. The auto-fit behavior is useful, but the UI should show when a requested size is being capped by box-fit logic instead of letting the control imply it is fully applied.
-    Status: Done in v0.2.20
-
-14. Evaluate per-box text styling overrides. Long names vary enough that some boxes may need individual font size and color overrides beyond generation-level defaults.
-    Status: Done in v0.2.21
-
-15. Add a better change-evaluation workflow. TreeGen needs a more deliberate way to inspect formatting changes across preview, SVG, PNG, and PDF before calling a change good.
-    Status: Done in v0.2.22
-
-16. Add a safer pre-publish release path for the demo and desktop artifacts. The goal is to validate a production-like Pages build and release package before publishing to official GitHub Pages and tagged releases.
-    Status: Done in v0.2.23
-
-17. Date-size controls are still semantically misleading. External date rendering uses generation-specific fallback sizes around 4.4-4.6pt, so the requested date size is not currently acting like a real target across all generations.
-    Status: Open
-
-18. Name-size controls can currently exceed the requested value in some generations because the fitter boosts the starting size before shrinking. Decide whether the requested size should be a target hint or a hard ceiling.
-    Status: Open
-
-19. Generation 4 long hyphenated surnames can still overflow even after the three-line fitter runs. Break those names at hyphen boundaries before shrinking.
-    Status: Done in v0.2.24
-
-20. Rework the app shell for more chart space. Replace the wide top menu with a compact hamburger menu, remove the header logo/description, and shrink the header footprint.
-    Status: Done in v0.2.26
-
-21. Merge the editor tab chooser into the inspector itself and reduce the inspector footprint so the preview gets more width.
-    Status: Done in v0.2.26
-
-22. Normalize menu names and make the selected inspector section visually explicit.
-    Status: Done in v0.2.26
-
-23. Add broader tooltips across menu items and editor fields, especially where "inherit" and generation-scoped controls are not obvious.
-    Status: First pass done in v0.2.26
-
-24. Windows desktop build: verify why Display Name may not be editable. If intentionally locked in some state, gray it out and explain why; otherwise fix the interaction bug.
-    Status: Done in v0.2.30
-
-25. Increase preview zoom controls to at least 300 percent everywhere, including the slider ceiling.
-    Status: Done in v0.2.26
-
-26. Add a simple first-run help modal for the desktop app and browser demo, shown only on initial launch.
-    Status: Done in v0.2.26
-
-27. Add undo and redo for editing actions.
-    Status: Open
-
-28. Split first and last name editing, add optional paternal surname inheritance, and allow an explicit arbitrary display-name override.
-    Status: Open
-
-29. Add project save and autosave behavior, including desktop-side cached recovery under a local TreeGen app directory.
-    Status: Open
-
-30. Widen generation 0-3 boxes slightly to use available width more effectively.
-    Status: Done in v0.2.27
-
-31. Remove the TreeGen logo from the menu bar.
-    Status: Done in v0.2.26
-
-32. Add an author/about link in the shared About view that points to the main site at `https://vibelabs2048.github.io/`.
-    Status: Done in v0.2.28
+- `v0.2.29` Downloads page uses explicit OS/architecture targets.
+- `v0.2.28` Dedicated downloads page, OS detection, SHA-256 display, and 500% zoom ceiling.
+- `v0.2.27` Wider generations 0-3 boxes.
+- `v0.2.26` Streamlined app shell, smaller inspector, tooltips, first-run help.
+- `v0.2.25` Generation 4 fit tightening and platform download modal.
+- `v0.2.24` Hyphenated generation 4 surname overflow fix.
+- `v0.2.23` Pre-publish validation workflow.
+- `v0.2.22` Repeatable QA review bundle.
+- `v0.2.21` Per-box text overrides.
+- `v0.2.20` Fit feedback in the UI.
+- `v0.2.19` Per-generation date prefixes.
+- `v0.2.18` Default early-generation `N/M/S` prefixes.
+- `v0.2.17` Preview no-clipping fit improvements.

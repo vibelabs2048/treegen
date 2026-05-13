@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.37 - 2026-05-12
+
+- made the app more project-focused by moving raw YAML import under an Advanced submenu while keeping project open/save/export prominent
+- added browser-side draft caching and recovery so the hosted and local browser versions can restore recent work automatically
+- added persistent light/dark mode and visible project-state status in the header
+- replaced the fullscreen preview control with a real inline SVG icon and cleaned up the inspector so the active tab title is shown once instead of being duplicated
+- started writing explicit YAML `meta` information for app version, schema version, and export timestamp
+
 ## 0.2.36 - 2026-05-12
 
 - changed name-size fitting so the requested name size is now a real ceiling instead of a boosted starting hint

@@ -3,9 +3,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.36",
+    version: "0.2.37",
     lastUpdated: "2026-05-12",
   };
+  const PROJECT_SCHEMA_VERSION = 2;
+  const THEME_STORAGE_KEY = "treegen-theme-v1";
+  const BROWSER_DRAFT_STORAGE_KEY = `treegen-browser-draft-v${PROJECT_SCHEMA_VERSION}`;
   const MAX_GENERATION = 6;
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
   const PAGE_WIDTH_PT = 792;
@@ -50,6 +53,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       path: "",
       autosavePath: "",
       autosaveUpdatedAt: "",
+      dirty: false,
+      browserDraftUpdatedAt: "",
     },
     history: {
       undoStack: [],
@@ -119,6 +124,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     sidebarTabs: Array.from(document.querySelectorAll(".sidebar-tab")),
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
+    toggleAdvanced: document.getElementById("toggle-advanced"),
+    advancedMenu: document.getElementById("advanced-menu"),
     openExport: document.getElementById("open-export"),
     openHelp: document.getElementById("open-help"),
     openAbout: document.getElementById("open-about"),
@@ -159,6 +166,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     fullscreenZoomRange: document.getElementById("fullscreen-zoom-range"),
     fullscreenZoomPercent: document.getElementById("fullscreen-zoom-percent"),
     appVersionBadge: document.getElementById("app-version-badge"),
+    toggleTheme: document.getElementById("toggle-theme"),
+    projectStatusLabel: document.getElementById("project-status-label"),
+    projectStatusDetail: document.getElementById("project-status-detail"),
     aboutVersion: document.getElementById("about-version"),
     aboutLastUpdated: document.getElementById("about-last-updated"),
     aboutRuntime: document.getElementById("about-runtime"),
@@ -172,8 +182,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
   const latestReleaseUrl = resolveLatestReleaseUrl();
   let autosaveTimer = null;
+  let browserDraftTimer = null;
 
   async function init() {
+    applyStoredTheme();
     configureRuntimeMode();
     populateGenerationStyleSelect();
     bindEvents();
@@ -181,10 +193,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     enableStageDragging(elements.previewStage, ".node-box");
     enableStageDragging(elements.fullscreenPreviewStage);
     const restored = await maybeRestoreDesktopAutosave();
-    if (!restored) {
+    if (!restored && !(await maybeRestoreBrowserDraft())) {
       loadDemoData();
     }
     maybeShowHelpModal();
+    updateProjectStatusIndicator();
     window.addEventListener("resize", handleWindowResize);
   }
 
@@ -197,6 +210,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.redoAction.addEventListener("click", redoChange);
     elements.openProject.addEventListener("click", openProjectFile);
     elements.saveProject.addEventListener("click", saveProjectFile);
+    elements.toggleTheme.addEventListener("click", toggleThemeMode);
+    elements.toggleAdvanced.addEventListener("click", toggleAdvancedMenu);
     document.getElementById("clear-tree").addEventListener("click", () => {
       closeTopbarMenu();
       clearTree();
@@ -433,6 +448,48 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     });
   }
 
+  function applyStoredTheme() {
+    let theme = "light";
+    try {
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+      if (stored === "dark" || stored === "light") {
+        theme = stored;
+      }
+    } catch {}
+    setTheme(theme, false);
+  }
+
+  function setTheme(theme, persist = true) {
+    const nextTheme = theme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = nextTheme;
+    if (elements.toggleTheme) {
+      elements.toggleTheme.textContent = nextTheme === "dark" ? "Use Light Mode" : "Use Dark Mode";
+      elements.toggleTheme.title = nextTheme === "dark"
+        ? "Switch from dark mode back to light mode"
+        : "Switch from light mode into dark mode";
+    }
+    if (persist) {
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+      } catch {}
+    }
+    updateProjectStatusIndicator();
+  }
+
+  function toggleThemeMode() {
+    const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    setTheme(current === "dark" ? "light" : "dark");
+  }
+
+  function toggleAdvancedMenu(event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    const nextHidden = !elements.advancedMenu.hidden;
+    elements.advancedMenu.hidden = nextHidden;
+    elements.toggleAdvanced.setAttribute("aria-expanded", String(!nextHidden));
+  }
+
   function setActivePanel(target) {
     elements.tabPanels.forEach((panel) => {
       panel.classList.toggle("active", panel.dataset.panel === target);
@@ -452,11 +509,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     state.people = buildBlankPeople();
     state.selectedId = "root";
     state.history.redoStack = [];
+    state.project.dirty = true;
     hydrateControls();
     renderChart();
     refreshYamlEditor();
     updateHistoryControls();
     scheduleDesktopAutosave();
+    scheduleBrowserDraftSave();
+    updateProjectStatusIndicator();
     setStatus("Cleared tree");
   }
 
@@ -518,6 +578,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     state.settings = clone(DEFAULT_SETTINGS);
     state.people = buildDefaultPeople();
     state.selectedId = "root";
+    state.project.path = "";
+    state.project.dirty = false;
     state.export = {
       format: canExactServerExport ? "pdf" : "svg",
       quality: 100,
@@ -532,6 +594,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     fitWidth();
     updateHistoryControls();
     scheduleDesktopAutosave();
+    scheduleBrowserDraftSave();
+    updateProjectStatusIndicator();
     setStatus("Loaded Italian family demo");
   }
 
@@ -604,6 +668,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   function syncAfterChange(options = {}) {
     const { rehydrate = true } = options;
+    state.project.dirty = true;
     if (rehydrate) {
       hydrateControls();
     }
@@ -611,6 +676,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     renderChart();
     updateHistoryControls();
     scheduleDesktopAutosave();
+    scheduleBrowserDraftSave();
+    updateProjectStatusIndicator();
   }
 
   function captureHistoryState() {
@@ -659,6 +726,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     refreshYamlEditor();
     renderChart();
     updateHistoryControls();
+    state.project.dirty = true;
+    scheduleDesktopAutosave();
+    scheduleBrowserDraftSave();
+    updateProjectStatusIndicator();
     if (statusText) {
       setStatus(statusText);
     }
@@ -698,7 +769,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     try {
       applyYamlFromEditor(result.text || "");
       state.project.path = result.path || "";
+      state.project.dirty = false;
       await writeDesktopAutosave();
+      updateProjectStatusIndicator();
       setStatus(`Opened project ${basename(result.path || "project")}`);
     } catch {
       // status already updated
@@ -720,7 +793,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       });
       if (!result || result.canceled) return;
       state.project.path = result.path || state.project.path;
+      state.project.dirty = false;
       await writeDesktopAutosave();
+      updateProjectStatusIndicator();
       setStatus(`Saved project ${basename(result.path || "project")}`);
     } catch (error) {
       setStatus(`Project save error: ${error.message}`);
@@ -743,6 +818,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       state.project.path = autosave.projectPath || "";
       state.project.autosavePath = autosave.path || "";
       state.project.autosaveUpdatedAt = autosave.updatedAt || "";
+      state.project.dirty = false;
+      updateProjectStatusIndicator();
       setStatus(`Recovered autosave${label}`);
       return true;
     } catch (error) {
@@ -769,8 +846,61 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       });
       state.project.autosavePath = result?.path || state.project.autosavePath;
       state.project.autosaveUpdatedAt = result?.updatedAt || state.project.autosaveUpdatedAt;
+      updateProjectStatusIndicator();
     } catch (error) {
       setStatus(`Autosave error: ${error.message}`);
+    }
+  }
+
+  async function maybeRestoreBrowserDraft() {
+    if (desktopBridge) return false;
+    try {
+      const raw = window.localStorage.getItem(BROWSER_DRAFT_STORAGE_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+      if (!draft || typeof draft.text !== "string" || !draft.text.trim()) {
+        return false;
+      }
+      const label = draft.updatedAt ? ` from ${formatTimestamp(draft.updatedAt)}` : "";
+      const restore = window.confirm(`Recover the last browser draft${label}?`);
+      if (!restore) {
+        return false;
+      }
+      applyYamlFromEditor(draft.text);
+      state.project.browserDraftUpdatedAt = draft.updatedAt || "";
+      state.project.dirty = false;
+      updateProjectStatusIndicator();
+      setStatus(`Recovered browser draft${label}`);
+      return true;
+    } catch (error) {
+      setStatus(`Browser draft recovery error: ${error.message}`);
+      return false;
+    }
+  }
+
+  function scheduleBrowserDraftSave() {
+    if (desktopBridge) return;
+    clearTimeout(browserDraftTimer);
+    browserDraftTimer = setTimeout(() => {
+      writeBrowserDraft();
+    }, 450);
+  }
+
+  function writeBrowserDraft() {
+    if (desktopBridge) return;
+    refreshYamlEditor();
+    try {
+      const updatedAt = new Date().toISOString();
+      window.localStorage.setItem(BROWSER_DRAFT_STORAGE_KEY, JSON.stringify({
+        appVersion: APP_META.version,
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+        updatedAt,
+        text: state.yamlText || serializeCurrentState(),
+      }));
+      state.project.browserDraftUpdatedAt = updatedAt;
+      updateProjectStatusIndicator();
+    } catch (error) {
+      setStatus(`Browser draft error: ${error.message}`);
     }
   }
 
@@ -808,11 +938,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       state.history.redoStack = [];
       const parsed = parseYaml(yamlText || elements.importYamlText.value);
       applyImportedState(parsed);
+      state.project.dirty = false;
       hydrateControls();
       renderChart();
       refreshYamlEditor();
       updateHistoryControls();
       scheduleDesktopAutosave();
+      scheduleBrowserDraftSave();
+      updateProjectStatusIndicator();
       setStatus("Imported YAML");
     } catch (error) {
       setStatus("YAML error: " + error.message);
@@ -1388,6 +1521,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   function closeTopbarMenu() {
     elements.topbarMenu.hidden = true;
     elements.menuToggle.setAttribute("aria-expanded", "false");
+    if (elements.advancedMenu && !elements.advancedMenu.hidden) {
+      elements.advancedMenu.hidden = true;
+      elements.toggleAdvanced.setAttribute("aria-expanded", "false");
+    }
   }
 
   function handleDocumentMenuClick(event) {
@@ -1641,6 +1778,36 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         : "Project files and autosave are available in the desktop app.";
     }
     renderDownloadOptions();
+    updateProjectStatusIndicator();
+  }
+
+  function updateProjectStatusIndicator() {
+    if (!elements.projectStatusLabel || !elements.projectStatusDetail) return;
+    const themeLabel = document.documentElement.dataset.theme === "dark" ? "Dark mode" : "Light mode";
+    if (desktopBridge) {
+      const label = state.project.path ? basename(state.project.path) : "Desktop session";
+      const detailParts = [
+        themeLabel,
+        state.project.dirty ? "Unsaved changes" : "Saved state",
+      ];
+      if (state.project.autosaveUpdatedAt) {
+        detailParts.push(`Autosaved ${formatTimestamp(state.project.autosaveUpdatedAt)}`);
+      }
+      elements.projectStatusLabel.textContent = label;
+      elements.projectStatusDetail.textContent = detailParts.join(" · ");
+      return;
+    }
+    const hasDraft = !!state.project.browserDraftUpdatedAt;
+    elements.projectStatusLabel.textContent = hasDraft ? "Browser draft" : "Local session";
+    const detailParts = [themeLabel];
+    if (state.project.dirty) {
+      detailParts.push("Unsaved changes");
+    } else if (hasDraft) {
+      detailParts.push(`Draft cached ${formatTimestamp(state.project.browserDraftUpdatedAt)}`);
+    } else {
+      detailParts.push("No cached draft yet");
+    }
+    elements.projectStatusDetail.textContent = detailParts.join(" · ");
   }
 
   function renderDownloadOptions() {
@@ -2399,6 +2566,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   function serializeYaml(data) {
     const lines = [];
+    lines.push("meta:");
+    lines.push(`  appVersion: ${quoteYaml(APP_META.version)}`);
+    lines.push(`  schemaVersion: ${PROJECT_SCHEMA_VERSION}`);
+    lines.push(`  exportedAt: ${quoteYaml(new Date().toISOString())}`);
     lines.push("settings:");
     lines.push(`  fontFamily: ${quoteYaml(data.settings.fontFamily)}`);
     lines.push(`  fauxBold: ${data.settings.fauxBold ? "true" : "false"}`);
