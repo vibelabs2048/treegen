@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.46 - 2026-05-12
+
+- added desktop-side rename directly in `Recent Projects` so browser and desktop project management are no longer asymmetric at the first useful level
+- updated the Recent Projects help copy in the app and README so the visible guide matches the actual open/rename/remove behavior
+- kept desktop projects file-backed while making the current project path and recent-entry management feel more like named projects
+
 ## 0.2.45 - 2026-05-12
 
 - made browser `Save As` define the logical project filename so browser-side saved work starts behaving more like named projects instead of anonymous snapshots

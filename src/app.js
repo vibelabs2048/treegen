@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.45",
+    version: "0.2.46",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -1106,12 +1106,16 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
           <p>Saved ${escapeHtml(formatTimestamp(entry.updatedAt))}</p>
           <div class="recent-project-actions">
             <button type="button" data-open-desktop-recent-project="${escapeHtml(entry.path || "")}">Open</button>
+            <button type="button" data-rename-desktop-recent-project="${escapeHtml(entry.path || "")}">Rename</button>
             <button type="button" data-delete-desktop-recent-project="${escapeHtml(entry.path || "")}">Remove</button>
           </div>
         </article>
       `).join("");
       elements.recentProjectsList.querySelectorAll("[data-open-desktop-recent-project]").forEach((button) => {
         button.addEventListener("click", () => openRecentDesktopProject(button.getAttribute("data-open-desktop-recent-project") || ""));
+      });
+      elements.recentProjectsList.querySelectorAll("[data-rename-desktop-recent-project]").forEach((button) => {
+        button.addEventListener("click", () => renameRecentDesktopProject(button.getAttribute("data-rename-desktop-recent-project") || ""));
       });
       elements.recentProjectsList.querySelectorAll("[data-delete-desktop-recent-project]").forEach((button) => {
         button.addEventListener("click", () => deleteRecentDesktopProject(button.getAttribute("data-delete-desktop-recent-project") || ""));
@@ -1195,6 +1199,26 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       await desktopBridge.removeRecentProject({ path: filePath });
       await renderDesktopRecentProjectsModal();
       setStatus("Removed recent desktop project");
+    } catch (error) {
+      setStatus(`Recent project error: ${error.message}`);
+    }
+  }
+
+  async function renameRecentDesktopProject(filePath) {
+    if (!desktopBridge || !filePath) return;
+    const currentName = basename(filePath);
+    const renamed = promptBrowserProjectName(currentName);
+    if (!renamed) return;
+    try {
+      const result = await desktopBridge.renameRecentProject({ path: filePath, name: renamed });
+      if (!result || !result.renamed) return;
+      if (state.project.path === filePath) {
+        state.project.path = result.path || filePath;
+        state.project.lastSavedAt = result.updatedAt || state.project.lastSavedAt;
+        updateProjectStatusIndicator();
+      }
+      await renderDesktopRecentProjectsModal();
+      setStatus(`Renamed recent project to ${basename(result.path || currentName)}`);
     } catch (error) {
       setStatus(`Recent project error: ${error.message}`);
     }

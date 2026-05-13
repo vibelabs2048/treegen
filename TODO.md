@@ -2,11 +2,10 @@
 
 ## Broken / Awkward
 
-1. Browser and desktop project workflow still lacks full named-project management.
+1. Decide whether TreeGen needs a dedicated project manager beyond the current recent-project workflow.
    Scope:
-   - browser now supports named `Save As` entries plus rename in `Recent Projects`
-   - desktop still treats projects strictly as files, not named managed entries
-   - there is still no full project manager for browsing, renaming, and organizing saved work
+   - browser and desktop now both support open/remove plus rename in `Recent Projects`
+   - there is still no dedicated project-manager surface for browsing and organizing saved work at larger scale
    Status: Open
 
 ## Missing
@@ -48,6 +47,7 @@
 
 ## Recently Completed
 
+- `v0.2.46` Brought desktop recent-project management closer to browser mode by allowing rename directly from `Recent Projects`, and updated the visible help text to match.
 - `v0.2.45` Added the first browser-side named-project step by making `Save As` assign browser project names and allowing rename directly from `Recent Projects`.
 - `v0.2.44` Strengthened project-state visibility by surfacing a current-project summary and clearer save/autosave state directly in the main menu, and enabled `Recent Projects` for desktop too.
 - `v0.2.43` Extended `Recent Projects` into the desktop app so the same project workflow exists in both browser and desktop runtimes.

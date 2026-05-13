@@ -54,6 +54,13 @@ async function rememberRecentProject(filePath) {
   await writeRecentProjects(entries);
 }
 
+function ensureProjectFileExtension(fileName) {
+  const trimmed = String(fileName || "").trim();
+  if (!trimmed) return "family-tree.treegen.yaml";
+  if (/\.(yaml|yml)$/i.test(trimmed)) return trimmed;
+  return `${trimmed}.treegen.yaml`;
+}
+
 ipcMain.handle("treegen:open-yaml", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     title: "Open TreeGen YAML",
@@ -208,6 +215,29 @@ ipcMain.handle("treegen:open-recent-project", async (_event, payload = {}) => {
   const text = await fs.readFile(filePath, "utf8");
   await rememberRecentProject(filePath);
   return { canceled: false, path: filePath, text };
+});
+
+ipcMain.handle("treegen:rename-recent-project", async (_event, payload = {}) => {
+  const filePath = String(payload.path || "").trim();
+  const requestedName = ensureProjectFileExtension(payload.name || "");
+  if (!filePath || !requestedName) {
+    return { renamed: false };
+  }
+  const nextPath = path.join(path.dirname(filePath), requestedName);
+  if (nextPath === filePath) {
+    const stats = await fs.stat(filePath);
+    return { renamed: true, path: filePath, updatedAt: stats.mtime.toISOString() };
+  }
+  try {
+    await fs.access(nextPath);
+    throw new Error(`A project named ${requestedName} already exists in this folder.`);
+  } catch (error) {
+    if (error && error.code !== "ENOENT") throw error;
+  }
+  await fs.rename(filePath, nextPath);
+  const stats = await fs.stat(nextPath);
+  await rememberRecentProject(nextPath);
+  return { renamed: true, path: nextPath, updatedAt: stats.mtime.toISOString() };
 });
 
 ipcMain.handle("treegen:remove-recent-project", async (_event, payload = {}) => {

@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld("treegenDesktop", {
   openRecentProject(payload) {
     return ipcRenderer.invoke("treegen:open-recent-project", payload);
   },
+  renameRecentProject(payload) {
+    return ipcRenderer.invoke("treegen:rename-recent-project", payload);
+  },
   removeRecentProject(payload) {
     return ipcRenderer.invoke("treegen:remove-recent-project", payload);
   },
