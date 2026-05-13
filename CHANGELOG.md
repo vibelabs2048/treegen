@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.59 - 2026-05-12
+
+- restored undo and redo as top-bar icon actions so the shared history controls are visible again and no longer hidden behind missing markup
+
 ## 0.2.58 - 2026-05-12
 
 - widened generations 3 and 4 slightly and used a bit more of the available page width to relieve mid-tree name pressure

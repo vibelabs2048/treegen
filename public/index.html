@@ -15,12 +15,28 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.58</span>
+            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.59</span>
           </div>
           <div class="project-status-row">
             <span id="project-status-label" class="project-status-label" title="Current project or session label">Local session</span>
             <span id="project-status-detail" class="project-status-detail" title="Current save or cache destination and timing">Not saved to your device yet</span>
           </div>
+        </div>
+        <div class="topbar-history" aria-label="History actions">
+          <button id="undo-action" type="button" class="icon-button history-button" title="Undo the most recent change">
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="toolbar-icon">
+              <path d="M9 7 4 12l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 17a7 7 0 0 0-7-7H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="sr-only">Undo</span>
+          </button>
+          <button id="redo-action" type="button" class="icon-button history-button" title="Redo the most recently undone change">
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="toolbar-icon">
+              <path d="m15 7 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 17a7 7 0 0 1 7-7h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="sr-only">Redo</span>
+          </button>
         </div>
         <nav class="menu-shell menu-bar" aria-label="Main menu">
           <div class="menu-group">
@@ -389,7 +405,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.58</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.59</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>
