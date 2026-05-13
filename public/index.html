@@ -15,7 +15,7 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.49</span>
+            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.50</span>
           </div>
           <div class="project-status-row">
             <span id="project-status-label" class="project-status-label" title="Current project or session label">Local session</span>
@@ -35,7 +35,7 @@
               <button id="undo-action" type="button" title="Undo the last tree change">Undo</button>
               <button id="redo-action" type="button" title="Redo the last undone tree change">Redo</button>
               <button id="open-project" type="button" title="Open a saved TreeGen project from disk">Open Project</button>
-              <button id="open-recent-projects" type="button" title="Open a recent browser-side TreeGen project snapshot">Recent Projects</button>
+              <button id="open-recent-projects" type="button" title="Open the project manager for current and recent TreeGen projects">Projects</button>
               <button id="new-project" type="button" title="Start a blank TreeGen project">New Project</button>
               <button id="save-project" type="button" title="Save the current TreeGen project">Save</button>
               <button id="save-project-as" type="button" title="Choose a new location or filename for the current TreeGen project">Save As</button>
@@ -370,7 +370,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.49</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.50</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>
@@ -398,11 +398,23 @@
       <div class="modal-backdrop" data-close-modal="recent-projects"></div>
       <section class="modal-card">
         <div class="modal-header">
-          <h2>Recent Projects</h2>
+          <h2>Projects</h2>
           <button id="close-recent-projects" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p class="help-text">Recent Projects shows saved browser-side project snapshots in the browser and tracked project files in the desktop app. In the desktop app, Remove from Recent only clears the list entry, while Delete from Disk removes the project file itself.</p>
+          <div id="project-manager-current" class="recent-project-card">
+            <h3>Current Project</h3>
+            <p id="project-manager-current-name">Local session</p>
+            <p id="project-manager-current-detail">Not saved to your device yet</p>
+            <div class="recent-project-actions">
+              <button id="project-manager-new" type="button">New</button>
+              <button id="project-manager-open" type="button">Open</button>
+              <button id="project-manager-save" type="button">Save</button>
+              <button id="project-manager-save-as" type="button">Save As</button>
+            </div>
+          </div>
+          <p class="help-text">Use this project manager to work with the current tree and reopen saved work. In the desktop app, Remove from Recent only clears the list entry, while Delete from Disk removes the project file itself.</p>
+          <h3 class="slot-title">Recent Projects</h3>
           <div id="recent-projects-list" class="recent-projects-list"></div>
         </div>
       </section>
@@ -421,8 +433,8 @@
           <p>3. Click any box in the chart, then edit person details in the inspector on the right.</p>
           <p>4. Use <strong>Format</strong> and <strong>Title</strong> to adjust generation defaults and title-box content.</p>
           <p>5. Use <strong>Save</strong>, <strong>Save As</strong>, and <strong>Autosave</strong> to manage your project while you work. The header shows where the current tree was last saved or cached and when that happened.</p>
-          <p>6. In the browser, <strong>Save As</strong> names the project file and <strong>Recent Projects</strong> lets you reopen, rename, or remove saved browser-side entries.</p>
-          <p>7. Use <strong>Recent Projects</strong> to reopen, rename, remove from the recent list, or delete desktop project files from disk with confirmation.</p>
+          <p>6. Open <strong>Projects</strong> from the main menu to manage the current tree and reopen saved work.</p>
+          <p>7. In the browser, <strong>Save As</strong> names the project file and <strong>Projects</strong> lets you reopen, rename, or remove saved browser-side entries. In the desktop app, it also supports removing entries from the recent list or deleting project files from disk with confirmation.</p>
           <p>8. Use the desktop app when you need exact PDF, PNG, or JPG output.</p>
         </div>
         <div class="modal-actions">

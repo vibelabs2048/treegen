@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.50 - 2026-05-12
+
+- turned the old recent-project modal into a dedicated `Projects` surface with current-project actions for new, open, save, and save as
+- renamed the main menu entry from `Recent Projects` to `Projects` so the workflow reads like an application rather than a cache viewer
+- updated the visible help copy and README so the user-facing documentation matches the new project-manager surface
+
 ## 0.2.49 - 2026-05-12
 
 - reworked project-status wording so the header and menu now lead with where and when the current tree was last saved or cached instead of leading with a generic saved/dirty label

@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.49",
+    version: "0.2.50",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -149,6 +149,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     aboutModal: document.getElementById("about-modal"),
     downloadsModal: document.getElementById("downloads-modal"),
     recentProjectsModal: document.getElementById("recent-projects-modal"),
+    projectManagerCurrentName: document.getElementById("project-manager-current-name"),
+    projectManagerCurrentDetail: document.getElementById("project-manager-current-detail"),
+    projectManagerNew: document.getElementById("project-manager-new"),
+    projectManagerOpen: document.getElementById("project-manager-open"),
+    projectManagerSave: document.getElementById("project-manager-save"),
+    projectManagerSaveAs: document.getElementById("project-manager-save-as"),
     helpModal: document.getElementById("help-modal"),
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
@@ -224,6 +230,22 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.redoAction.addEventListener("click", redoChange);
     elements.openProject.addEventListener("click", openProjectFile);
     elements.openRecentProjects.addEventListener("click", openRecentProjectsModal);
+    elements.projectManagerNew.addEventListener("click", () => {
+      closeModal("recent-projects");
+      newProject();
+    });
+    elements.projectManagerOpen.addEventListener("click", async () => {
+      closeModal("recent-projects");
+      await openProjectFile();
+    });
+    elements.projectManagerSave.addEventListener("click", async () => {
+      closeModal("recent-projects");
+      await saveProjectFile();
+    });
+    elements.projectManagerSaveAs.addEventListener("click", async () => {
+      closeModal("recent-projects");
+      await saveProjectFileAs();
+    });
     elements.newProject.addEventListener("click", newProject);
     elements.saveProject.addEventListener("click", saveProjectFile);
     elements.saveProjectAs.addEventListener("click", saveProjectFileAs);
@@ -804,6 +826,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   function openRecentProjectsModal() {
     closeTopbarMenu();
+    renderProjectManagerCurrent();
     openModal("recent-projects");
   }
 
@@ -1058,6 +1081,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function renderRecentProjectsModal() {
+    renderProjectManagerCurrent();
     if (!elements.recentProjectsList) return;
     if (desktopBridge) {
       void renderDesktopRecentProjectsModal();
@@ -1263,6 +1287,25 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const date = new Date(value);
     if (!Number.isFinite(date.getTime())) return "an unknown time";
     return date.toLocaleString();
+  }
+
+  function renderProjectManagerCurrent() {
+    if (!elements.projectManagerCurrentName || !elements.projectManagerCurrentDetail) return;
+    const status = desktopBridge ? buildDesktopProjectStatus() : buildBrowserProjectStatus();
+    elements.projectManagerCurrentName.textContent = status.label;
+    elements.projectManagerCurrentDetail.textContent = status.detail;
+    if (elements.projectManagerSave) {
+      elements.projectManagerSave.disabled = false;
+      elements.projectManagerSave.title = desktopBridge
+        ? "Save the current TreeGen project to its current disk file or choose one if needed."
+        : "Download the current TreeGen project using its current browser filename.";
+    }
+    if (elements.projectManagerSaveAs) {
+      elements.projectManagerSaveAs.disabled = false;
+      elements.projectManagerSaveAs.title = desktopBridge
+        ? "Save the current TreeGen project to a new disk file."
+        : "Download the current TreeGen project under a new browser filename.";
+    }
   }
 
   function joinStatusParts(parts) {
@@ -2267,8 +2310,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     if (elements.openRecentProjects) {
       elements.openRecentProjects.disabled = false;
       elements.openRecentProjects.title = desktopBridge
-        ? "Open a recent desktop project file tracked on this machine."
-        : "Open a recent browser-side TreeGen project snapshot stored on this device.";
+        ? "Open the project manager for the current project and recent desktop project files."
+        : "Open the project manager for the current project and recent browser-side project files.";
     }
     if (elements.saveProject) {
       elements.saveProject.disabled = false;

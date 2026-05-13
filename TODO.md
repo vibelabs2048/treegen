@@ -2,10 +2,10 @@
 
 ## Priority Work
 
-1. Build a fuller project manager later.
+1. Decide whether the first project-manager surface needs a second pass for scale.
    Scope:
-   - browser and desktop now both support open/remove/rename in `Recent Projects`
-   - there is still no dedicated project-manager surface for browsing and organizing saved work at larger scale
+   - browser and desktop now have a dedicated `Projects` surface for current actions plus recent entries
+   - decide whether larger collections need search, sections, or stronger organization later
    Status: Open
 
 ## Missing
@@ -47,6 +47,7 @@
 
 ## Recently Completed
 
+- `v0.2.50` Turned the old recent-project modal into a dedicated `Projects` surface with current-project actions plus the recent list, keeping the workflow file-oriented in both browser and desktop mode.
 - `v0.2.49` Reworked project-status wording so TreeGen now leads with where and when the current tree was last saved or cached, with unsaved changes treated as secondary context instead of the main status message.
 - `v0.2.48` Split desktop recent-project removal into a lightweight `Remove from Recent` action and a destructive `Delete from Disk` action with stronger confirmation, while keeping the current tree open but unsaved if its backing file is deleted.
 - `v0.2.47` Added hard QA validation for SVG sanity, artifact sizes, and fit-report invariants so CI can reject obviously broken preview/export output before release.
