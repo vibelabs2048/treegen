@@ -9,6 +9,8 @@ const repoRoot = process.cwd();
 const outputDir = path.join(repoRoot, "artifacts", "qa-review");
 const screenshotDir = path.join(outputDir, "preview-browser");
 const reportPath = path.join(outputDir, "preview-browser-check.json");
+const baselinePath = path.join(repoRoot, "qa", "baselines", "preview-browser.json");
+const updateBaseline = process.argv.includes("--update-baseline");
 const SCENARIOS = [
   {
     id: "desktop-default",
@@ -71,11 +73,23 @@ try {
     scenarios.push(await runScenario(page, scenario));
   }
 
+  let baselineFailures = [];
+  if (updateBaseline) {
+    await writeBaselineFile(scenarios);
+  } else {
+    baselineFailures = compareAgainstBaseline(readBaselineFile(), scenarios);
+  }
+
   const summary = {
     generatedAt: new Date().toISOString(),
-    ok: scenarios.every((scenario) => scenario.ok) && pageErrors.length === 0 && consoleErrors.length === 0,
+    ok:
+      scenarios.every((scenario) => scenario.ok) &&
+      pageErrors.length === 0 &&
+      consoleErrors.length === 0 &&
+      baselineFailures.length === 0,
     pageErrors,
     consoleErrors,
+    baselineFailures,
     scenarios,
   };
 
@@ -83,7 +97,13 @@ try {
 
   if (!summary.ok) {
     const failed = scenarios.filter((scenario) => !scenario.ok).map((scenario) => `${scenario.id}:${scenario.contentTop}px`);
-    console.error(`Preview browser check failed. ${failed.join(" | ") || "Browser console/page errors detected."}`);
+    console.error(
+      `Preview browser check failed. ${[
+        ...failed,
+        ...baselineFailures,
+        ...(pageErrors.length || consoleErrors.length ? ["Browser console/page errors detected."] : []),
+      ].join(" | ")}`
+    );
     process.exitCode = 1;
   } else {
     console.log(`Preview browser check passed. ${scenarios.map((scenario) => `${scenario.id}:${scenario.contentTop}px`).join(" | ")}`);
@@ -285,4 +305,83 @@ async function measurePreviewGeometry(page, target) {
       contentBottomGap: round2(stageRect.bottom - bottomRight.y),
     };
   }, target);
+}
+
+function readBaselineFile() {
+  const raw = fs.readFileSync(baselinePath, "utf8");
+  return JSON.parse(raw);
+}
+
+async function writeBaselineFile(scenarios) {
+  await fs.promises.mkdir(path.dirname(baselinePath), { recursive: true });
+  const payload = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    scenarios: Object.fromEntries(
+      scenarios.map((scenario) => [
+        scenario.id,
+        {
+          viewport: scenario.viewport,
+          width: withTolerance(scenario.width, 6),
+          height: withTolerance(scenario.height, 6),
+          svgTop: withTolerance(scenario.svgTop, 14, 20),
+          contentTop: withTolerance(scenario.contentTop, 18, scenario.minContentTop),
+          contentBottomGap: withTolerance(scenario.contentBottomGap, 24, 24),
+        },
+      ])
+    ),
+  };
+  await fs.promises.writeFile(baselinePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+function withTolerance(expected, tolerance, min = null) {
+  return {
+    expected: round2(expected),
+    tolerance: round2(tolerance),
+    ...(min == null ? {} : { min: round2(min) }),
+  };
+}
+
+function compareAgainstBaseline(baseline, scenarios) {
+  const failures = [];
+  const actualById = Object.fromEntries(scenarios.map((scenario) => [scenario.id, scenario]));
+  for (const [id, expected] of Object.entries(baseline.scenarios || {})) {
+    const actual = actualById[id];
+    if (!actual) {
+      failures.push(`Missing preview scenario: ${id}`);
+      continue;
+    }
+    compareMetric(failures, id, "width", actual.width, expected.width);
+    compareMetric(failures, id, "height", actual.height, expected.height);
+    compareMetric(failures, id, "svgTop", actual.svgTop, expected.svgTop);
+    compareMetric(failures, id, "contentTop", actual.contentTop, expected.contentTop);
+    compareMetric(failures, id, "contentBottomGap", actual.contentBottomGap, expected.contentBottomGap);
+  }
+  for (const actual of scenarios) {
+    if (!baseline.scenarios?.[actual.id]) {
+      failures.push(`Unexpected preview scenario without baseline: ${actual.id}`);
+    }
+  }
+  return failures;
+}
+
+function compareMetric(failures, scenarioId, metricName, actualValue, expectedRule) {
+  if (!expectedRule || typeof expectedRule.expected !== "number") {
+    failures.push(`Baseline is missing ${metricName} for ${scenarioId}`);
+    return;
+  }
+  const actual = round2(actualValue);
+  const expected = round2(expectedRule.expected);
+  const tolerance = Math.max(0, Number(expectedRule.tolerance) || 0);
+  const min = expectedRule.min == null ? null : round2(expectedRule.min);
+  if (min != null && actual < min) {
+    failures.push(`${scenarioId} ${metricName} fell below minimum (${actual} < ${min})`);
+  }
+  if (Math.abs(actual - expected) > tolerance) {
+    failures.push(`${scenarioId} ${metricName} drifted too far (${actual} vs ${expected} +/- ${tolerance})`);
+  }
+}
+
+function round2(value) {
+  return Math.round(value * 100) / 100;
 }

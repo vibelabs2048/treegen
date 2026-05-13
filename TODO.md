@@ -11,7 +11,7 @@
 2. Keep hardening preview-shell clipping prevention and its automatic validation.
    Scope:
    - top-edge clipping has recurred multiple times in the preview shell
-   - keep preview padding, fit margins, browser-level geometry checks, and QA checks aligned so the SVG preview stays fully visible
+   - keep preview padding, fit margins, browser-level geometry checks, baseline drift checks, and QA checks aligned so the SVG preview stays fully visible
    Status: Open
 
 ## Missing
@@ -53,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.57` Added a checked-in browser preview baseline with toleranced scenario metrics and a refresh command so preview-shell drift is checked against stored accepted behavior.
 - `v0.2.56` Added a little more vertical spacing between the two external date lines in generation 4 so those labels no longer read as crowded.
 - `v0.2.55` Strengthened the browser QA gate so it now checks preview geometry across multiple scenarios, including hidden-editor, compact viewport, and fullscreen preview states.
 - `v0.2.54` Replaced the brittle disclosure-based menu interactions with an explicit top-menu controller, prevented overlapping open panels, and extended browser QA to assert real menu behavior.

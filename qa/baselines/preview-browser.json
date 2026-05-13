@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-13T03:01:33.323Z",
+  "scenarios": {
+    "desktop-default": {
+      "viewport": {
+        "width": 1440,
+        "height": 1024
+      },
+      "width": {
+        "expected": 1120,
+        "tolerance": 6
+      },
+      "height": {
+        "expected": 875,
+        "tolerance": 6
+      },
+      "svgTop": {
+        "expected": 34.39,
+        "tolerance": 14,
+        "min": 20
+      },
+      "contentTop": {
+        "expected": 84.65,
+        "tolerance": 18,
+        "min": 18
+      },
+      "contentBottomGap": {
+        "expected": 75.58,
+        "tolerance": 24,
+        "min": 24
+      }
+    },
+    "desktop-hidden-editor": {
+      "viewport": {
+        "width": 1440,
+        "height": 1024
+      },
+      "width": {
+        "expected": 1414,
+        "tolerance": 6
+      },
+      "height": {
+        "expected": 875,
+        "tolerance": 6
+      },
+      "svgTop": {
+        "expected": 34.39,
+        "tolerance": 14,
+        "min": 20
+      },
+      "contentTop": {
+        "expected": 84.65,
+        "tolerance": 18,
+        "min": 18
+      },
+      "contentBottomGap": {
+        "expected": 75.58,
+        "tolerance": 24,
+        "min": 24
+      }
+    },
+    "compact-default": {
+      "viewport": {
+        "width": 1180,
+        "height": 840
+      },
+      "width": {
+        "expected": 862,
+        "tolerance": 6
+      },
+      "height": {
+        "expected": 868,
+        "tolerance": 6
+      },
+      "svgTop": {
+        "expected": 31.99,
+        "tolerance": 14,
+        "min": 20
+      },
+      "contentTop": {
+        "expected": 74.71,
+        "tolerance": 18,
+        "min": 16
+      },
+      "contentBottomGap": {
+        "expected": 185.76,
+        "tolerance": 24,
+        "min": 24
+      }
+    },
+    "fullscreen-default": {
+      "viewport": {
+        "width": 1440,
+        "height": 1024
+      },
+      "width": {
+        "expected": 1380,
+        "tolerance": 6
+      },
+      "height": {
+        "expected": 890,
+        "tolerance": 6
+      },
+      "svgTop": {
+        "expected": 32,
+        "tolerance": 14,
+        "min": 20
+      },
+      "contentTop": {
+        "expected": 82.26,
+        "tolerance": 18,
+        "min": 18
+      },
+      "contentBottomGap": {
+        "expected": 92.7,
+        "tolerance": 24,
+        "min": 24
+      }
+    }
+  }
+}

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.57 - 2026-05-12
+
+- added a checked-in browser preview baseline with toleranced scenario metrics so the preview shell is now compared against stored expected behavior, not only raw minimum thresholds
+- added `npm run qa:baseline:update` to intentionally refresh the stored browser preview baseline when the shell is changed on purpose
+- kept the multi-scenario browser QA gate and made it fail when preview geometry drifts too far from the accepted baseline
+
 ## 0.2.56 - 2026-05-12
 
 - added a small extra vertical gap between the two external date lines in generation 4 so the birth and death labels read as separate lines more clearly
