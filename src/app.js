@@ -3,13 +3,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.41",
+    version: "0.2.42",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
   const THEME_STORAGE_KEY = "treegen-theme-v1";
   const BROWSER_DRAFT_STORAGE_KEY = `treegen-browser-draft-v${PROJECT_SCHEMA_VERSION}`;
   const AUTOSAVE_STORAGE_KEY = "treegen-autosave-enabled-v1";
+  const BROWSER_RECENT_PROJECTS_KEY = `treegen-browser-projects-v${PROJECT_SCHEMA_VERSION}`;
   const MAX_GENERATION = 6;
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
   const PAGE_WIDTH_PT = 792;
@@ -133,6 +134,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     openAbout: document.getElementById("open-about"),
     openDownloads: document.getElementById("open-downloads"),
     openProject: document.getElementById("open-project"),
+    openRecentProjects: document.getElementById("open-recent-projects"),
     newProject: document.getElementById("new-project"),
     saveProject: document.getElementById("save-project"),
     saveProjectAs: document.getElementById("save-project-as"),
@@ -145,12 +147,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     exportModal: document.getElementById("export-modal"),
     aboutModal: document.getElementById("about-modal"),
     downloadsModal: document.getElementById("downloads-modal"),
+    recentProjectsModal: document.getElementById("recent-projects-modal"),
     helpModal: document.getElementById("help-modal"),
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
     closeHelp: document.getElementById("close-help"),
     closeAbout: document.getElementById("close-about"),
     closeDownloads: document.getElementById("close-downloads"),
+    closeRecentProjects: document.getElementById("close-recent-projects"),
     acceptHelp: document.getElementById("accept-help"),
     importYamlFile: document.getElementById("import-yaml-file"),
     importYamlChoose: document.getElementById("import-yaml-choose"),
@@ -181,6 +185,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     aboutReleaseLink: document.getElementById("about-release-link"),
     downloadSuggestion: document.getElementById("download-suggestion"),
     downloadOptions: document.getElementById("download-options"),
+    recentProjectsList: document.getElementById("recent-projects-list"),
   };
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
@@ -215,6 +220,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.undoAction.addEventListener("click", undoChange);
     elements.redoAction.addEventListener("click", redoChange);
     elements.openProject.addEventListener("click", openProjectFile);
+    elements.openRecentProjects.addEventListener("click", openRecentProjectsModal);
     elements.newProject.addEventListener("click", newProject);
     elements.saveProject.addEventListener("click", saveProjectFile);
     elements.saveProjectAs.addEventListener("click", saveProjectFileAs);
@@ -255,6 +261,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.closeHelp.addEventListener("click", acknowledgeHelpModal);
     elements.closeAbout.addEventListener("click", () => closeModal("about"));
     elements.closeDownloads.addEventListener("click", () => closeModal("downloads"));
+    elements.closeRecentProjects.addEventListener("click", () => closeModal("recent-projects"));
     elements.closeFullscreenPreview.addEventListener("click", () => closeModal("fullscreen-preview"));
     elements.acceptHelp.addEventListener("click", acknowledgeHelpModal);
     document.querySelectorAll("[data-close-modal]").forEach((node) => {
@@ -791,6 +798,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
   }
 
+  function openRecentProjectsModal() {
+    closeTopbarMenu();
+    openModal("recent-projects");
+  }
+
   function newProject() {
     closeTopbarMenu();
     if (state.project.dirty) {
@@ -839,6 +851,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       if (!result || result.canceled) return;
       state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
       state.project.dirty = false;
+      if (!desktopBridge) {
+        saveBrowserRecentProject(result.path || suggestProjectFileName(), state.yamlText || serializeCurrentState());
+      }
       await writeDesktopAutosave();
       updateProjectStatusIndicator();
       setStatus(`Saved project ${basename(result.path || suggestProjectFileName())}`);
@@ -860,6 +875,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       if (!result || result.canceled) return;
       state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
       state.project.dirty = false;
+      if (!desktopBridge) {
+        saveBrowserRecentProject(result.path || suggestProjectFileName(), state.yamlText || serializeCurrentState());
+      }
       await writeDesktopAutosave();
       updateProjectStatusIndicator();
       setStatus(`Saved project as ${basename(result.path || suggestProjectFileName())}`);
@@ -980,6 +998,93 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       path: filename,
       updatedAt: new Date().toISOString(),
     };
+  }
+
+  function loadBrowserRecentProjects() {
+    try {
+      const raw = window.localStorage.getItem(BROWSER_RECENT_PROJECTS_KEY);
+      const parsed = JSON.parse(raw || "[]");
+      return Array.isArray(parsed) ? parsed.filter((entry) => entry && typeof entry.id === "string" && typeof entry.name === "string" && typeof entry.text === "string") : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function persistBrowserRecentProjects(entries) {
+    try {
+      window.localStorage.setItem(BROWSER_RECENT_PROJECTS_KEY, JSON.stringify(entries.slice(0, 8)));
+    } catch {}
+  }
+
+  function saveBrowserRecentProject(name, text) {
+    if (desktopBridge) return;
+    const trimmedName = basename(name || suggestProjectFileName());
+    const now = new Date().toISOString();
+    const entries = loadBrowserRecentProjects().filter((entry) => entry.name !== trimmedName);
+    entries.unshift({
+      id: `${trimmedName}:${now}`,
+      name: trimmedName,
+      text,
+      updatedAt: now,
+    });
+    persistBrowserRecentProjects(entries);
+  }
+
+  function renderRecentProjectsModal() {
+    if (!elements.recentProjectsList) return;
+    if (desktopBridge) {
+      elements.recentProjectsList.innerHTML = `<p class="help-text">Recent browser projects are only available in browser mode. Desktop recent-project handling is still on the backlog.</p>`;
+      return;
+    }
+    const entries = loadBrowserRecentProjects();
+    if (!entries.length) {
+      elements.recentProjectsList.innerHTML = `<p class="help-text">No recent browser projects are cached yet. Open or save a project in the browser to populate this list.</p>`;
+      return;
+    }
+    elements.recentProjectsList.innerHTML = entries.map((entry) => `
+      <article class="recent-project-card">
+        <h3>${escapeHtml(entry.name)}</h3>
+        <p>Saved ${escapeHtml(formatTimestamp(entry.updatedAt))}</p>
+        <div class="recent-project-actions">
+          <button type="button" data-open-recent-project="${escapeHtml(entry.id)}">Open</button>
+          <button type="button" data-delete-recent-project="${escapeHtml(entry.id)}">Remove</button>
+        </div>
+      </article>
+    `).join("");
+    elements.recentProjectsList.querySelectorAll("[data-open-recent-project]").forEach((button) => {
+      button.addEventListener("click", () => openRecentBrowserProject(button.getAttribute("data-open-recent-project") || ""));
+    });
+    elements.recentProjectsList.querySelectorAll("[data-delete-recent-project]").forEach((button) => {
+      button.addEventListener("click", () => deleteRecentBrowserProject(button.getAttribute("data-delete-recent-project") || ""));
+    });
+  }
+
+  function openRecentBrowserProject(id) {
+    const entries = loadBrowserRecentProjects();
+    const entry = entries.find((item) => item.id === id);
+    if (!entry) return;
+    if (state.project.dirty) {
+      const replace = window.confirm("Open this recent browser project and replace the current unsaved work?");
+      if (!replace) return;
+    }
+    try {
+      applyYamlFromEditor(entry.text);
+      state.project.path = entry.name;
+      state.project.dirty = false;
+      state.project.browserDraftUpdatedAt = entry.updatedAt || "";
+      updateProjectStatusIndicator();
+      closeModal("recent-projects");
+      setStatus(`Opened recent project ${entry.name}`);
+    } catch {
+      // status already updated
+    }
+  }
+
+  function deleteRecentBrowserProject(id) {
+    const entries = loadBrowserRecentProjects().filter((entry) => entry.id !== id);
+    persistBrowserRecentProjects(entries);
+    renderRecentProjectsModal();
+    setStatus("Removed recent browser project");
   }
 
   function suggestProjectFileName() {
@@ -1605,11 +1710,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       kind === "export" ? elements.exportModal :
       kind === "help" ? elements.helpModal :
       kind === "downloads" ? elements.downloadsModal :
+      kind === "recent-projects" ? elements.recentProjectsModal :
       kind === "fullscreen-preview" ? elements.fullscreenPreviewModal :
       elements.aboutModal;
     modal.hidden = false;
     if (kind === "import") {
       elements.importYamlText.value = state.yamlText || serializeCurrentState();
+    } else if (kind === "recent-projects") {
+      renderRecentProjectsModal();
     } else if (kind === "fullscreen-preview") {
       syncFullscreenPreview();
       fitFullscreenPreview();
@@ -1627,6 +1735,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       kind === "export" ? elements.exportModal :
       kind === "help" ? elements.helpModal :
       kind === "downloads" ? elements.downloadsModal :
+      kind === "recent-projects" ? elements.recentProjectsModal :
       kind === "fullscreen-preview" ? elements.fullscreenPreviewModal :
       elements.aboutModal;
     modal.hidden = true;
@@ -1701,8 +1810,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     if (browserFileIntent === "project-open") {
       try {
         applyYamlFromEditor(text);
+        state.project.path = file.name || "";
         state.project.dirty = false;
         state.project.browserDraftUpdatedAt = "";
+        saveBrowserRecentProject(file.name || suggestProjectFileName(), text);
         updateProjectStatusIndicator();
         setStatus(`Opened project ${basename(file.name || "project")}`);
       } catch {
@@ -1911,6 +2022,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         ? "Open a saved TreeGen project from disk."
         : "Open a saved TreeGen project YAML file from your device.";
     }
+    if (elements.openRecentProjects) {
+      elements.openRecentProjects.disabled = !!desktopBridge;
+      elements.openRecentProjects.title = desktopBridge
+        ? "Recent browser projects are only available in browser mode."
+        : "Open a recent browser-side TreeGen project snapshot stored on this device.";
+    }
     if (elements.saveProject) {
       elements.saveProject.disabled = false;
       elements.saveProject.title = desktopBridge
@@ -1949,7 +2066,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       return;
     }
     const hasDraft = !!state.project.browserDraftUpdatedAt;
-    elements.projectStatusLabel.textContent = hasDraft ? "Browser draft" : "Local session";
+    elements.projectStatusLabel.textContent = state.project.path
+      ? basename(state.project.path)
+      : hasDraft
+        ? "Browser draft"
+        : "Local session";
     const detailParts = [themeLabel, state.project.autosaveEnabled ? "Autosave on" : "Autosave off"];
     if (state.project.dirty) {
       detailParts.push("Unsaved changes");
@@ -1959,9 +2080,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       detailParts.push("No cached draft yet");
     }
     elements.projectStatusDetail.textContent = detailParts.join(" · ");
-    elements.projectStatusLabel.title = hasDraft
-      ? "Browser draft cached locally for this device"
-      : "Current browser editing session";
+    elements.projectStatusLabel.title = state.project.path
+      ? `Current browser project: ${state.project.path}`
+      : hasDraft
+        ? "Browser draft cached locally for this device"
+        : "Current browser editing session";
     elements.projectStatusDetail.title = detailParts.join(" · ");
   }
 

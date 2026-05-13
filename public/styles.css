@@ -561,6 +561,39 @@ label > textarea {
   background: var(--button-hover);
 }
 
+.recent-projects-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.recent-project-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+}
+
+.recent-project-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.recent-project-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.recent-project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+}
+
 .icon-button {
   min-width: 2.35rem;
   min-height: 2.35rem;

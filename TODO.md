@@ -2,11 +2,11 @@
 
 ## Broken / Awkward
 
-1. Browser project workflow still lacks named projects.
+1. Browser project workflow still lacks full named-project management.
    Scope:
-   - browser now supports `New Project`, `Open Project`, `Save`, and `Save As`
-   - project handling is still single-file / single-draft oriented
-   - there is still no browser-side recent-project chooser or named project list
+   - browser now supports `New Project`, `Open Project`, `Recent Projects`, `Save`, and `Save As`
+   - project handling is still snapshot-oriented rather than a true named project workspace
+   - there is still no rename/manage workflow for browser-side projects
    Status: Open
 
 ## Missing
@@ -48,6 +48,7 @@
 
 ## Recently Completed
 
+- `v0.2.42` Added recent browser projects so browser mode can reopen locally cached project snapshots through a first-class project workflow.
 - `v0.2.41` Made browser `Open Project` a first-class workflow and updated the visible user guide/help copy to match the real project actions.
 - `v0.2.40` Adds a real `New Project` action and resets project/session state cleanly instead of forcing users to reuse `Clear Tree`.
 - `v0.2.39` Defaulted surname inheritance on for non-root boxes, clarified the checkbox-to-field sync behavior, and added explicit `Save`, `Save As`, and autosave controls for project work.

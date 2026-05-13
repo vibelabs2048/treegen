@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.42 - 2026-05-12
+
+- added a `Recent Projects` browser workflow backed by local storage so browser mode can reopen cached project snapshots without routing through raw YAML import
+- made the browser project status label show the active project filename when one is known
+- kept the recent-project flow explicitly browser-only and visible in the UI instead of silently overloading autosave/draft behavior
+
 ## 0.2.41 - 2026-05-12
 
 - made browser `Open Project` a real project action instead of routing users through the raw YAML import flow
