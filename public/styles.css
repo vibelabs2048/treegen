@@ -190,24 +190,24 @@ label > textarea {
 }
 
 .menu-button {
-  list-style: none;
   min-height: 2.2rem;
   padding: 0.42rem 0.72rem;
   font-weight: 600;
+  border-radius: 7px;
+  background: transparent;
+  border-color: transparent;
 }
 
-.menu-button::-webkit-details-marker {
-  display: none;
-}
-
-details.menu-group > summary {
-  cursor: pointer;
+.menu-button:hover,
+.menu-group.open > .menu-button {
+  background: var(--button-hover);
+  border-color: var(--panel-border);
 }
 
 .menu-panel {
   position: absolute;
   top: calc(100% + 0.35rem);
-  right: 0;
+  left: 0;
   z-index: 25;
   display: grid;
   gap: 0.55rem;
@@ -218,6 +218,15 @@ details.menu-group > summary {
   border-radius: 8px;
   background: var(--button-bg);
   box-shadow: 0 16px 32px var(--shadow-soft);
+}
+
+.menu-group-right .menu-panel {
+  left: auto;
+  right: 0;
+}
+
+.menu-panel[hidden] {
+  display: none !important;
 }
 
 .menu-panel button {
@@ -308,10 +317,6 @@ details.menu-group > summary {
 
 .tab-panel.active {
   display: block;
-}
-
-details.menu-group:not([open]) > .menu-panel {
-  display: none;
 }
 
 .workspace.editor-hidden {

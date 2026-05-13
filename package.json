@@ -1,6 +1,6 @@
 {
   "name": "treegen",
-  "version": "0.2.53",
+  "version": "0.2.54",
   "description": "Local family tree editor and deterministic export tool.",
   "author": {
     "name": "TreeGen",
@@ -14,7 +14,7 @@
     "build:pages": "node build/build-pages.js",
     "build:logo-assets": "node build/generate-logo-assets.js",
     "qa:review": "npm run build:pages && node build/review-artifacts.js",
-    "qa:check": "npm run qa:review && node build/validate-qa.js",
+    "qa:check": "npm run qa:review && node build/validate-qa.js && node build/check-preview-browser.js",
     "render": "node src/render-cli.js",
     "start": "node src/server.js",
     "desktop:rebuild": "node build/desktop-runner.js rebuild",
@@ -31,6 +31,7 @@
     "svg-to-pdfkit": "^0.1.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "electron": "^42.0.1",
     "electron-builder": "^26.8.1"
   },

@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.53",
+    version: "0.2.54",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -132,7 +132,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     sidebarTabs: Array.from(document.querySelectorAll(".sidebar-tab")),
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
+    menuShell: document.querySelector(".menu-shell"),
     menuGroups: Array.from(document.querySelectorAll(".menu-group")),
+    menuButtons: Array.from(document.querySelectorAll(".menu-button[data-menu-target]")),
     advancedMenu: document.getElementById("advanced-menu"),
     openExport: document.getElementById("open-export"),
     openHelp: document.getElementById("open-help"),
@@ -212,6 +214,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   let autosaveTimer = null;
   let browserDraftTimer = null;
   let browserFileIntent = "import";
+  let activeMenuId = "";
 
   async function init() {
     applyStoredTheme();
@@ -233,11 +236,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function bindEvents() {
-    elements.menuGroups.forEach((group) => {
-      group.addEventListener("toggle", handleMenuGroupToggle);
-    });
-    elements.undoAction.addEventListener("click", undoChange);
-    elements.redoAction.addEventListener("click", redoChange);
+    bindMenuBar();
+    if (elements.undoAction) {
+      elements.undoAction.addEventListener("click", undoChange);
+    }
+    if (elements.redoAction) {
+      elements.redoAction.addEventListener("click", redoChange);
+    }
     elements.openRecentProjects.addEventListener("click", openRecentProjectsModal);
     elements.projectMenuNew.addEventListener("click", () => {
       closeTopbarMenu();
@@ -333,6 +338,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       node.addEventListener("click", () => closeModal(node.getAttribute("data-close-modal")));
     });
     document.addEventListener("click", handleDocumentMenuClick);
+    document.addEventListener("keydown", handleGlobalKeydown);
     elements.importYamlFile.addEventListener("change", handleImportFile);
     elements.importYamlChoose.addEventListener("click", chooseImportFile);
     elements.applyImport.addEventListener("click", applyImportModal);
@@ -566,12 +572,43 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     setTheme(current === "dark" ? "light" : "dark");
   }
 
-  function handleMenuGroupToggle(event) {
-    const toggledGroup = event.currentTarget;
-    if (!toggledGroup.open) return;
+  function bindMenuBar() {
+    elements.menuButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const menuId = button.dataset.menuTarget || "";
+        toggleMenu(menuId);
+      });
+    });
     elements.menuGroups.forEach((group) => {
-      if (group !== toggledGroup) {
-        group.open = false;
+      group.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+    });
+  }
+
+  function toggleMenu(menuId) {
+    if (!menuId) return;
+    if (activeMenuId === menuId) {
+      closeTopbarMenu();
+      return;
+    }
+    setActiveMenu(menuId);
+  }
+
+  function setActiveMenu(menuId) {
+    activeMenuId = menuId || "";
+    elements.menuGroups.forEach((group) => {
+      const button = group.querySelector(".menu-button[data-menu-target]");
+      const panel = button ? document.getElementById(button.dataset.menuTarget || "") : null;
+      const isActive = !!button && button.dataset.menuTarget === activeMenuId;
+      group.classList.toggle("open", isActive);
+      if (button) {
+        button.setAttribute("aria-expanded", isActive ? "true" : "false");
+      }
+      if (panel) {
+        panel.hidden = !isActive;
       }
     });
   }
@@ -2098,15 +2135,20 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function closeTopbarMenu() {
-    elements.menuGroups.forEach((group) => {
-      group.open = false;
-    });
+    activeMenuId = "";
+    setActiveMenu("");
   }
 
   function handleDocumentMenuClick(event) {
-    if (!elements.menuGroups.some((group) => group.open)) return;
+    if (!activeMenuId) return;
     if (event.target.closest(".menu-shell")) return;
     closeTopbarMenu();
+  }
+
+  function handleGlobalKeydown(event) {
+    if (event.key === "Escape" && activeMenuId) {
+      closeTopbarMenu();
+    }
   }
 
   function applyStoredSidebarPreference() {

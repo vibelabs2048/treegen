@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.54 - 2026-05-12
+
+- replaced the brittle `details/summary` top-level menu interaction with an explicit one-open-at-a-time menu controller so the horizontal menus actually respond reliably
+- prevented menu-panel overlap by making only one top-level panel open at a time and closing it on second click, outside click, or Escape
+- extended the browser QA check so it now asserts menu open/close behavior in addition to preview rendering, and wired Playwright Chromium installation into CI for that gate
+
 ## 0.2.53 - 2026-05-12
 
 - fixed the horizontal menu bar by switching the top-level menus to native disclosure behavior instead of the brittle custom toggle state from the first pass

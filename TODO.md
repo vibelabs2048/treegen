@@ -11,7 +11,7 @@
 2. Keep hardening preview-shell clipping prevention and its automatic validation.
    Scope:
    - top-edge clipping has recurred multiple times in the preview shell
-   - keep preview padding, fit margins, and QA checks aligned so the SVG preview stays fully visible
+   - keep preview padding, fit margins, browser-level checks, and QA checks aligned so the SVG preview stays fully visible
    Status: Open
 
 ## Missing
@@ -39,7 +39,7 @@
 
 6. Continue small UI polish passes where behavior is subtle.
    Scope:
-   - keep the hamburger menu compact and coherent
+   - keep the top menu bar compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
    - continue tightening the shell as new project features land
    Status: Open
@@ -53,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.54` Replaced the brittle disclosure-based menu interactions with an explicit top-menu controller, prevented overlapping open panels, and extended browser QA to assert real menu behavior.
 - `v0.2.53` Fixed the horizontal menu bar interaction model by switching it to native disclosure behavior so the menu buttons actually open and close their panels reliably.
 - `v0.2.52` Replaced the scrolling hamburger with a horizontal menu bar and submenus, added a show/hide editor control, and switched preview clipping protection to measured preview-bound normalization plus stronger shell validation.
 - `v0.2.51` Shortened the hamburger by moving more document actions into the `Projects` surface, strengthened preview-shell padding and fit margins, and added automatic QA checks for the preview safety constants.

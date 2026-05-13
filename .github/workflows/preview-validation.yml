@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Chromium for browser QA
+        run: npx playwright install --with-deps chromium
+
       - name: Build preview demo and run QA validation
         run: npm run qa:check
 
