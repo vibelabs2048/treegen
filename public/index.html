@@ -15,31 +15,40 @@
         <div class="brand compact-brand">
           <div class="brand-title-row">
             <h1>TreeGen</h1>
-            <span id="app-version-badge" class="version-badge">v0.2.37</span>
+            <span id="app-version-badge" class="version-badge" title="Current TreeGen application version">v0.2.38</span>
           </div>
           <div class="project-status-row">
-            <span id="project-status-label" class="project-status-label">Local session</span>
-            <span id="project-status-detail" class="project-status-detail">Light mode</span>
+            <span id="project-status-label" class="project-status-label" title="Current project or session label">Local session</span>
+            <span id="project-status-detail" class="project-status-detail" title="Current theme, save state, and draft or autosave status">Light mode</span>
           </div>
         </div>
         <div class="menu-shell">
           <button id="menu-toggle" type="button" class="menu-toggle" title="Open the main menu" aria-expanded="false" aria-controls="topbar-menu">☰</button>
           <div id="topbar-menu" class="topbar-menu" hidden>
-            <button id="undo-action" type="button" title="Undo the last tree change">Undo</button>
-            <button id="redo-action" type="button" title="Redo the last undone tree change">Redo</button>
-            <button id="open-project" type="button" title="Open a saved TreeGen project from disk">Open Project</button>
-            <button id="save-project" type="button" title="Save the current TreeGen project to disk">Save Project</button>
-            <button id="toggle-theme" type="button" title="Switch between light and dark mode">Use Dark Mode</button>
-            <button id="load-demo" type="button" title="Load the example family tree into the editor">Load Demo</button>
-            <button id="open-export" type="button" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
-            <button id="open-downloads" type="button" title="Open direct desktop downloads for Windows, macOS, and Linux">Downloads</button>
-            <button id="toggle-advanced" type="button" title="Show advanced YAML import tools" aria-expanded="false" aria-controls="advanced-menu">Advanced</button>
-            <div id="advanced-menu" class="advanced-menu" hidden>
-              <button id="open-import" type="button" title="Import a YAML family tree from a file or pasted text">Import YAML</button>
-            </div>
-            <button id="open-help" type="button" title="Open a quick guide to editing and exporting family trees">How To</button>
-            <button id="open-about" type="button" title="View version and release information">About</button>
-            <button id="clear-tree" type="button" title="Clear every person and reset the current tree">Clear Tree</button>
+            <section class="menu-section" aria-label="Project actions">
+              <p class="menu-section-title">Project</p>
+              <button id="undo-action" type="button" title="Undo the last tree change">Undo</button>
+              <button id="redo-action" type="button" title="Redo the last undone tree change">Redo</button>
+              <button id="open-project" type="button" title="Open a saved TreeGen project from disk">Open Project</button>
+              <button id="save-project" type="button" title="Save the current TreeGen project to disk">Save Project</button>
+              <button id="load-demo" type="button" title="Load the example family tree into the editor">Load Demo</button>
+              <button id="open-export" type="button" title="Export the current tree to PDF, JPG, PNG, SVG, or YAML">Export</button>
+              <button id="toggle-advanced" type="button" title="Show advanced YAML import tools" aria-expanded="false" aria-controls="advanced-menu">Advanced</button>
+              <div id="advanced-menu" class="advanced-menu" hidden>
+                <button id="open-import" type="button" title="Import a YAML family tree from a file or pasted text">Import YAML</button>
+              </div>
+              <button id="clear-tree" type="button" title="Clear every person and reset the current tree">Clear Tree</button>
+            </section>
+            <section class="menu-section" aria-label="Display and downloads">
+              <p class="menu-section-title">Display</p>
+              <button id="toggle-theme" type="button" title="Switch between light and dark mode">Use Dark Mode</button>
+              <button id="open-downloads" type="button" title="Open direct desktop downloads for Windows, macOS, and Linux">Downloads</button>
+            </section>
+            <section class="menu-section" aria-label="Help and information">
+              <p class="menu-section-title">Help</p>
+              <button id="open-help" type="button" title="Open a quick guide to editing and exporting family trees">How To</button>
+              <button id="open-about" type="button" title="View version and release information">About</button>
+            </section>
           </div>
         </div>
       </header>
@@ -53,11 +62,11 @@
             </div>
             <div class="preview-toolbar-actions">
               <button id="zoom-out" type="button" title="Zoom out">-</button>
-              <label class="preview-zoom">
+              <label class="preview-zoom" title="Drag to change preview zoom from 5% to 500%">
                 <span>Zoom</span>
                 <input id="zoom-range" type="range" min="5" max="500" step="5" value="70">
               </label>
-              <label class="preview-zoom-value">
+              <label class="preview-zoom-value" title="Type an exact preview zoom percentage">
                 <span>%</span>
                 <input id="zoom-percent" type="number" min="5" max="500" step="5" value="70">
               </label>
@@ -77,7 +86,6 @@
 
         <aside class="sidebar inspector-panel panel">
           <div class="inspector-header">
-            <strong id="inspector-active-label">Person</strong>
             <div class="sidebar-tabs" aria-label="Editor sections">
               <button class="sidebar-tab active" data-target-panel="person" type="button" title="Edit the currently selected box and its person data">Person</button>
               <button class="sidebar-tab" data-target-panel="type" type="button" title="Adjust generation styles, sizes, colors, and prefix rules">Format</button>
@@ -194,7 +202,7 @@
               </label>
               <label>
                 Last Name
-                <input id="person-last-name" type="text" autocomplete="off" title="Family name used when surname inheritance is turned off for this box.">
+                <input id="person-last-name" type="text" autocomplete="off" title="Family name used when surname inheritance is turned off for this box. When inheritance is on, the inherited surname stays visible here in a read-only state.">
               </label>
             </div>
             <label class="checkbox-row" title="When enabled, this box inherits its surname from the linked descendant branch instead of using its local last-name field. This is useful for the paternal surname chain.">
@@ -353,7 +361,7 @@
           <button id="close-about" type="button">Close</button>
         </div>
         <div class="modal-body">
-          <p><strong>Version:</strong> <span id="about-version">v0.2.37</span></p>
+          <p><strong>Version:</strong> <span id="about-version">v0.2.38</span></p>
           <p><strong>Last updated:</strong> <span id="about-last-updated">2026-05-12</span></p>
           <p><strong>Mode:</strong> <span id="about-runtime">Browser demo</span></p>
           <p><strong>Author:</strong> <a href="https://vibelabs2048.github.io/" target="_blank" rel="noopener noreferrer">vibelabs2048.github.io</a></p>

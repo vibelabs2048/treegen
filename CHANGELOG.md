@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.38 - 2026-05-12
+
+- grouped the hamburger menu into clearer Project, Display, and Help sections so the shell reads more like an application
+- converted the inspector header into tab-only navigation so the active tab itself is the only visible section title
+- tightened tooltip coverage around version, project state, zoom controls, and surname inheritance behavior
+- added a visible dirty-state marker to the header project label and improved project-state titles for browser drafts and desktop sessions
+
 ## 0.2.37 - 2026-05-12
 
 - made the app more project-focused by moving raw YAML import under an Advanced submenu while keeping project open/save/export prominent

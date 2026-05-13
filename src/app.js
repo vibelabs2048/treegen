@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.37",
+    version: "0.2.38",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -176,7 +176,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     aboutReleaseLink: document.getElementById("about-release-link"),
     downloadSuggestion: document.getElementById("download-suggestion"),
     downloadOptions: document.getElementById("download-options"),
-    inspectorActiveLabel: document.getElementById("inspector-active-label"),
   };
   const desktopBridge = window.treegenDesktop && window.treegenDesktop.isDesktop ? window.treegenDesktop : null;
   const canExactServerExport = !!desktopBridge || isLikelyLocalHost();
@@ -497,10 +496,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.sidebarTabs.forEach((button) => {
       button.classList.toggle("active", button.dataset.targetPanel === target);
     });
-    if (elements.inspectorActiveLabel) {
-      const active = elements.sidebarTabs.find((button) => button.dataset.targetPanel === target);
-      elements.inspectorActiveLabel.textContent = active ? active.textContent : "Editor";
-    }
   }
 
   function clearTree() {
@@ -1784,6 +1779,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   function updateProjectStatusIndicator() {
     if (!elements.projectStatusLabel || !elements.projectStatusDetail) return;
     const themeLabel = document.documentElement.dataset.theme === "dark" ? "Dark mode" : "Light mode";
+    elements.projectStatusLabel.dataset.dirty = state.project.dirty ? "true" : "false";
     if (desktopBridge) {
       const label = state.project.path ? basename(state.project.path) : "Desktop session";
       const detailParts = [
@@ -1795,6 +1791,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
       elements.projectStatusLabel.textContent = label;
       elements.projectStatusDetail.textContent = detailParts.join(" · ");
+      elements.projectStatusLabel.title = state.project.path || "Desktop session";
+      elements.projectStatusDetail.title = detailParts.join(" · ");
       return;
     }
     const hasDraft = !!state.project.browserDraftUpdatedAt;
@@ -1808,6 +1806,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       detailParts.push("No cached draft yet");
     }
     elements.projectStatusDetail.textContent = detailParts.join(" · ");
+    elements.projectStatusLabel.title = hasDraft
+      ? "Browser draft cached locally for this device"
+      : "Current browser editing session";
+    elements.projectStatusDetail.title = detailParts.join(" · ");
   }
 
   function renderDownloadOptions() {

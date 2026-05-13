@@ -2,24 +2,24 @@
 
 ## Current Priorities
 
-1. Continue UI polish around the editor shell.
-   Scope:
-   - keep the hamburger menu compact and coherent
-   - keep the inspector tab model clear and avoid duplicate section naming
-   - continue tightening tooltip coverage where behavior is subtle
-   Status: Open
-
-2. Decide whether browser mode should gain named local projects instead of one rolling draft.
+1. Decide whether browser mode should gain named local projects instead of one rolling draft.
    Scope:
    - current browser mode now supports one cached draft and recovery
    - next step would be multiple browser-side drafts/projects if needed
    Status: Open
 
-3. Decide whether desktop project state needs stronger visible affordances.
+2. Decide whether desktop project state needs stronger visible affordances.
    Scope:
    - recent files
    - dirty badges in more places
    - clearer saved/autosaved distinction
+   Status: Open
+
+3. Continue small UI polish passes where behavior is subtle.
+   Scope:
+   - keep the hamburger menu compact and coherent
+   - keep tooltip coverage strong for advanced formatting controls
+   - continue tightening the shell as new project features land
    Status: Open
 
 ## Active Behavior Notes
@@ -31,6 +31,7 @@
 
 ## Recently Completed
 
+- `v0.2.38` Polished the editor shell again by grouping the hamburger menu into clearer sections, improving tooltip coverage, and making the header project-state badge read more clearly when changes are unsaved.
 - `v0.2.37` TreeGen became more project-focused in both browser and desktop mode: browser draft recovery was added, light/dark theme selection now persists, fullscreen control uses a real icon, project state is visible in the header, raw YAML import moved under Advanced, and the inspector now behaves more like a tabbed editor.
 - `v0.2.36` Name size controls now behave as a real ceiling; auto-fit can only hold or reduce the requested size.
 - `v0.2.35` Date size controls now use the requested size as the target, and inherited surnames remain visible in the disabled surname field.
