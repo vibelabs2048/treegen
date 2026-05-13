@@ -17,8 +17,41 @@ function autosavePath() {
   return path.join(projectDirectory(), "autosave.json");
 }
 
+function recentProjectsPath() {
+  return path.join(projectDirectory(), "recent-projects.json");
+}
+
 async function ensureProjectDirectory() {
   await fs.mkdir(projectDirectory(), { recursive: true });
+}
+
+async function readRecentProjects() {
+  try {
+    const raw = await fs.readFile(recentProjectsPath(), "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeRecentProjects(entries) {
+  await ensureProjectDirectory();
+  await fs.writeFile(recentProjectsPath(), JSON.stringify(entries.slice(0, 12), null, 2), "utf8");
+}
+
+async function rememberRecentProject(filePath) {
+  const trimmed = String(filePath || "").trim();
+  if (!trimmed) return;
+  const now = new Date().toISOString();
+  const entries = (await readRecentProjects()).filter((entry) => entry && entry.path !== trimmed);
+  entries.unshift({
+    id: `${trimmed}:${now}`,
+    path: trimmed,
+    name: path.basename(trimmed),
+    updatedAt: now,
+  });
+  await writeRecentProjects(entries);
 }
 
 ipcMain.handle("treegen:open-yaml", async () => {
@@ -52,6 +85,7 @@ ipcMain.handle("treegen:open-project", async () => {
   }
   const filePath = result.filePaths[0];
   const text = await fs.readFile(filePath, "utf8");
+  await rememberRecentProject(filePath);
   return { canceled: false, path: filePath, text };
 });
 
@@ -79,6 +113,7 @@ ipcMain.handle("treegen:save-project", async (_event, payload = {}) => {
   }
   await fs.writeFile(filePath, String(text), "utf8");
   const stats = await fs.stat(filePath);
+  await rememberRecentProject(filePath);
   return {
     canceled: false,
     path: filePath,
@@ -105,6 +140,7 @@ ipcMain.handle("treegen:save-project-as", async (_event, payload = {}) => {
   }
   await fs.writeFile(result.filePath, String(text), "utf8");
   const stats = await fs.stat(result.filePath);
+  await rememberRecentProject(result.filePath);
   return {
     canceled: false,
     path: result.filePath,
@@ -157,6 +193,28 @@ ipcMain.handle("treegen:save-file", async (_event, payload = {}) => {
   }
   await fs.writeFile(result.filePath, Buffer.from(bytes));
   return { canceled: false, path: result.filePath };
+});
+
+ipcMain.handle("treegen:list-recent-projects", async () => {
+  const entries = await readRecentProjects();
+  return { entries };
+});
+
+ipcMain.handle("treegen:open-recent-project", async (_event, payload = {}) => {
+  const filePath = String(payload.path || "").trim();
+  if (!filePath) {
+    return { canceled: true };
+  }
+  const text = await fs.readFile(filePath, "utf8");
+  await rememberRecentProject(filePath);
+  return { canceled: false, path: filePath, text };
+});
+
+ipcMain.handle("treegen:remove-recent-project", async (_event, payload = {}) => {
+  const filePath = String(payload.path || "").trim();
+  const entries = (await readRecentProjects()).filter((entry) => entry && entry.path !== filePath);
+  await writeRecentProjects(entries);
+  return { removed: true };
 });
 
 async function createWindow() {

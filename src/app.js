@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.42",
+    version: "0.2.43",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -1033,7 +1033,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   function renderRecentProjectsModal() {
     if (!elements.recentProjectsList) return;
     if (desktopBridge) {
-      elements.recentProjectsList.innerHTML = `<p class="help-text">Recent browser projects are only available in browser mode. Desktop recent-project handling is still on the backlog.</p>`;
+      void renderDesktopRecentProjectsModal();
       return;
     }
     const entries = loadBrowserRecentProjects();
@@ -1057,6 +1057,37 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.recentProjectsList.querySelectorAll("[data-delete-recent-project]").forEach((button) => {
       button.addEventListener("click", () => deleteRecentBrowserProject(button.getAttribute("data-delete-recent-project") || ""));
     });
+  }
+
+  async function renderDesktopRecentProjectsModal() {
+    if (!elements.recentProjectsList || !desktopBridge) return;
+    try {
+      const result = await desktopBridge.listRecentProjects();
+      const entries = Array.isArray(result?.entries) ? result.entries : [];
+      if (!entries.length) {
+        elements.recentProjectsList.innerHTML = `<p class="help-text">No recent desktop projects are tracked yet. Open or save a desktop project to populate this list.</p>`;
+        return;
+      }
+      elements.recentProjectsList.innerHTML = entries.map((entry) => `
+        <article class="recent-project-card">
+          <h3>${escapeHtml(entry.name || basename(entry.path || "project"))}</h3>
+          <p>${escapeHtml(entry.path || "")}</p>
+          <p>Saved ${escapeHtml(formatTimestamp(entry.updatedAt))}</p>
+          <div class="recent-project-actions">
+            <button type="button" data-open-desktop-recent-project="${escapeHtml(entry.path || "")}">Open</button>
+            <button type="button" data-delete-desktop-recent-project="${escapeHtml(entry.path || "")}">Remove</button>
+          </div>
+        </article>
+      `).join("");
+      elements.recentProjectsList.querySelectorAll("[data-open-desktop-recent-project]").forEach((button) => {
+        button.addEventListener("click", () => openRecentDesktopProject(button.getAttribute("data-open-desktop-recent-project") || ""));
+      });
+      elements.recentProjectsList.querySelectorAll("[data-delete-desktop-recent-project]").forEach((button) => {
+        button.addEventListener("click", () => deleteRecentDesktopProject(button.getAttribute("data-delete-desktop-recent-project") || ""));
+      });
+    } catch (error) {
+      elements.recentProjectsList.innerHTML = `<p class="help-text">Recent desktop projects could not be loaded: ${escapeHtml(error.message || "unknown error")}.</p>`;
+    }
   }
 
   function openRecentBrowserProject(id) {
@@ -1085,6 +1116,38 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     persistBrowserRecentProjects(entries);
     renderRecentProjectsModal();
     setStatus("Removed recent browser project");
+  }
+
+  async function openRecentDesktopProject(filePath) {
+    if (!desktopBridge || !filePath) return;
+    if (state.project.dirty) {
+      const replace = window.confirm("Open this recent desktop project and replace the current unsaved work?");
+      if (!replace) return;
+    }
+    try {
+      const result = await desktopBridge.openRecentProject({ path: filePath });
+      if (!result || result.canceled) return;
+      applyYamlFromEditor(result.text || "");
+      state.project.path = result.path || "";
+      state.project.dirty = false;
+      await writeDesktopAutosave();
+      updateProjectStatusIndicator();
+      closeModal("recent-projects");
+      setStatus(`Opened recent project ${basename(result.path || "project")}`);
+    } catch (error) {
+      setStatus(`Project open error: ${error.message}`);
+    }
+  }
+
+  async function deleteRecentDesktopProject(filePath) {
+    if (!desktopBridge || !filePath) return;
+    try {
+      await desktopBridge.removeRecentProject({ path: filePath });
+      await renderDesktopRecentProjectsModal();
+      setStatus("Removed recent desktop project");
+    } catch (error) {
+      setStatus(`Recent project error: ${error.message}`);
+    }
   }
 
   function suggestProjectFileName() {

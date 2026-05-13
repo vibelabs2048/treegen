@@ -14,6 +14,15 @@ contextBridge.exposeInMainWorld("treegenDesktop", {
   saveProjectFileAs(payload) {
     return ipcRenderer.invoke("treegen:save-project-as", payload);
   },
+  listRecentProjects() {
+    return ipcRenderer.invoke("treegen:list-recent-projects");
+  },
+  openRecentProject(payload) {
+    return ipcRenderer.invoke("treegen:open-recent-project", payload);
+  },
+  removeRecentProject(payload) {
+    return ipcRenderer.invoke("treegen:remove-recent-project", payload);
+  },
   readAutosave() {
     return ipcRenderer.invoke("treegen:read-autosave");
   },

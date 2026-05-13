@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.43 - 2026-05-12
+
+- extended `Recent Projects` into the desktop app by tracking recent project files in app data and letting users reopen or remove them from the same modal used in browser mode
+- kept the browser and desktop project workflows more aligned by making `Recent Projects` a real first-class concept in both runtimes
+- updated the visible help text and README so the user guide reflects the new cross-runtime recent-project behavior
+
 ## 0.2.42 - 2026-05-12
 
 - added a `Recent Projects` browser workflow backed by local storage so browser mode can reopen cached project snapshots without routing through raw YAML import

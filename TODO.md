@@ -2,11 +2,11 @@
 
 ## Broken / Awkward
 
-1. Browser project workflow still lacks full named-project management.
+1. Browser and desktop project workflow still lacks full named-project management.
    Scope:
-   - browser now supports `New Project`, `Open Project`, `Recent Projects`, `Save`, and `Save As`
-   - project handling is still snapshot-oriented rather than a true named project workspace
-   - there is still no rename/manage workflow for browser-side projects
+   - browser and desktop now both support `Recent Projects`
+   - project handling is still recent-file/snapshot oriented rather than a true named project workspace
+   - there is still no rename/manage workflow for saved project entries
    Status: Open
 
 ## Missing
@@ -17,7 +17,7 @@
    - next step would be multiple browser-side drafts/projects if needed
    Status: Open
 
-3. Decide whether desktop project state needs stronger visible affordances.
+2. Decide whether desktop project state needs stronger visible affordances.
    Scope:
    - recent files
    - dirty badges in more places
@@ -26,14 +26,14 @@
 
 ## Nice To Have
 
-4. Continue small UI polish passes where behavior is subtle.
+3. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
    - continue tightening the shell as new project features land
    Status: Open
 
-5. Strengthen automated visual regression checks.
+4. Strengthen automated visual regression checks.
    Scope:
    - current QA bundle is useful but still human-reviewed
    - add sharper checks around preview/export consistency and layout regressions
@@ -48,6 +48,7 @@
 
 ## Recently Completed
 
+- `v0.2.43` Extended `Recent Projects` into the desktop app so the same project workflow exists in both browser and desktop runtimes.
 - `v0.2.42` Added recent browser projects so browser mode can reopen locally cached project snapshots through a first-class project workflow.
 - `v0.2.41` Made browser `Open Project` a first-class workflow and updated the visible user guide/help copy to match the real project actions.
 - `v0.2.40` Adds a real `New Project` action and resets project/session state cleanly instead of forcing users to reuse `Clear Tree`.
