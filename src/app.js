@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.44",
+    version: "0.2.45",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -852,9 +852,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
             suggestedName: suggestProjectFileName(),
             text: state.yamlText || serializeCurrentState(),
           })
-        : await saveBrowserProjectFile();
+        : await saveBrowserProjectFile({ forcePrompt: !state.project.path });
       if (!result || result.canceled) return;
-      state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
+      state.project.path = result.path || state.project.path;
       state.project.dirty = false;
       state.project.lastSavedAt = result.updatedAt || new Date().toISOString();
       if (!desktopBridge) {
@@ -877,9 +877,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
             suggestedName: suggestProjectFileName(),
             text: state.yamlText || serializeCurrentState(),
           })
-        : await saveBrowserProjectFile();
+        : await saveBrowserProjectFile({ forcePrompt: true });
       if (!result || result.canceled) return;
-      state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
+      state.project.path = result.path || state.project.path;
       state.project.dirty = false;
       state.project.lastSavedAt = result.updatedAt || new Date().toISOString();
       if (!desktopBridge) {
@@ -997,8 +997,15 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
   }
 
-  async function saveBrowserProjectFile() {
-    const filename = suggestProjectFileName();
+  async function saveBrowserProjectFile(options = {}) {
+    const { forcePrompt = false } = options;
+    const requestedName = forcePrompt
+      ? promptBrowserProjectName(state.project.path || suggestProjectFileName())
+      : (state.project.path || suggestProjectFileName());
+    if (!requestedName) {
+      return { canceled: true };
+    }
+    const filename = ensureProjectFileName(requestedName);
     await saveOrDownload(new Blob([state.yamlText || serializeCurrentState()], { type: "text/yaml;charset=utf-8" }), filename, [
       { name: "TreeGen Project", extensions: ["yaml", "yml"] },
     ]);
@@ -1007,6 +1014,17 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       path: filename,
       updatedAt: new Date().toISOString(),
     };
+  }
+
+  function promptBrowserProjectName(initialValue) {
+    const value = window.prompt("Project name", basename(initialValue || suggestProjectFileName()));
+    return value == null ? "" : sanitizeText(value);
+  }
+
+  function ensureProjectFileName(value) {
+    const base = sanitizeText(value);
+    if (!base) return suggestProjectFileName();
+    return /\.ya?ml$/i.test(base) ? base : `${base}.treegen.yaml`;
   }
 
   function loadBrowserRecentProjects() {
@@ -1056,12 +1074,16 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         <p>Saved ${escapeHtml(formatTimestamp(entry.updatedAt))}</p>
         <div class="recent-project-actions">
           <button type="button" data-open-recent-project="${escapeHtml(entry.id)}">Open</button>
+          <button type="button" data-rename-recent-project="${escapeHtml(entry.id)}">Rename</button>
           <button type="button" data-delete-recent-project="${escapeHtml(entry.id)}">Remove</button>
         </div>
       </article>
     `).join("");
     elements.recentProjectsList.querySelectorAll("[data-open-recent-project]").forEach((button) => {
       button.addEventListener("click", () => openRecentBrowserProject(button.getAttribute("data-open-recent-project") || ""));
+    });
+    elements.recentProjectsList.querySelectorAll("[data-rename-recent-project]").forEach((button) => {
+      button.addEventListener("click", () => renameRecentBrowserProject(button.getAttribute("data-rename-recent-project") || ""));
     });
     elements.recentProjectsList.querySelectorAll("[data-delete-recent-project]").forEach((button) => {
       button.addEventListener("click", () => deleteRecentBrowserProject(button.getAttribute("data-delete-recent-project") || ""));
@@ -1126,6 +1148,23 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     persistBrowserRecentProjects(entries);
     renderRecentProjectsModal();
     setStatus("Removed recent browser project");
+  }
+
+  function renameRecentBrowserProject(id) {
+    const entries = loadBrowserRecentProjects();
+    const entry = entries.find((item) => item.id === id);
+    if (!entry) return;
+    const renamed = promptBrowserProjectName(entry.name);
+    if (!renamed) return;
+    const nextName = ensureProjectFileName(renamed);
+    const updatedEntries = entries.map((item) => item.id === id ? { ...item, name: nextName } : item);
+    persistBrowserRecentProjects(updatedEntries);
+    if (state.project.path === entry.name) {
+      state.project.path = nextName;
+      updateProjectStatusIndicator();
+    }
+    renderRecentProjectsModal();
+    setStatus(`Renamed recent project to ${basename(nextName)}`);
   }
 
   async function openRecentDesktopProject(filePath) {

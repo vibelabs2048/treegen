@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.45 - 2026-05-12
+
+- made browser `Save As` define the logical project filename so browser-side saved work starts behaving more like named projects instead of anonymous snapshots
+- added browser-side rename from `Recent Projects`
+- updated the visible help text and README so the user-facing guide reflects the new browser naming behavior
+
 ## 0.2.44 - 2026-05-12
 
 - surfaced a clearer current-project summary directly in the main menu so users can see the active project, saved state, and last meaningful save/autosave timestamp without guessing

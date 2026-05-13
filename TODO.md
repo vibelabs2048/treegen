@@ -4,9 +4,9 @@
 
 1. Browser and desktop project workflow still lacks full named-project management.
    Scope:
-   - browser and desktop now both support `Recent Projects`
-   - project handling is still recent-file/snapshot oriented rather than a true named project workspace
-   - there is still no rename/manage workflow for saved project entries
+   - browser now supports named `Save As` entries plus rename in `Recent Projects`
+   - desktop still treats projects strictly as files, not named managed entries
+   - there is still no full project manager for browsing, renaming, and organizing saved work
    Status: Open
 
 ## Missing
@@ -48,6 +48,7 @@
 
 ## Recently Completed
 
+- `v0.2.45` Added the first browser-side named-project step by making `Save As` assign browser project names and allowing rename directly from `Recent Projects`.
 - `v0.2.44` Strengthened project-state visibility by surfacing a current-project summary and clearer save/autosave state directly in the main menu, and enabled `Recent Projects` for desktop too.
 - `v0.2.43` Extended `Recent Projects` into the desktop app so the same project workflow exists in both browser and desktop runtimes.
 - `v0.2.42` Added recent browser projects so browser mode can reopen locally cached project snapshots through a first-class project workflow.
