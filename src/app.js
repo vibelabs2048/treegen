@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.39",
+    version: "0.2.40",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -133,6 +133,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     openAbout: document.getElementById("open-about"),
     openDownloads: document.getElementById("open-downloads"),
     openProject: document.getElementById("open-project"),
+    newProject: document.getElementById("new-project"),
     saveProject: document.getElementById("save-project"),
     saveProjectAs: document.getElementById("save-project-as"),
     toggleAutosave: document.getElementById("toggle-autosave"),
@@ -213,6 +214,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.undoAction.addEventListener("click", undoChange);
     elements.redoAction.addEventListener("click", redoChange);
     elements.openProject.addEventListener("click", openProjectFile);
+    elements.newProject.addEventListener("click", newProject);
     elements.saveProject.addEventListener("click", saveProjectFile);
     elements.saveProjectAs.addEventListener("click", saveProjectFileAs);
     elements.toggleAutosave.addEventListener("click", toggleAutosavePreference);
@@ -782,6 +784,40 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     } catch {
       // status already updated
     }
+  }
+
+  function newProject() {
+    closeTopbarMenu();
+    if (state.project.dirty) {
+      const replace = window.confirm("Start a new blank project and replace the current unsaved work?");
+      if (!replace) return;
+    }
+    resetHistory();
+    state.settings = clone(DEFAULT_SETTINGS);
+    state.people = buildBlankPeople();
+    state.selectedId = "root";
+    state.project.path = "";
+    state.project.autosavePath = "";
+    state.project.autosaveUpdatedAt = "";
+    state.project.browserDraftUpdatedAt = "";
+    state.project.dirty = false;
+    state.export = {
+      format: canExactServerExport ? "pdf" : "svg",
+      quality: 100,
+      widthInches: 11,
+      heightInches: round2(11 / getChartAspectRatio()),
+      dpi: 600,
+      lockAspect: true,
+    };
+    hydrateControls();
+    refreshYamlEditor();
+    renderChart();
+    fitWidth();
+    updateHistoryControls();
+    scheduleDesktopAutosave();
+    scheduleBrowserDraftSave();
+    updateProjectStatusIndicator();
+    setStatus("Started a new blank project");
   }
 
   async function saveProjectFile() {

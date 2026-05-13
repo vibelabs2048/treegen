@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.40 - 2026-05-12
+
+- added a real `New Project` action so users can start a blank tree explicitly instead of reusing `Clear Tree`
+- made `New Project` reset project/session state cleanly, including current project path, autosave markers, and browser-draft markers
+- kept `Load Demo` separate from blank-project creation so the project menu reads more like a normal application
+
 ## 0.2.39 - 2026-05-12
 
 - turned `Inherit Linked Surname` on by default for non-root boxes and made the surname field/checkbox transition clearer by preserving the currently inherited surname when inheritance is turned off

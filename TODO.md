@@ -1,25 +1,50 @@
 # TreeGen Backlog
 
-## Current Priorities
+## Broken / Awkward
 
-1. Decide whether browser mode should gain named local projects instead of one rolling draft.
+1. Add a real `New Tree / New Project` action.
+   Scope:
+   - start a blank project explicitly
+   - separate it from `Load Demo` and `Clear Tree`
+   - confirm before replacing unsaved work
+   - reset project/session state cleanly
+   Status: In progress
+
+2. Browser project workflow is still asymmetrical.
+   Scope:
+   - browser now supports `Save` / `Save As`
+   - browser still does not have a first-class `Open Project` path
+   - raw YAML import is still doing double duty as open/import
+   Status: Open
+
+## Missing
+
+3. Decide whether browser mode should gain named local projects instead of one rolling draft.
    Scope:
    - current browser mode now supports one cached draft and recovery
    - next step would be multiple browser-side drafts/projects if needed
    Status: Open
 
-2. Decide whether desktop project state needs stronger visible affordances.
+4. Decide whether desktop project state needs stronger visible affordances.
    Scope:
    - recent files
    - dirty badges in more places
    - clearer saved/autosaved distinction
    Status: Open
 
-3. Continue small UI polish passes where behavior is subtle.
+## Nice To Have
+
+5. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
    - continue tightening the shell as new project features land
+   Status: Open
+
+6. Strengthen automated visual regression checks.
+   Scope:
+   - current QA bundle is useful but still human-reviewed
+   - add sharper checks around preview/export consistency and layout regressions
    Status: Open
 
 ## Active Behavior Notes
@@ -31,6 +56,7 @@
 
 ## Recently Completed
 
+- `v0.2.40` Adds a real `New Project` action and resets project/session state cleanly instead of forcing users to reuse `Clear Tree`.
 - `v0.2.39` Defaulted surname inheritance on for non-root boxes, clarified the checkbox-to-field sync behavior, and added explicit `Save`, `Save As`, and autosave controls for project work.
 - `v0.2.38` Polished the editor shell again by grouping the hamburger menu into clearer sections, improving tooltip coverage, and making the header project-state badge read more clearly when changes are unsaved.
 - `v0.2.37` TreeGen became more project-focused in both browser and desktop mode: browser draft recovery was added, light/dark theme selection now persists, fullscreen control uses a real icon, project state is visible in the header, raw YAML import moved under Advanced, and the inspector now behaves more like a tabbed editor.
