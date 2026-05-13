@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.44 - 2026-05-12
+
+- surfaced a clearer current-project summary directly in the main menu so users can see the active project, saved state, and last meaningful save/autosave timestamp without guessing
+- enabled `Recent Projects` for desktop in the same menu path instead of leaving it browser-only
+- tightened project-state labeling across browser and desktop modes so save state is easier to read at a glance
+
 ## 0.2.43 - 2026-05-12
 
 - extended `Recent Projects` into the desktop app by tracking recent project files in app data and letting users reopen or remove them from the same modal used in browser mode

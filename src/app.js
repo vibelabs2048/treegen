@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.43",
+    version: "0.2.44",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -58,6 +58,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       dirty: false,
       browserDraftUpdatedAt: "",
       autosaveEnabled: true,
+      lastSavedAt: "",
     },
     history: {
       undoStack: [],
@@ -178,6 +179,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     toggleTheme: document.getElementById("toggle-theme"),
     projectStatusLabel: document.getElementById("project-status-label"),
     projectStatusDetail: document.getElementById("project-status-detail"),
+    menuProjectName: document.getElementById("menu-project-name"),
+    menuProjectState: document.getElementById("menu-project-state"),
     aboutVersion: document.getElementById("about-version"),
     aboutLastUpdated: document.getElementById("about-last-updated"),
     aboutRuntime: document.getElementById("about-runtime"),
@@ -790,6 +793,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       applyYamlFromEditor(result.text || "");
       state.project.path = result.path || "";
       state.project.dirty = false;
+      state.project.lastSavedAt = "";
       await writeDesktopAutosave();
       updateProjectStatusIndicator();
       setStatus(`Opened project ${basename(result.path || "project")}`);
@@ -818,6 +822,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     state.project.autosaveUpdatedAt = "";
     state.project.browserDraftUpdatedAt = "";
     state.project.dirty = false;
+    state.project.lastSavedAt = "";
     state.export = {
       format: canExactServerExport ? "pdf" : "svg",
       quality: 100,
@@ -851,6 +856,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       if (!result || result.canceled) return;
       state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
       state.project.dirty = false;
+      state.project.lastSavedAt = result.updatedAt || new Date().toISOString();
       if (!desktopBridge) {
         saveBrowserRecentProject(result.path || suggestProjectFileName(), state.yamlText || serializeCurrentState());
       }
@@ -875,6 +881,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       if (!result || result.canceled) return;
       state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
       state.project.dirty = false;
+      state.project.lastSavedAt = result.updatedAt || new Date().toISOString();
       if (!desktopBridge) {
         saveBrowserRecentProject(result.path || suggestProjectFileName(), state.yamlText || serializeCurrentState());
       }
@@ -903,6 +910,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       state.project.autosavePath = autosave.path || "";
       state.project.autosaveUpdatedAt = autosave.updatedAt || "";
       state.project.dirty = false;
+      state.project.lastSavedAt = "";
       updateProjectStatusIndicator();
       setStatus(`Recovered autosave${label}`);
       return true;
@@ -953,6 +961,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       applyYamlFromEditor(draft.text);
       state.project.browserDraftUpdatedAt = draft.updatedAt || "";
       state.project.dirty = false;
+      state.project.lastSavedAt = "";
       updateProjectStatusIndicator();
       setStatus(`Recovered browser draft${label}`);
       return true;
@@ -1103,6 +1112,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       state.project.path = entry.name;
       state.project.dirty = false;
       state.project.browserDraftUpdatedAt = entry.updatedAt || "";
+      state.project.lastSavedAt = "";
       updateProjectStatusIndicator();
       closeModal("recent-projects");
       setStatus(`Opened recent project ${entry.name}`);
@@ -1130,6 +1140,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       applyYamlFromEditor(result.text || "");
       state.project.path = result.path || "";
       state.project.dirty = false;
+      state.project.lastSavedAt = "";
       await writeDesktopAutosave();
       updateProjectStatusIndicator();
       closeModal("recent-projects");
@@ -2086,9 +2097,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         : "Open a saved TreeGen project YAML file from your device.";
     }
     if (elements.openRecentProjects) {
-      elements.openRecentProjects.disabled = !!desktopBridge;
+      elements.openRecentProjects.disabled = false;
       elements.openRecentProjects.title = desktopBridge
-        ? "Recent browser projects are only available in browser mode."
+        ? "Open a recent desktop project file tracked on this machine."
         : "Open a recent browser-side TreeGen project snapshot stored on this device.";
     }
     if (elements.saveProject) {
@@ -2124,6 +2135,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
       elements.projectStatusLabel.textContent = label;
       elements.projectStatusDetail.textContent = detailParts.join(" · ");
+      if (elements.menuProjectName) {
+        elements.menuProjectName.textContent = label;
+      }
+      if (elements.menuProjectState) {
+        const menuParts = [state.project.dirty ? "Unsaved changes" : "Saved state"];
+        if (state.project.lastSavedAt) {
+          menuParts.push(`Saved ${formatTimestamp(state.project.lastSavedAt)}`);
+        } else if (state.project.autosaveUpdatedAt) {
+          menuParts.push(`Autosaved ${formatTimestamp(state.project.autosaveUpdatedAt)}`);
+        }
+        elements.menuProjectState.textContent = menuParts.join(" · ");
+      }
       elements.projectStatusLabel.title = state.project.path || "Desktop session";
       elements.projectStatusDetail.title = detailParts.join(" · ");
       return;
@@ -2143,6 +2166,20 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       detailParts.push("No cached draft yet");
     }
     elements.projectStatusDetail.textContent = detailParts.join(" · ");
+    if (elements.menuProjectName) {
+      elements.menuProjectName.textContent = elements.projectStatusLabel.textContent;
+    }
+    if (elements.menuProjectState) {
+      const menuParts = [state.project.dirty ? "Unsaved changes" : "Saved state"];
+      if (state.project.lastSavedAt) {
+        menuParts.push(`Saved ${formatTimestamp(state.project.lastSavedAt)}`);
+      } else if (hasDraft) {
+        menuParts.push(`Draft cached ${formatTimestamp(state.project.browserDraftUpdatedAt)}`);
+      } else {
+        menuParts.push("No cached draft yet");
+      }
+      elements.menuProjectState.textContent = menuParts.join(" · ");
+    }
     elements.projectStatusLabel.title = state.project.path
       ? `Current browser project: ${state.project.path}`
       : hasDraft

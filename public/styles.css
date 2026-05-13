@@ -210,6 +210,29 @@ label > textarea {
   gap: 0.35rem;
 }
 
+.menu-project-summary {
+  gap: 0.18rem;
+}
+
+.menu-project-name,
+.menu-project-state {
+  margin: 0;
+  padding: 0 0.15rem;
+}
+
+.menu-project-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.menu-project-state {
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
 .menu-section + .menu-section {
   padding-top: 0.45rem;
   border-top: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);

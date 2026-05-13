@@ -17,7 +17,7 @@
    - next step would be multiple browser-side drafts/projects if needed
    Status: Open
 
-2. Decide whether desktop project state needs stronger visible affordances.
+2. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
    Scope:
    - recent files
    - dirty badges in more places
@@ -48,6 +48,7 @@
 
 ## Recently Completed
 
+- `v0.2.44` Strengthened project-state visibility by surfacing a current-project summary and clearer save/autosave state directly in the main menu, and enabled `Recent Projects` for desktop too.
 - `v0.2.43` Extended `Recent Projects` into the desktop app so the same project workflow exists in both browser and desktop runtimes.
 - `v0.2.42` Added recent browser projects so browser mode can reopen locally cached project snapshots through a first-class project workflow.
 - `v0.2.41` Made browser `Open Project` a first-class workflow and updated the visible user guide/help copy to match the real project actions.
