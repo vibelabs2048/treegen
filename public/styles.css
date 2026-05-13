@@ -190,9 +190,18 @@ label > textarea {
 }
 
 .menu-button {
+  list-style: none;
   min-height: 2.2rem;
   padding: 0.42rem 0.72rem;
   font-weight: 600;
+}
+
+.menu-button::-webkit-details-marker {
+  display: none;
+}
+
+details.menu-group > summary {
+  cursor: pointer;
 }
 
 .menu-panel {
@@ -301,7 +310,7 @@ label > textarea {
   display: block;
 }
 
-.menu-panel[hidden] {
+details.menu-group:not([open]) > .menu-panel {
   display: none;
 }
 

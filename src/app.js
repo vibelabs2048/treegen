@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.52",
+    version: "0.2.53",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -132,8 +132,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     sidebarTabs: Array.from(document.querySelectorAll(".sidebar-tab")),
     tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
     openImport: document.getElementById("open-import"),
-    menuButtons: Array.from(document.querySelectorAll(".menu-button")),
-    menuPanels: Array.from(document.querySelectorAll(".menu-panel")),
+    menuGroups: Array.from(document.querySelectorAll(".menu-group")),
     advancedMenu: document.getElementById("advanced-menu"),
     openExport: document.getElementById("open-export"),
     openHelp: document.getElementById("open-help"),
@@ -213,7 +212,6 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   let autosaveTimer = null;
   let browserDraftTimer = null;
   let browserFileIntent = "import";
-  let openMenuId = "";
 
   async function init() {
     applyStoredTheme();
@@ -235,8 +233,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function bindEvents() {
-    elements.menuButtons.forEach((button) => {
-      button.addEventListener("click", toggleMenuPanel);
+    elements.menuGroups.forEach((group) => {
+      group.addEventListener("toggle", handleMenuGroupToggle);
     });
     elements.undoAction.addEventListener("click", undoChange);
     elements.redoAction.addEventListener("click", redoChange);
@@ -568,21 +566,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     setTheme(current === "dark" ? "light" : "dark");
   }
 
-  function toggleMenuPanel(event) {
-    const button = event.currentTarget;
-    const targetId = button.dataset.menuTarget || "";
-    if (!targetId) return;
-    event.stopPropagation();
-    if (openMenuId === targetId) {
-      closeTopbarMenu();
-      return;
-    }
-    openMenuId = targetId;
-    elements.menuPanels.forEach((panel) => {
-      panel.hidden = panel.id !== targetId;
-    });
-    elements.menuButtons.forEach((menuButton) => {
-      menuButton.setAttribute("aria-expanded", String(menuButton === button));
+  function handleMenuGroupToggle(event) {
+    const toggledGroup = event.currentTarget;
+    if (!toggledGroup.open) return;
+    elements.menuGroups.forEach((group) => {
+      if (group !== toggledGroup) {
+        group.open = false;
+      }
     });
   }
 
@@ -2108,17 +2098,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function closeTopbarMenu() {
-    openMenuId = "";
-    elements.menuPanels.forEach((panel) => {
-      panel.hidden = true;
-    });
-    elements.menuButtons.forEach((button) => {
-      button.setAttribute("aria-expanded", "false");
+    elements.menuGroups.forEach((group) => {
+      group.open = false;
     });
   }
 
   function handleDocumentMenuClick(event) {
-    if (!openMenuId) return;
+    if (!elements.menuGroups.some((group) => group.open)) return;
     if (event.target.closest(".menu-shell")) return;
     closeTopbarMenu();
   }

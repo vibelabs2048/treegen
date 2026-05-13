@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.53 - 2026-05-12
+
+- fixed the horizontal menu bar by switching the top-level menus to native disclosure behavior instead of the brittle custom toggle state from the first pass
+- kept the project, export, view, help, and advanced groupings while making the actual menu interactions reliable again
+
 ## 0.2.52 - 2026-05-12
 
 - replaced the scrolling hamburger with a horizontal menu bar and submenu panels so the main shell no longer depends on a long vertical menu

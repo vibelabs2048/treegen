@@ -53,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.53` Fixed the horizontal menu bar interaction model by switching it to native disclosure behavior so the menu buttons actually open and close their panels reliably.
 - `v0.2.52` Replaced the scrolling hamburger with a horizontal menu bar and submenus, added a show/hide editor control, and switched preview clipping protection to measured preview-bound normalization plus stronger shell validation.
 - `v0.2.51` Shortened the hamburger by moving more document actions into the `Projects` surface, strengthened preview-shell padding and fit margins, and added automatic QA checks for the preview safety constants.
 - `v0.2.50` Turned the old recent-project modal into a dedicated `Projects` surface with current-project actions plus the recent list, keeping the workflow file-oriented in both browser and desktop mode.
