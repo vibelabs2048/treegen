@@ -86,6 +86,32 @@ ipcMain.handle("treegen:save-project", async (_event, payload = {}) => {
   };
 });
 
+ipcMain.handle("treegen:save-project-as", async (_event, payload = {}) => {
+  const {
+    suggestedName = "family-tree.treegen.yaml",
+    text = "",
+  } = payload;
+  await ensureProjectDirectory();
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: "Save TreeGen Project As",
+    defaultPath: path.join(projectDirectory(), suggestedName),
+    filters: [
+      { name: "TreeGen Project", extensions: PROJECT_EXTENSIONS },
+      { name: "All Files", extensions: ["*"] },
+    ],
+  });
+  if (result.canceled || !result.filePath) {
+    return { canceled: true };
+  }
+  await fs.writeFile(result.filePath, String(text), "utf8");
+  const stats = await fs.stat(result.filePath);
+  return {
+    canceled: false,
+    path: result.filePath,
+    updatedAt: stats.mtime.toISOString(),
+  };
+});
+
 ipcMain.handle("treegen:read-autosave", async () => {
   try {
     const filePath = autosavePath();

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.39 - 2026-05-12
+
+- turned `Inherit Linked Surname` on by default for non-root boxes and made the surname field/checkbox transition clearer by preserving the currently inherited surname when inheritance is turned off
+- added explicit `Save` and `Save As` actions to the project menu instead of relying on one implicit save path
+- added a visible autosave toggle, enabled by default, so automatic project saving can be controlled in both desktop and browser modes
+- let browser mode use `Save` and `Save As` to download the current TreeGen project YAML directly instead of forcing users through export for basic project saving
+
 ## 0.2.38 - 2026-05-12
 
 - grouped the hamburger menu into clearer Project, Display, and Help sections so the shell reads more like an application

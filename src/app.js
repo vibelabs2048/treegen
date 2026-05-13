@@ -3,12 +3,13 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.38",
+    version: "0.2.39",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
   const THEME_STORAGE_KEY = "treegen-theme-v1";
   const BROWSER_DRAFT_STORAGE_KEY = `treegen-browser-draft-v${PROJECT_SCHEMA_VERSION}`;
+  const AUTOSAVE_STORAGE_KEY = "treegen-autosave-enabled-v1";
   const MAX_GENERATION = 6;
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
   const PAGE_WIDTH_PT = 792;
@@ -55,6 +56,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       autosaveUpdatedAt: "",
       dirty: false,
       browserDraftUpdatedAt: "",
+      autosaveEnabled: true,
     },
     history: {
       undoStack: [],
@@ -132,6 +134,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     openDownloads: document.getElementById("open-downloads"),
     openProject: document.getElementById("open-project"),
     saveProject: document.getElementById("save-project"),
+    saveProjectAs: document.getElementById("save-project-as"),
+    toggleAutosave: document.getElementById("toggle-autosave"),
     undoAction: document.getElementById("undo-action"),
     redoAction: document.getElementById("redo-action"),
     menuToggle: document.getElementById("menu-toggle"),
@@ -185,6 +189,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   async function init() {
     applyStoredTheme();
+    applyStoredAutosavePreference();
     configureRuntimeMode();
     populateGenerationStyleSelect();
     bindEvents();
@@ -209,6 +214,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     elements.redoAction.addEventListener("click", redoChange);
     elements.openProject.addEventListener("click", openProjectFile);
     elements.saveProject.addEventListener("click", saveProjectFile);
+    elements.saveProjectAs.addEventListener("click", saveProjectFileAs);
+    elements.toggleAutosave.addEventListener("click", toggleAutosavePreference);
     elements.toggleTheme.addEventListener("click", toggleThemeMode);
     elements.toggleAdvanced.addEventListener("click", toggleAdvancedMenu);
     document.getElementById("clear-tree").addEventListener("click", () => {
@@ -273,7 +280,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     });
     elements.personInheritSurname.addEventListener("change", () => {
       commitStateChange(() => {
-        state.people[state.selectedId].inheritSurname = elements.personInheritSurname.checked;
+        const person = state.people[state.selectedId];
+        if (!elements.personInheritSurname.checked && !sanitizeText(person.lastName)) {
+          person.lastName = resolvePersonSurname(state.selectedId);
+        }
+        person.inheritSurname = elements.personInheritSurname.checked;
       });
     });
     elements.personDisplayOverrideEnabled.addEventListener("change", () => {
@@ -523,7 +534,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       people[slot.id] = {
         firstName: nameParts.firstName,
         lastName: nameParts.lastName,
-        inheritSurname: slot.id === "root" ? false : false,
+        inheritSurname: slot.id === "root" ? false : true,
         displayNameOverrideEnabled: false,
         displayNameOverride: "",
         birthYear: years.birthYear,
@@ -546,7 +557,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       people[slot.id] = {
         firstName: "",
         lastName: "",
-        inheritSurname: false,
+        inheritSurname: slot.id === "root" ? false : true,
         displayNameOverrideEnabled: false,
         displayNameOverride: "",
         birthYear: "",
@@ -775,23 +786,42 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   async function saveProjectFile() {
     closeTopbarMenu();
-    if (!desktopBridge) {
-      openModal("export");
-      return;
-    }
     refreshYamlEditor();
     try {
-      const result = await desktopBridge.saveProjectFile({
-        currentPath: state.project.path || "",
-        suggestedName: suggestProjectFileName(),
-        text: state.yamlText || serializeCurrentState(),
-      });
+      const result = desktopBridge
+        ? await desktopBridge.saveProjectFile({
+            currentPath: state.project.path || "",
+            suggestedName: suggestProjectFileName(),
+            text: state.yamlText || serializeCurrentState(),
+          })
+        : await saveBrowserProjectFile();
       if (!result || result.canceled) return;
-      state.project.path = result.path || state.project.path;
+      state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
       state.project.dirty = false;
       await writeDesktopAutosave();
       updateProjectStatusIndicator();
-      setStatus(`Saved project ${basename(result.path || "project")}`);
+      setStatus(`Saved project ${basename(result.path || suggestProjectFileName())}`);
+    } catch (error) {
+      setStatus(`Project save error: ${error.message}`);
+    }
+  }
+
+  async function saveProjectFileAs() {
+    closeTopbarMenu();
+    refreshYamlEditor();
+    try {
+      const result = desktopBridge
+        ? await desktopBridge.saveProjectFileAs({
+            suggestedName: suggestProjectFileName(),
+            text: state.yamlText || serializeCurrentState(),
+          })
+        : await saveBrowserProjectFile();
+      if (!result || result.canceled) return;
+      state.project.path = desktopBridge ? (result.path || state.project.path) : state.project.path;
+      state.project.dirty = false;
+      await writeDesktopAutosave();
+      updateProjectStatusIndicator();
+      setStatus(`Saved project as ${basename(result.path || suggestProjectFileName())}`);
     } catch (error) {
       setStatus(`Project save error: ${error.message}`);
     }
@@ -824,7 +854,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function scheduleDesktopAutosave() {
-    if (!desktopBridge) return;
+    if (!desktopBridge || !state.project.autosaveEnabled) return;
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(() => {
       void writeDesktopAutosave();
@@ -832,7 +862,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   async function writeDesktopAutosave() {
-    if (!desktopBridge) return;
+    if (!desktopBridge || !state.project.autosaveEnabled) return;
     refreshYamlEditor();
     try {
       const result = await desktopBridge.writeAutosave({
@@ -874,7 +904,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function scheduleBrowserDraftSave() {
-    if (desktopBridge) return;
+    if (desktopBridge || !state.project.autosaveEnabled) return;
     clearTimeout(browserDraftTimer);
     browserDraftTimer = setTimeout(() => {
       writeBrowserDraft();
@@ -882,7 +912,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function writeBrowserDraft() {
-    if (desktopBridge) return;
+    if (desktopBridge || !state.project.autosaveEnabled) return;
     refreshYamlEditor();
     try {
       const updatedAt = new Date().toISOString();
@@ -899,6 +929,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
   }
 
+  async function saveBrowserProjectFile() {
+    const filename = suggestProjectFileName();
+    await saveOrDownload(new Blob([state.yamlText || serializeCurrentState()], { type: "text/yaml;charset=utf-8" }), filename, [
+      { name: "TreeGen Project", extensions: ["yaml", "yml"] },
+    ]);
+    return {
+      canceled: false,
+      path: filename,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
   function suggestProjectFileName() {
     const root = state.people.root || {};
     const rootName = displayName(root, "root") || "family-tree";
@@ -910,6 +952,44 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const date = new Date(value);
     if (!Number.isFinite(date.getTime())) return "an unknown time";
     return date.toLocaleString();
+  }
+
+  function applyStoredAutosavePreference() {
+    try {
+      const stored = window.localStorage.getItem(AUTOSAVE_STORAGE_KEY);
+      if (stored === "false") {
+        state.project.autosaveEnabled = false;
+      } else if (stored === "true") {
+        state.project.autosaveEnabled = true;
+      }
+    } catch {}
+    syncAutosaveButton();
+  }
+
+  function toggleAutosavePreference() {
+    state.project.autosaveEnabled = !state.project.autosaveEnabled;
+    try {
+      window.localStorage.setItem(AUTOSAVE_STORAGE_KEY, state.project.autosaveEnabled ? "true" : "false");
+    } catch {}
+    clearTimeout(autosaveTimer);
+    clearTimeout(browserDraftTimer);
+    syncAutosaveButton();
+    updateProjectStatusIndicator();
+    if (state.project.autosaveEnabled) {
+      scheduleDesktopAutosave();
+      scheduleBrowserDraftSave();
+      setStatus("Autosave enabled");
+    } else {
+      setStatus("Autosave disabled");
+    }
+  }
+
+  function syncAutosaveButton() {
+    if (!elements.toggleAutosave) return;
+    elements.toggleAutosave.textContent = state.project.autosaveEnabled ? "Autosave: On" : "Autosave: Off";
+    elements.toggleAutosave.title = state.project.autosaveEnabled
+      ? "Automatic background saving is on. Click to turn it off."
+      : "Automatic background saving is off. Click to turn it on.";
   }
 
   function refreshYamlEditor() {
@@ -994,10 +1074,15 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       const incoming = importedPeople[slot.id] || {};
       const legacyName = sanitizeText(incoming.name ?? "");
       const splitName = splitDisplayName(legacyName);
+      const explicitInherit = typeof incoming.inheritSurname === "boolean";
       nextPeople[slot.id] = {
         firstName: sanitizeText(incoming.firstName ?? splitName.firstName ?? nextPeople[slot.id].firstName),
         lastName: sanitizeText(incoming.lastName ?? splitName.lastName ?? nextPeople[slot.id].lastName),
-        inheritSurname: sanitizeOptionalBoolean(incoming.inheritSurname, nextPeople[slot.id].inheritSurname),
+        inheritSurname: explicitInherit
+          ? sanitizeOptionalBoolean(incoming.inheritSurname, nextPeople[slot.id].inheritSurname)
+          : slot.id === "root"
+            ? false
+            : true,
         displayNameOverrideEnabled: sanitizeOptionalBoolean(
           incoming.displayNameOverrideEnabled,
           incoming.displayNameOverride ? true : nextPeople[slot.id].displayNameOverrideEnabled
@@ -1767,11 +1852,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         : "Project files and autosave are available in the desktop app.";
     }
     if (elements.saveProject) {
-      elements.saveProject.disabled = !desktopBridge;
+      elements.saveProject.disabled = false;
       elements.saveProject.title = desktopBridge
         ? "Save the current TreeGen project to disk."
-        : "Project files and autosave are available in the desktop app.";
+        : "Download the current TreeGen project YAML to your device.";
     }
+    if (elements.saveProjectAs) {
+      elements.saveProjectAs.disabled = false;
+      elements.saveProjectAs.title = desktopBridge
+        ? "Save the current TreeGen project to a new location or filename."
+        : "Download the current TreeGen project YAML using the project filename.";
+    }
+    syncAutosaveButton();
     renderDownloadOptions();
     updateProjectStatusIndicator();
   }
@@ -1785,6 +1877,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       const detailParts = [
         themeLabel,
         state.project.dirty ? "Unsaved changes" : "Saved state",
+        state.project.autosaveEnabled ? "Autosave on" : "Autosave off",
       ];
       if (state.project.autosaveUpdatedAt) {
         detailParts.push(`Autosaved ${formatTimestamp(state.project.autosaveUpdatedAt)}`);
@@ -1797,7 +1890,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     }
     const hasDraft = !!state.project.browserDraftUpdatedAt;
     elements.projectStatusLabel.textContent = hasDraft ? "Browser draft" : "Local session";
-    const detailParts = [themeLabel];
+    const detailParts = [themeLabel, state.project.autosaveEnabled ? "Autosave on" : "Autosave off"];
     if (state.project.dirty) {
       detailParts.push("Unsaved changes");
     } else if (hasDraft) {

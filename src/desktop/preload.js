@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld("treegenDesktop", {
   saveProjectFile(payload) {
     return ipcRenderer.invoke("treegen:save-project", payload);
   },
+  saveProjectFileAs(payload) {
+    return ipcRenderer.invoke("treegen:save-project-as", payload);
+  },
   readAutosave() {
     return ipcRenderer.invoke("treegen:read-autosave");
   },
