@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.48",
+    version: "0.2.49",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -1265,6 +1265,83 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     return date.toLocaleString();
   }
 
+  function joinStatusParts(parts) {
+    return parts.filter(Boolean).join(" · ");
+  }
+
+  function buildDesktopProjectStatus() {
+    const label = state.project.path ? basename(state.project.path) : "Desktop session";
+    let primary = "Not saved to disk yet";
+    if (state.project.lastSavedAt) {
+      primary = `Saved to disk ${formatTimestamp(state.project.lastSavedAt)}`;
+    } else if (state.project.autosaveUpdatedAt) {
+      primary = `Cached locally ${formatTimestamp(state.project.autosaveUpdatedAt)}`;
+    }
+    const secondary = [];
+    if (state.project.path) {
+      secondary.push("Backed by disk file");
+    }
+    if (state.project.autosaveEnabled) {
+      if (state.project.autosaveUpdatedAt) {
+        secondary.push(`Autosave updated ${formatTimestamp(state.project.autosaveUpdatedAt)}`);
+      } else {
+        secondary.push("Autosave on");
+      }
+    } else {
+      secondary.push("Autosave off");
+    }
+    if (state.project.dirty) {
+      secondary.push(state.project.lastSavedAt ? "Unsaved changes since disk save" : "Unsaved changes");
+    }
+    return {
+      label,
+      detail: joinStatusParts([primary, ...secondary]),
+      menuState: joinStatusParts([primary, state.project.dirty ? "Unsaved changes" : "Up to date"]),
+      labelTitle: state.project.path || "Current desktop editing session",
+    };
+  }
+
+  function buildBrowserProjectStatus() {
+    const hasDraft = !!state.project.browserDraftUpdatedAt;
+    const label = state.project.path
+      ? basename(state.project.path)
+      : hasDraft
+        ? "Browser draft"
+        : "Local session";
+    let primary = "Not saved to your device yet";
+    if (state.project.lastSavedAt) {
+      primary = `Saved to your device ${formatTimestamp(state.project.lastSavedAt)}`;
+    } else if (hasDraft) {
+      primary = `Cached locally ${formatTimestamp(state.project.browserDraftUpdatedAt)}`;
+    }
+    const secondary = [];
+    if (state.project.path) {
+      secondary.push("Download filename set");
+    }
+    if (state.project.autosaveEnabled) {
+      if (hasDraft) {
+        secondary.push(`Local cache updated ${formatTimestamp(state.project.browserDraftUpdatedAt)}`);
+      } else {
+        secondary.push("Local cache on");
+      }
+    } else {
+      secondary.push("Local cache off");
+    }
+    if (state.project.dirty) {
+      secondary.push(state.project.lastSavedAt ? "Unsaved changes since device save" : "Unsaved changes");
+    }
+    return {
+      label,
+      detail: joinStatusParts([primary, ...secondary]),
+      menuState: joinStatusParts([primary, state.project.dirty ? "Unsaved changes" : "Up to date"]),
+      labelTitle: state.project.path
+        ? `Current browser project: ${state.project.path}`
+        : hasDraft
+          ? "Browser project cached locally on this device"
+          : "Current browser editing session",
+    };
+  }
+
   function applyStoredAutosavePreference() {
     try {
       const stored = window.localStorage.getItem(AUTOSAVE_STORAGE_KEY);
@@ -2212,71 +2289,18 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 
   function updateProjectStatusIndicator() {
     if (!elements.projectStatusLabel || !elements.projectStatusDetail) return;
-    const themeLabel = document.documentElement.dataset.theme === "dark" ? "Dark mode" : "Light mode";
     elements.projectStatusLabel.dataset.dirty = state.project.dirty ? "true" : "false";
-    if (desktopBridge) {
-      const label = state.project.path ? basename(state.project.path) : "Desktop session";
-      const detailParts = [
-        themeLabel,
-        state.project.dirty ? "Unsaved changes" : "Saved state",
-        state.project.autosaveEnabled ? "Autosave on" : "Autosave off",
-      ];
-      if (state.project.autosaveUpdatedAt) {
-        detailParts.push(`Autosaved ${formatTimestamp(state.project.autosaveUpdatedAt)}`);
-      }
-      elements.projectStatusLabel.textContent = label;
-      elements.projectStatusDetail.textContent = detailParts.join(" · ");
-      if (elements.menuProjectName) {
-        elements.menuProjectName.textContent = label;
-      }
-      if (elements.menuProjectState) {
-        const menuParts = [state.project.dirty ? "Unsaved changes" : "Saved state"];
-        if (state.project.lastSavedAt) {
-          menuParts.push(`Saved ${formatTimestamp(state.project.lastSavedAt)}`);
-        } else if (state.project.autosaveUpdatedAt) {
-          menuParts.push(`Autosaved ${formatTimestamp(state.project.autosaveUpdatedAt)}`);
-        }
-        elements.menuProjectState.textContent = menuParts.join(" · ");
-      }
-      elements.projectStatusLabel.title = state.project.path || "Desktop session";
-      elements.projectStatusDetail.title = detailParts.join(" · ");
-      return;
-    }
-    const hasDraft = !!state.project.browserDraftUpdatedAt;
-    elements.projectStatusLabel.textContent = state.project.path
-      ? basename(state.project.path)
-      : hasDraft
-        ? "Browser draft"
-        : "Local session";
-    const detailParts = [themeLabel, state.project.autosaveEnabled ? "Autosave on" : "Autosave off"];
-    if (state.project.dirty) {
-      detailParts.push("Unsaved changes");
-    } else if (hasDraft) {
-      detailParts.push(`Draft cached ${formatTimestamp(state.project.browserDraftUpdatedAt)}`);
-    } else {
-      detailParts.push("No cached draft yet");
-    }
-    elements.projectStatusDetail.textContent = detailParts.join(" · ");
+    const status = desktopBridge ? buildDesktopProjectStatus() : buildBrowserProjectStatus();
+    elements.projectStatusLabel.textContent = status.label;
+    elements.projectStatusDetail.textContent = status.detail;
     if (elements.menuProjectName) {
-      elements.menuProjectName.textContent = elements.projectStatusLabel.textContent;
+      elements.menuProjectName.textContent = status.label;
     }
     if (elements.menuProjectState) {
-      const menuParts = [state.project.dirty ? "Unsaved changes" : "Saved state"];
-      if (state.project.lastSavedAt) {
-        menuParts.push(`Saved ${formatTimestamp(state.project.lastSavedAt)}`);
-      } else if (hasDraft) {
-        menuParts.push(`Draft cached ${formatTimestamp(state.project.browserDraftUpdatedAt)}`);
-      } else {
-        menuParts.push("No cached draft yet");
-      }
-      elements.menuProjectState.textContent = menuParts.join(" · ");
+      elements.menuProjectState.textContent = status.menuState;
     }
-    elements.projectStatusLabel.title = state.project.path
-      ? `Current browser project: ${state.project.path}`
-      : hasDraft
-        ? "Browser draft cached locally for this device"
-        : "Current browser editing session";
-    elements.projectStatusDetail.title = detailParts.join(" · ");
+    elements.projectStatusLabel.title = status.labelTitle;
+    elements.projectStatusDetail.title = status.detail;
   }
 
   function renderDownloadOptions() {

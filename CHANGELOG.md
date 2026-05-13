@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.49 - 2026-05-12
+
+- reworked project-status wording so the header and menu now lead with where and when the current tree was last saved or cached instead of leading with a generic saved/dirty label
+- kept unsaved changes visible, but moved them into secondary context after the actual save destination and timestamp
+- updated the visible help copy and README so users understand that the header status line reports save and cache destination information
+
 ## 0.2.48 - 2026-05-12
 
 - split desktop recent-project removal into `Remove from Recent` and `Delete from Disk` so destructive file deletion is no longer mixed with simple list cleanup

@@ -2,13 +2,7 @@
 
 ## Priority Work
 
-1. Tighten project-state language around save destination instead of generic dirty markers.
-   Scope:
-   - emphasize last saved time/date and destination like disk or local cache
-   - keep unsaved-state signals explicit but secondary
-   Status: Open
-
-2. Build a fuller project manager later.
+1. Build a fuller project manager later.
    Scope:
    - browser and desktop now both support open/remove/rename in `Recent Projects`
    - there is still no dedicated project-manager surface for browsing and organizing saved work at larger scale
@@ -16,20 +10,20 @@
 
 ## Missing
 
-4. Keep browser mode file-oriented with local cache and avoid drifting into a separate project model.
+2. Keep browser mode file-oriented with local cache and avoid drifting into a separate project model.
    Scope:
    - browser should stay as close to desktop behavior as the platform allows
    - local storage should remain a cache/recovery layer rather than the primary project system
    Status: Open
 
-5. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
+3. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
    Scope:
    - recent files
    - clearer save destinations
    - clearer saved/autosaved distinction
    Status: Open
 
-6. Decide whether persistent QA warnings for generations 3 and 4 should be treated as a formatting problem or an expected demo artifact.
+4. Decide whether persistent QA warnings for generations 3 and 4 should be treated as a formatting problem or an expected demo artifact.
    Scope:
    - current machine QA passes but warns that every generation 3 and 4 box name is being reduced to fit in the demo
    - decide whether to tune the demo data, geometry, or warning thresholds
@@ -37,7 +31,7 @@
 
 ## Nice To Have
 
-7. Continue small UI polish passes where behavior is subtle.
+5. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
@@ -53,6 +47,7 @@
 
 ## Recently Completed
 
+- `v0.2.49` Reworked project-status wording so TreeGen now leads with where and when the current tree was last saved or cached, with unsaved changes treated as secondary context instead of the main status message.
 - `v0.2.48` Split desktop recent-project removal into a lightweight `Remove from Recent` action and a destructive `Delete from Disk` action with stronger confirmation, while keeping the current tree open but unsaved if its backing file is deleted.
 - `v0.2.47` Added hard QA validation for SVG sanity, artifact sizes, and fit-report invariants so CI can reject obviously broken preview/export output before release.
 - `v0.2.46` Brought desktop recent-project management closer to browser mode by allowing rename directly from `Recent Projects`, and updated the visible help text to match.

@@ -16,6 +16,7 @@ TreeGen is a family-tree editor for building ancestor charts and exporting them 
 2. Start with **New Project**, **Load Demo**, or **Open Project**.
 3. Click any person box to edit names, dates, marriage dates, and child lists.
 4. Use **Save**, **Save As**, **Autosave**, and **Recent Projects** while you work. In the browser, **Save As** also defines the project name used in the recent-project list, and **Recent Projects** can reopen, rename, or remove saved entries. In the desktop app, **Remove from Recent** only clears the list entry, while **Delete from Disk** removes the actual project file.
+5. Watch the header status line to see where the current tree was last saved or cached and when that happened.
 5. Adjust formatting if needed.
 6. Export the finished tree.
 
