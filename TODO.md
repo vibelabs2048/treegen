@@ -17,7 +17,7 @@
    - next step would be multiple browser-side drafts/projects if needed
    Status: Open
 
-2. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
+3. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
    Scope:
    - recent files
    - dirty badges in more places
@@ -26,14 +26,14 @@
 
 ## Nice To Have
 
-3. Continue small UI polish passes where behavior is subtle.
+4. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
    - continue tightening the shell as new project features land
    Status: Open
 
-4. Strengthen automated visual regression checks.
+5. Strengthen automated visual regression checks.
    Scope:
    - current QA bundle is useful but still human-reviewed
    - add sharper checks around preview/export consistency and layout regressions
