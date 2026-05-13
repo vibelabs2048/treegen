@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.47 - 2026-05-12
+
+- added a machine-checked QA validation step that inspects the generated SVG, output artifact sizes, and fit-report invariants instead of relying only on human review
+- added a new `npm run qa:check` command so local and CI validation can fail early when preview/export output is obviously malformed
+- reprioritized the backlog around automated checks, explicit save-destination language, and safer project-file removal behavior
+
 ## 0.2.46 - 2026-05-12
 
 - added desktop-side rename directly in `Recent Projects` so browser and desktop project management are no longer asymmetric at the first useful level

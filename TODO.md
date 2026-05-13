@@ -1,41 +1,53 @@
 # TreeGen Backlog
 
-## Broken / Awkward
+## Priority Work
 
-1. Decide whether TreeGen needs a dedicated project manager beyond the current recent-project workflow.
+1. Add both desktop recent-project removal modes.
    Scope:
-   - browser and desktop now both support open/remove plus rename in `Recent Projects`
+   - keep `Remove from recent` lightweight and clearly non-destructive
+   - add `Delete from disk` with a stronger warning/confirmation path
+   Status: Open
+
+2. Tighten project-state language around save destination instead of generic dirty markers.
+   Scope:
+   - emphasize last saved time/date and destination like disk or local cache
+   - keep unsaved-state signals explicit but secondary
+   Status: Open
+
+3. Build a fuller project manager later.
+   Scope:
+   - browser and desktop now both support open/remove/rename in `Recent Projects`
    - there is still no dedicated project-manager surface for browsing and organizing saved work at larger scale
    Status: Open
 
 ## Missing
 
-2. Decide whether browser mode should gain named local projects instead of one rolling draft.
+4. Keep browser mode file-oriented with local cache and avoid drifting into a separate project model.
    Scope:
-   - current browser mode now supports one cached draft and recovery
-   - next step would be multiple browser-side drafts/projects if needed
+   - browser should stay as close to desktop behavior as the platform allows
+   - local storage should remain a cache/recovery layer rather than the primary project system
    Status: Open
 
-3. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
+5. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
    Scope:
    - recent files
-   - dirty badges in more places
+   - clearer save destinations
    - clearer saved/autosaved distinction
+   Status: Open
+
+6. Decide whether persistent QA warnings for generations 3 and 4 should be treated as a formatting problem or an expected demo artifact.
+   Scope:
+   - current machine QA passes but warns that every generation 3 and 4 box name is being reduced to fit in the demo
+   - decide whether to tune the demo data, geometry, or warning thresholds
    Status: Open
 
 ## Nice To Have
 
-4. Continue small UI polish passes where behavior is subtle.
+7. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
    - continue tightening the shell as new project features land
-   Status: Open
-
-5. Strengthen automated visual regression checks.
-   Scope:
-   - current QA bundle is useful but still human-reviewed
-   - add sharper checks around preview/export consistency and layout regressions
    Status: Open
 
 ## Active Behavior Notes
@@ -47,6 +59,7 @@
 
 ## Recently Completed
 
+- `v0.2.47` Added hard QA validation for SVG sanity, artifact sizes, and fit-report invariants so CI can reject obviously broken preview/export output before release.
 - `v0.2.46` Brought desktop recent-project management closer to browser mode by allowing rename directly from `Recent Projects`, and updated the visible help text to match.
 - `v0.2.45` Added the first browser-side named-project step by making `Save As` assign browser project names and allowing rename directly from `Recent Projects`.
 - `v0.2.44` Strengthened project-state visibility by surfacing a current-project summary and clearer save/autosave state directly in the main menu, and enabled `Recent Projects` for desktop too.
