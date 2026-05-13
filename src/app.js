@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.59",
+    version: "0.2.60",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -20,8 +20,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   const PREVIEW_FIT_MARGIN_X = 72;
   const PREVIEW_FIT_MARGIN_Y = 96;
   const HISTORY_LIMIT = 120;
-  const BOX_WIDTHS = [144, 124, 96, 76, 46, 14, 11];
-  const BOX_HEIGHTS = [60, 50, 40, 32, 31, 72, 64];
+  const BOX_WIDTHS = [144, 124, 96, 76, 47, 14, 11];
+  const BOX_HEIGHTS = [60, 50, 40, 32, 34, 72, 64];
   const ROW_STEPS = [0, 24, 26, 28, 30, 36, 40];
   const CHART_WIDTH = 768;
   const MARGIN_X = 12;

@@ -2,8 +2,8 @@ const MAX_GENERATION = 6;
 const PAGE_WIDTH_PT = 792;
 const PAGE_HEIGHT_PT = 612;
 const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
-const BOX_WIDTHS = [144, 124, 96, 76, 46, 14, 11];
-const BOX_HEIGHTS = [60, 50, 40, 32, 31, 72, 64];
+const BOX_WIDTHS = [144, 124, 96, 76, 47, 14, 11];
+const BOX_HEIGHTS = [60, 50, 40, 32, 34, 72, 64];
 const BASE_ROW_STEPS = [0, 24, 26, 28, 30, 36, 40];
 const CHART_WIDTH = 768;
 const MARGIN_X = 12;
@@ -564,8 +564,8 @@ function fitWrappedLinesPreferred(text, maxChars, maxLines, preferredLines) {
 }
 
 function fitBoxNameOnly(node, style, name, generation) {
-  const widthSafety = generation === 4 ? 1.6 : 0;
-  const heightSafety = generation === 4 ? 0.4 : 0;
+  const widthSafety = generation === 4 ? 0.5 : 0;
+  const heightSafety = generation === 4 ? 0 : 0;
   const availableWidth = Math.max(8, node.width - INNER_MARGIN * 2 - widthSafety);
   const availableHeight = Math.max(8, node.height - INNER_MARGIN * 2 - heightSafety);
   const preferThreeNameLines = generation === 4;

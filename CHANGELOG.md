@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.60 - 2026-05-13
+
+- gave generation 4 boxes a little more room and reduced the fitter’s extra safety padding there, which raised the fitted demo-name range from roughly `4.65–6.0pt` to `4.95–6.3pt`
+- kept the browser preview regression gate stable while making that geometry change
+
 ## 0.2.59 - 2026-05-12
 
 - restored undo and redo as top-bar icon actions so the shared history controls are visible again and no longer hidden behind missing markup
