@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.50",
+    version: "0.2.51",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -15,6 +15,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
   const PAGE_WIDTH_PT = 792;
   const PAGE_HEIGHT_PT = 612;
+  const PREVIEW_SVG_MARGIN_PT = 48;
+  const PREVIEW_FIT_MARGIN_X = 72;
+  const PREVIEW_FIT_MARGIN_Y = 96;
   const HISTORY_LIMIT = 120;
   const BOX_WIDTHS = [144, 124, 96, 68, 40, 14, 11];
   const BOX_HEIGHTS = [60, 50, 40, 32, 28, 72, 64];
@@ -155,6 +158,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     projectManagerOpen: document.getElementById("project-manager-open"),
     projectManagerSave: document.getElementById("project-manager-save"),
     projectManagerSaveAs: document.getElementById("project-manager-save-as"),
+    projectManagerAutosave: document.getElementById("project-manager-autosave"),
+    projectManagerLoadDemo: document.getElementById("project-manager-load-demo"),
+    projectManagerClear: document.getElementById("project-manager-clear"),
     helpModal: document.getElementById("help-modal"),
     closeImport: document.getElementById("close-import"),
     closeExport: document.getElementById("close-export"),
@@ -222,13 +228,8 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function bindEvents() {
-    document.getElementById("load-demo").addEventListener("click", () => {
-      closeTopbarMenu();
-      loadDemoData(true);
-    });
     elements.undoAction.addEventListener("click", undoChange);
     elements.redoAction.addEventListener("click", redoChange);
-    elements.openProject.addEventListener("click", openProjectFile);
     elements.openRecentProjects.addEventListener("click", openRecentProjectsModal);
     elements.projectManagerNew.addEventListener("click", () => {
       closeModal("recent-projects");
@@ -246,16 +247,20 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       closeModal("recent-projects");
       await saveProjectFileAs();
     });
-    elements.newProject.addEventListener("click", newProject);
-    elements.saveProject.addEventListener("click", saveProjectFile);
-    elements.saveProjectAs.addEventListener("click", saveProjectFileAs);
-    elements.toggleAutosave.addEventListener("click", toggleAutosavePreference);
-    elements.toggleTheme.addEventListener("click", toggleThemeMode);
-    elements.toggleAdvanced.addEventListener("click", toggleAdvancedMenu);
-    document.getElementById("clear-tree").addEventListener("click", () => {
-      closeTopbarMenu();
+    elements.projectManagerAutosave.addEventListener("click", () => {
+      toggleAutosavePreference();
+      renderProjectManagerCurrent();
+    });
+    elements.projectManagerLoadDemo.addEventListener("click", () => {
+      closeModal("recent-projects");
+      loadDemoData(true);
+    });
+    elements.projectManagerClear.addEventListener("click", () => {
+      closeModal("recent-projects");
       clearTree();
     });
+    elements.toggleTheme.addEventListener("click", toggleThemeMode);
+    elements.toggleAdvanced.addEventListener("click", toggleAdvancedMenu);
     elements.menuToggle.addEventListener("click", toggleTopbarMenu);
     elements.zoomOut.addEventListener("click", () => stepZoom(-5));
     elements.zoomIn.addEventListener("click", () => stepZoom(5));
@@ -1306,6 +1311,12 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         ? "Save the current TreeGen project to a new disk file."
         : "Download the current TreeGen project under a new browser filename.";
     }
+    if (elements.projectManagerAutosave) {
+      elements.projectManagerAutosave.textContent = state.project.autosaveEnabled ? "Autosave: On" : "Autosave: Off";
+      elements.projectManagerAutosave.title = desktopBridge
+        ? "Turn desktop autosave on or off for the current project."
+        : "Turn browser local draft caching on or off for the current project.";
+    }
   }
 
   function joinStatusParts(parts) {
@@ -1416,9 +1427,9 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function syncAutosaveButton() {
-    if (!elements.toggleAutosave) return;
-    elements.toggleAutosave.textContent = state.project.autosaveEnabled ? "Autosave: On" : "Autosave: Off";
-    elements.toggleAutosave.title = state.project.autosaveEnabled
+    if (!elements.projectManagerAutosave) return;
+    elements.projectManagerAutosave.textContent = state.project.autosaveEnabled ? "Autosave: On" : "Autosave: Off";
+    elements.projectManagerAutosave.title = state.project.autosaveEnabled
       ? "Automatic background saving is on. Click to turn it off."
       : "Automatic background saving is off. Click to turn it on.";
   }
@@ -1540,7 +1551,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
     const yaml = serializeCurrentState();
     state.yamlText = yaml;
     try {
-      const svgText = applyPreviewMargin(renderYamlToSvg(yaml), 36);
+      const svgText = applyPreviewMargin(renderYamlToSvg(yaml), PREVIEW_SVG_MARGIN_PT);
       state.fitReport = analyzeYamlLayout(yaml);
       const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
       const svg = doc.documentElement;
@@ -1915,7 +1926,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   }
 
   function fitWidth() {
-    fitStage(elements.previewStage, elements.svgWrapper, elements.zoomRange, elements.zoomPercent, 56, 72, 150);
+    fitStage(elements.previewStage, elements.svgWrapper, elements.zoomRange, elements.zoomPercent, PREVIEW_FIT_MARGIN_X, PREVIEW_FIT_MARGIN_Y, 150);
   }
 
   function fitFullscreenPreview() {
@@ -2301,31 +2312,14 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
         elements.aboutReleaseLinkWrap.hidden = true;
       }
     }
-    if (elements.openProject) {
-      elements.openProject.disabled = false;
-      elements.openProject.title = desktopBridge
-        ? "Open a saved TreeGen project from disk."
-        : "Open a saved TreeGen project YAML file from your device.";
-    }
     if (elements.openRecentProjects) {
       elements.openRecentProjects.disabled = false;
       elements.openRecentProjects.title = desktopBridge
         ? "Open the project manager for the current project and recent desktop project files."
         : "Open the project manager for the current project and recent browser-side project files.";
     }
-    if (elements.saveProject) {
-      elements.saveProject.disabled = false;
-      elements.saveProject.title = desktopBridge
-        ? "Save the current TreeGen project to disk."
-        : "Download the current TreeGen project YAML to your device.";
-    }
-    if (elements.saveProjectAs) {
-      elements.saveProjectAs.disabled = false;
-      elements.saveProjectAs.title = desktopBridge
-        ? "Save the current TreeGen project to a new location or filename."
-        : "Download the current TreeGen project YAML using the project filename.";
-    }
     syncAutosaveButton();
+    renderProjectManagerCurrent();
     renderDownloadOptions();
     updateProjectStatusIndicator();
   }

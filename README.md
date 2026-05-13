@@ -18,8 +18,8 @@ TreeGen is a family-tree editor for building ancestor charts and exporting them 
 4. Use **Projects** from the main menu to manage the current tree, open saved work, and reach the recent-project list.
 5. Use **Save**, **Save As**, **Autosave**, and the items inside **Projects** while you work. In the browser, **Save As** also defines the project name used in the recent-project list, and recent entries can be reopened, renamed, or removed. In the desktop app, **Remove from Recent** only clears the list entry, while **Delete from Disk** removes the actual project file.
 6. Watch the header status line to see where the current tree was last saved or cached and when that happened.
-5. Adjust formatting if needed.
-6. Export the finished tree.
+7. Adjust formatting if needed.
+8. Export the finished tree.
 
 ## Which version should I use?
 

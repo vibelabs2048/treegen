@@ -8,22 +8,28 @@
    - decide whether larger collections need search, sections, or stronger organization later
    Status: Open
 
+2. Keep hardening preview-shell clipping prevention and its automatic validation.
+   Scope:
+   - top-edge clipping has recurred multiple times in the preview shell
+   - keep preview padding, fit margins, and QA checks aligned so the SVG preview stays fully visible
+   Status: Open
+
 ## Missing
 
-2. Keep browser mode file-oriented with local cache and avoid drifting into a separate project model.
+3. Keep browser mode file-oriented with local cache and avoid drifting into a separate project model.
    Scope:
    - browser should stay as close to desktop behavior as the platform allows
    - local storage should remain a cache/recovery layer rather than the primary project system
    Status: Open
 
-3. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
+4. Decide whether desktop project state still needs stronger visible affordances beyond the current status summary.
    Scope:
    - recent files
    - clearer save destinations
    - clearer saved/autosaved distinction
    Status: Open
 
-4. Decide whether persistent QA warnings for generations 3 and 4 should be treated as a formatting problem or an expected demo artifact.
+5. Decide whether persistent QA warnings for generations 3 and 4 should be treated as a formatting problem or an expected demo artifact.
    Scope:
    - current machine QA passes but warns that every generation 3 and 4 box name is being reduced to fit in the demo
    - decide whether to tune the demo data, geometry, or warning thresholds
@@ -31,7 +37,7 @@
 
 ## Nice To Have
 
-5. Continue small UI polish passes where behavior is subtle.
+6. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
@@ -47,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.51` Shortened the hamburger by moving more document actions into the `Projects` surface, strengthened preview-shell padding and fit margins, and added automatic QA checks for the preview safety constants.
 - `v0.2.50` Turned the old recent-project modal into a dedicated `Projects` surface with current-project actions plus the recent list, keeping the workflow file-oriented in both browser and desktop mode.
 - `v0.2.49` Reworked project-status wording so TreeGen now leads with where and when the current tree was last saved or cached, with unsaved changes treated as secondary context instead of the main status message.
 - `v0.2.48` Split desktop recent-project removal into a lightweight `Remove from Recent` action and a destructive `Delete from Disk` action with stronger confirmation, while keeping the current tree open but unsaved if its backing file is deleted.

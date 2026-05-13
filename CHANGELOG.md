@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.51 - 2026-05-12
+
+- shortened the hamburger menu by moving more document-level actions into the dedicated `Projects` surface so the top menu no longer needs to carry the full project workflow
+- increased preview-shell padding and fit margins, and made those preview safety constants part of the QA validation so top-edge clipping has an explicit regression check
+- kept the new `Projects` surface as the primary place for new/open/save/save-as/autosave/demo/clear actions
+
 ## 0.2.50 - 2026-05-12
 
 - turned the old recent-project modal into a dedicated `Projects` surface with current-project actions for new, open, save, and save as

@@ -8,6 +8,7 @@ const svgPath = path.join(qaDir, "demo.svg");
 const pngPath = path.join(qaDir, "demo.png");
 const pdfPath = path.join(qaDir, "demo.pdf");
 const reportPath = path.join(qaDir, "qa-check.json");
+const appJsPath = path.join(repoRoot, "src", "app.js");
 
 const errors = [];
 const warnings = [];
@@ -15,12 +16,14 @@ const warnings = [];
 const fitPayload = JSON.parse(fs.readFileSync(fitReportPath, "utf8"));
 const fitReport = Array.isArray(fitPayload?.fitReport) ? fitPayload.fitReport : [];
 const svgText = fs.readFileSync(svgPath, "utf8");
+const appJsText = fs.readFileSync(appJsPath, "utf8");
 
 checkFileSize(svgPath, 1024, "SVG artifact");
 checkFileSize(pngPath, 4096, "PNG artifact");
 checkFileSize(pdfPath, 4096, "PDF artifact");
 checkSvg(svgText);
 checkFitReport(fitReport);
+checkPreviewShellConfig(appJsText);
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -120,6 +123,27 @@ function checkFitReport(report) {
       warnings.push(`Generation ${generation.generation} had every box name reduced to fit.`);
     }
   }
+}
+
+function checkPreviewShellConfig(source) {
+  const margin = readNumericConst(source, "PREVIEW_SVG_MARGIN_PT");
+  const fitX = readNumericConst(source, "PREVIEW_FIT_MARGIN_X");
+  const fitY = readNumericConst(source, "PREVIEW_FIT_MARGIN_Y");
+  if (margin == null || fitX == null || fitY == null) {
+    errors.push("Preview shell safety constants are missing from src/app.js.");
+    return;
+  }
+  if (margin < 40) {
+    errors.push(`Preview SVG margin is too small (${margin}pt).`);
+  }
+  if (fitX < 64 || fitY < 88) {
+    errors.push(`Preview fit margins are too small (${fitX} x ${fitY}).`);
+  }
+}
+
+function readNumericConst(source, name) {
+  const match = source.match(new RegExp(`const\\s+${name}\\s*=\\s*(\\d+(?:\\.\\d+)?)\\s*;`));
+  return match ? Number.parseFloat(match[1]) : null;
 }
 
 function isFiniteNonNegative(value) {
