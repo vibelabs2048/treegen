@@ -11,7 +11,7 @@
 2. Keep hardening preview-shell clipping prevention and its automatic validation.
    Scope:
    - top-edge clipping has recurred multiple times in the preview shell
-   - keep preview padding, fit margins, browser-level checks, and QA checks aligned so the SVG preview stays fully visible
+   - keep preview padding, fit margins, browser-level geometry checks, and QA checks aligned so the SVG preview stays fully visible
    Status: Open
 
 ## Missing
@@ -53,6 +53,7 @@
 
 ## Recently Completed
 
+- `v0.2.55` Strengthened the browser QA gate so it now checks preview geometry across multiple scenarios, including hidden-editor, compact viewport, and fullscreen preview states.
 - `v0.2.54` Replaced the brittle disclosure-based menu interactions with an explicit top-menu controller, prevented overlapping open panels, and extended browser QA to assert real menu behavior.
 - `v0.2.53` Fixed the horizontal menu bar interaction model by switching it to native disclosure behavior so the menu buttons actually open and close their panels reliably.
 - `v0.2.52` Replaced the scrolling hamburger with a horizontal menu bar and submenus, added a show/hide editor control, and switched preview clipping protection to measured preview-bound normalization plus stronger shell validation.

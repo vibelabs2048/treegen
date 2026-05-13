@@ -955,7 +955,9 @@ function getExternalDateLines(person, generation, settings = DEFAULT_SETTINGS) {
 function getExternalDateReserve(person, generation, style, settings = DEFAULT_SETTINGS) {
   const lines = getExternalDateLines(person, generation, settings);
   if (!lines.length) return 0;
-  const fontSize = Math.max(3, style.dateSize);
+  const fontSize = generation >= 5
+    ? getLateGenerationDateFontSize(generation, style.dateSize)
+    : Math.max(3, style.dateSize);
   const lineHeight = getExternalDateLineHeight(fontSize, generation);
   return round2(fontSize + 4 + (lines.length - 1) * lineHeight + 2);
 }
@@ -984,12 +986,15 @@ function getExternalDateLayout(node, style, slot, person, settings = DEFAULT_SET
   }
   if (slot.generation >= 5) {
     const isMother = slot.path[slot.path.length - 1] === "mother";
+    const lateFontSize = getLateGenerationDateFontSize(slot.generation, style.dateSize, availableWidth, lines);
+    const lateLineHeight = getExternalDateLineHeight(lateFontSize, slot.generation);
+    const xOffset = slot.generation >= 6 ? 3.2 : 1.8;
     return {
       lines,
-      x: getConnectorAnchorX(node, isMother ? "mother" : "father") - 1.5,
-      y: node.y + node.height + fontSize + 2.6,
-      lineHeight,
-      fontSize,
+      x: getConnectorAnchorX(node, isMother ? "mother" : "father") - xOffset,
+      y: node.y + node.height + lateFontSize + 2.4,
+      lineHeight: lateLineHeight,
+      fontSize: lateFontSize,
       anchor: "end",
     };
   }
@@ -1004,15 +1009,26 @@ function getExternalDateLayout(node, style, slot, person, settings = DEFAULT_SET
   };
 }
 
-function fitExternalDateFontSize(lines, requestedSize, availableWidth) {
-  const target = Math.max(3, requestedSize || 0);
-  for (let fontSize = target; fontSize >= 3; fontSize -= 0.2) {
+function fitExternalDateFontSize(lines, requestedSize, availableWidth, minimumSize = 3) {
+  const floor = Math.max(2, minimumSize || 0);
+  const target = Math.max(floor, requestedSize || 0);
+  for (let fontSize = target; fontSize >= floor; fontSize -= 0.2) {
     const widest = Math.max(...lines.map((line) => estimateLineWidth(line, fontSize, false)));
     if (widest <= availableWidth) {
       return round2(fontSize);
     }
   }
-  return 3;
+  return round2(floor);
+}
+
+function getLateGenerationDateFontSize(generation, requestedSize, availableWidth = 0, lines = []) {
+  const baseTarget = generation >= 6
+    ? Math.max(2.2, (requestedSize || 0) - 2.35)
+    : Math.max(2.8, (requestedSize || 0) - 1.4);
+  if (!availableWidth || !lines.length) {
+    return round2(baseTarget);
+  }
+  return fitExternalDateFontSize(lines, baseTarget, availableWidth, generation >= 6 ? 2.2 : 2.8);
 }
 
 function getExternalDateAvailableWidth(node, slot, anchorX, anchor) {

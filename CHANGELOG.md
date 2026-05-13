@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.55 - 2026-05-12
+
+- strengthened the browser QA gate from a single preview snapshot into multi-scenario checks that cover normal preview, editor-hidden preview, compact viewport preview, and fullscreen preview
+- made the browser QA verify real preview geometry against the rendered SVG bounds instead of relying on a fragile top-row pixel heuristic
+- kept the top-menu interaction checks in the same browser gate so preview-shell regressions and menu regressions are both caught before release
+
 ## 0.2.54 - 2026-05-12
 
 - replaced the brittle `details/summary` top-level menu interaction with an explicit one-open-at-a-time menu controller so the horizontal menus actually respond reliably
