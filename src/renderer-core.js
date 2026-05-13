@@ -2,11 +2,11 @@ const MAX_GENERATION = 6;
 const PAGE_WIDTH_PT = 792;
 const PAGE_HEIGHT_PT = 612;
 const GENERATION_SIZES = [14, 12, 10.5, 9, 7.5, 6.5, 5.5];
-const BOX_WIDTHS = [108, 88, 70, 54, 40, 14, 11];
-const BOX_HEIGHTS = [54, 46, 36, 30, 28, 72, 64];
+const BOX_WIDTHS = [144, 124, 96, 68, 40, 14, 11];
+const BOX_HEIGHTS = [60, 50, 40, 32, 28, 72, 64];
 const BASE_ROW_STEPS = [0, 24, 26, 28, 30, 36, 40];
-const CHART_WIDTH = 748;
-const MARGIN_X = 22;
+const CHART_WIDTH = 760;
+const MARGIN_X = 16;
 const MARGIN_TOP = 18;
 const INNER_MARGIN = 3;
 

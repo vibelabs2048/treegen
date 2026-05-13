@@ -3,7 +3,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const APP_META = {
-    version: "0.2.40",
+    version: "0.2.41",
     lastUpdated: "2026-05-12",
   };
   const PROJECT_SCHEMA_VERSION = 2;
@@ -15,11 +15,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   const PAGE_WIDTH_PT = 792;
   const PAGE_HEIGHT_PT = 612;
   const HISTORY_LIMIT = 120;
-  const BOX_WIDTHS = [108, 88, 70, 54, 40, 14, 11];
-  const BOX_HEIGHTS = [54, 46, 36, 30, 28, 72, 64];
+  const BOX_WIDTHS = [144, 124, 96, 68, 40, 14, 11];
+  const BOX_HEIGHTS = [60, 50, 40, 32, 28, 72, 64];
   const ROW_STEPS = [0, 24, 26, 28, 30, 36, 40];
-  const CHART_WIDTH = 748;
-  const MARGIN_X = 22;
+  const CHART_WIDTH = 760;
+  const MARGIN_X = 16;
   const MARGIN_TOP = 18;
   const MARGIN_BOTTOM = 8;
   const CONNECTOR_HEIGHT = 40;
@@ -187,6 +187,7 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   const latestReleaseUrl = resolveLatestReleaseUrl();
   let autosaveTimer = null;
   let browserDraftTimer = null;
+  let browserFileIntent = "import";
 
   async function init() {
     applyStoredTheme();
@@ -769,7 +770,11 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
   async function openProjectFile() {
     closeTopbarMenu();
     if (!desktopBridge) {
-      openModal("import");
+      const replace = !state.project.dirty || window.confirm("Open a project file and replace the current unsaved work?");
+      if (!replace) return;
+      browserFileIntent = "project-open";
+      elements.importYamlFile.value = "";
+      elements.importYamlFile.click();
       return;
     }
     const result = await desktopBridge.openProjectFile();
@@ -1684,13 +1689,32 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       setStatus(`Loaded YAML from ${basename(result.path || "selected file")}`);
       return;
     }
+    browserFileIntent = "import";
+    elements.importYamlFile.value = "";
     elements.importYamlFile.click();
   }
 
   async function handleImportFile() {
     const [file] = elements.importYamlFile.files || [];
     if (!file) return;
-    elements.importYamlText.value = await file.text();
+    const text = await file.text();
+    if (browserFileIntent === "project-open") {
+      try {
+        applyYamlFromEditor(text);
+        state.project.dirty = false;
+        state.project.browserDraftUpdatedAt = "";
+        updateProjectStatusIndicator();
+        setStatus(`Opened project ${basename(file.name || "project")}`);
+      } catch {
+        // status already updated
+      } finally {
+        browserFileIntent = "import";
+        elements.importYamlFile.value = "";
+      }
+      return;
+    }
+    elements.importYamlText.value = text;
+    browserFileIntent = "import";
   }
 
   function applyImportModal() {
@@ -1882,10 +1906,10 @@ import { analyzeYamlLayout, renderYamlToSvg } from "./renderer-core.js";
       }
     }
     if (elements.openProject) {
-      elements.openProject.disabled = !desktopBridge;
+      elements.openProject.disabled = false;
       elements.openProject.title = desktopBridge
         ? "Open a saved TreeGen project from disk."
-        : "Project files and autosave are available in the desktop app.";
+        : "Open a saved TreeGen project YAML file from your device.";
     }
     if (elements.saveProject) {
       elements.saveProject.disabled = false;

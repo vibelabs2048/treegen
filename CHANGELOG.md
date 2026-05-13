@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.41 - 2026-05-12
+
+- made browser `Open Project` a real project action instead of routing users through the raw YAML import flow
+- added unsaved-work confirmation before replacing the current browser project with a newly opened file
+- updated the in-app help modal and README so the visible user guide matches the current project workflow: `New Project`, `Open Project`, `Save`, `Save As`, and `Autosave`
+- widened and slightly enlarged generations 0-3 so the early tree uses more of the page and leaves less dead white space between boxes
+
 ## 0.2.40 - 2026-05-12
 
 - added a real `New Project` action so users can start a blank tree explicitly instead of reusing `Clear Tree`

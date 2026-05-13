@@ -2,30 +2,22 @@
 
 ## Broken / Awkward
 
-1. Add a real `New Tree / New Project` action.
+1. Browser project workflow still lacks named projects.
    Scope:
-   - start a blank project explicitly
-   - separate it from `Load Demo` and `Clear Tree`
-   - confirm before replacing unsaved work
-   - reset project/session state cleanly
-   Status: In progress
-
-2. Browser project workflow is still asymmetrical.
-   Scope:
-   - browser now supports `Save` / `Save As`
-   - browser still does not have a first-class `Open Project` path
-   - raw YAML import is still doing double duty as open/import
+   - browser now supports `New Project`, `Open Project`, `Save`, and `Save As`
+   - project handling is still single-file / single-draft oriented
+   - there is still no browser-side recent-project chooser or named project list
    Status: Open
 
 ## Missing
 
-3. Decide whether browser mode should gain named local projects instead of one rolling draft.
+2. Decide whether browser mode should gain named local projects instead of one rolling draft.
    Scope:
    - current browser mode now supports one cached draft and recovery
    - next step would be multiple browser-side drafts/projects if needed
    Status: Open
 
-4. Decide whether desktop project state needs stronger visible affordances.
+3. Decide whether desktop project state needs stronger visible affordances.
    Scope:
    - recent files
    - dirty badges in more places
@@ -34,14 +26,14 @@
 
 ## Nice To Have
 
-5. Continue small UI polish passes where behavior is subtle.
+4. Continue small UI polish passes where behavior is subtle.
    Scope:
    - keep the hamburger menu compact and coherent
    - keep tooltip coverage strong for advanced formatting controls
    - continue tightening the shell as new project features land
    Status: Open
 
-6. Strengthen automated visual regression checks.
+5. Strengthen automated visual regression checks.
    Scope:
    - current QA bundle is useful but still human-reviewed
    - add sharper checks around preview/export consistency and layout regressions
@@ -56,6 +48,7 @@
 
 ## Recently Completed
 
+- `v0.2.41` Made browser `Open Project` a first-class workflow and updated the visible user guide/help copy to match the real project actions.
 - `v0.2.40` Adds a real `New Project` action and resets project/session state cleanly instead of forcing users to reuse `Clear Tree`.
 - `v0.2.39` Defaulted surname inheritance on for non-root boxes, clarified the checkbox-to-field sync behavior, and added explicit `Save`, `Save As`, and autosave controls for project work.
 - `v0.2.38` Polished the editor shell again by grouping the hamburger menu into clearer sections, improving tooltip coverage, and making the header project-state badge read more clearly when changes are unsaved.

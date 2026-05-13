@@ -13,10 +13,11 @@ TreeGen is a family-tree editor for building ancestor charts and exporting them 
 ## How to use TreeGen
 
 1. Open the demo site or desktop app.
-2. Load the placeholder demo or import your own YAML file.
+2. Start with **New Project**, **Load Demo**, or **Open Project**.
 3. Click any person box to edit names, dates, marriage dates, and child lists.
-4. Adjust formatting if needed.
-5. Export the finished tree.
+4. Use **Save**, **Save As**, and **Autosave** while you work.
+5. Adjust formatting if needed.
+6. Export the finished tree.
 
 ## Which version should I use?
 
